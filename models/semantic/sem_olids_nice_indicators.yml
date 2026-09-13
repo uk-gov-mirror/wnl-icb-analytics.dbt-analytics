@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: sem_olids_nice_indicators
+    description: |
+      OLIDS NICE indicators semantic view. One row represents one person
+      in one NICE indicator on the reporting date.
+
+      Exposes the shared status contract from
+      fct_person_nice_indicator_status: denominator, numerator and
+      care-gap metrics with practice, geography, ethnicity and
+      deprivation dimensions. Personalised care adjustments are not
+      applied. Indicator-specific readings and thresholds stay on the
+      family measures and on specialised views such as
+      sem_olids_bp_indicators.
+
+      Filter or group by indicator_id before using metrics because a
+      person can appear in more than one indicator.
+
+      Secondary-use consumers must apply National Data Opt-Out and
+      Type 1 opt-out filtering themselves. This view does not join
+      opt-out models.
+
+      Never return person_id or sk_patient_id in final results.
+
+      dbt grain tests are not defined on this semantic_view because
+      semantic views are not standard queryable relations. The
+      person_id and indicator_id grain is tested on
+      fct_person_nice_indicator_status.
+    config:
+      materialized: semantic_view
+      schema: SEMANTIC
+      meta:
+        owner:
+          name: Eddie Davison
