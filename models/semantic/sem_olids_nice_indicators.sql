@@ -6,14 +6,16 @@
 }}
 
 {#
-    Grain: one row per person per NICE indicator on the reporting date.
+    Grain: one row per eligible person per NICE indicator, assessed on
+    the build date.
 
     Cross-indicator status view over fct_person_nice_indicator_status.
-    A person can appear in more than one indicator, so filter or group by
-    indicator_id before calculating a rate or comparing populations.
+    Each indicator keeps its own population, time window and clinical
+    criteria. A person can appear in more than one indicator, so filter
+    or group by indicator_id before calculating a rate.
     Every row is already in the denominator; is_in_denominator is always
     TRUE and is not exposed as a dimension or filter.
-    Denominators are before personalised care adjustments.
+    Personalised care adjustments are not applied.
     Secondary-use opt-out filtering is a consumer concern; this view
     does not join opt-out models.
 #}
@@ -21,7 +23,7 @@
 TABLES(
     indicators AS {{ ref('fct_person_nice_indicator_status') }}
         PRIMARY KEY (person_id, indicator_id)
-        COMMENT = 'Shared NICE indicator denominator and numerator status. One row per person per indicator on the reporting date; personalised care adjustments are not applied.',
+        COMMENT = 'Current NICE indicator results. One row per eligible person and indicator, assessed on the build date. Personalised care adjustments are not applied.',
 
     demographics AS {{ ref('dim_person_demographics') }}
         PRIMARY KEY (person_id)
@@ -41,16 +43,16 @@ DIMENSIONS(
     -- Indicator and person grain
     indicators.person_id AS person_id COMMENT = 'Pseudonymised person key for aggregate-only linkage to other sem_olids_* views. Never return person_id in final results.',
     demographics.sk_patient_id AS sk_patient_id COMMENT = 'Representative pseudonymised patient key for aggregate-only linkage to non-OLIDS semantic views. Never return sk_patient_id in final results.',
-    indicators.indicator_id AS indicator_id WITH SYNONYMS = ('NICE indicator', 'measure') COMMENT = 'NICE indicator identifier. Filter or group by this before using indicator metrics because a person can appear in more than one indicator.',
-    indicators.indicator_name AS indicator_name COMMENT = 'Published NICE indicator name',
-    indicators.reporting_date AS reporting_date WITH SYNONYMS = ('as at date', 'measure date') COMMENT = 'Date on which age and the measurement period were assessed',
+    indicators.indicator_id AS indicator_id WITH SYNONYMS = ('NICE indicator', 'measure') COMMENT = 'NICE indicator identifier. Filter or group by this before using metrics because a person can appear in more than one indicator, and each indicator has its own population and time window.',
+    indicators.indicator_name AS indicator_name COMMENT = 'Published NICE indicator name. Join def_indicator for categories and clinical definitions.',
+    indicators.reporting_date AS reporting_date WITH SYNONYMS = ('build date', 'as at date', 'measure date') COMMENT = 'Build date on which eligibility and the measurement period were assessed',
     indicators.measurement_period_start AS measurement_period_start COMMENT = 'Inclusive start of the indicator measurement period; the length depends on the indicator',
     indicators.age AS age COMMENT = 'Age in years on the reporting date; null when no birth date is recorded',
 
-    -- Shared status contract. is_in_denominator is always TRUE on these
-    -- rows, so it is not a dimension or filter.
-    indicators.is_in_numerator AS is_in_numerator COMMENT = 'Person meets the indicator on the reporting date',
-    indicators.indicator_status AS indicator_status WITH SYNONYMS = ('achievement status', 'care gap reason') COMMENT = 'Accepted tokens only: ACHIEVED, ABOVE_TARGET, NOT_RECORDED_IN_PERIOD, NOT_ASSESSABLE, NOT_TREATED_IN_PERIOD, NEVER_TREATED, VKA_WITHOUT_DOAC_EXCEPTION, DOAC_WHERE_VKA_INDICATED, OUT_OF_RANGE. ACHIEVED when in the numerator; otherwise the matching reason. Do not invent tokens.',
+    -- Shared status. is_in_denominator is always TRUE on these rows,
+    -- so it is not a dimension or filter.
+    indicators.is_in_numerator AS is_in_numerator COMMENT = 'Person meets the selected indicator achievement rule on the build date',
+    indicators.indicator_status AS indicator_status WITH SYNONYMS = ('achievement status', 'care gap reason') COMMENT = 'Accepted tokens only: ACHIEVED, ABOVE_TARGET, NOT_RECORDED_IN_PERIOD, NOT_ASSESSABLE, NOT_TREATED_IN_PERIOD, NEVER_TREATED, VKA_WITHOUT_DOAC_EXCEPTION, DOAC_WHERE_VKA_INDICATED, OUT_OF_RANGE. ACHIEVED when the achievement rule is met; otherwise the reason. An invalid latest result in the measurement window is NOT_ASSESSABLE and is not replaced by an older result. OUT_OF_RANGE means the latest result in the period is outside the target range. Do not invent tokens.',
 
     -- Demographics
     demographics.gender AS gender COMMENT = 'Patient gender',
@@ -84,11 +86,11 @@ DIMENSIONS(
 
 METRICS(
     indicators.denominator_count AS COUNT(DISTINCT indicators.person_id) COMMENT = 'People on the selected indicator rows. Every row is already an eligible denominator person; this does not filter is_in_denominator.',
-    indicators.numerator_count AS COUNT(DISTINCT CASE WHEN indicators.is_in_numerator THEN indicators.person_id END) COMMENT = 'People achieving the selected indicator',
-    indicators.care_gap_count AS COUNT(DISTINCT CASE WHEN NOT indicators.is_in_numerator THEN indicators.person_id END) COMMENT = 'People not achieving the selected indicator before personalised care adjustments',
-    indicators.achievement_rate AS COUNT(DISTINCT CASE WHEN indicators.is_in_numerator THEN indicators.person_id END) / NULLIF(COUNT(DISTINCT indicators.person_id), 0) COMMENT = 'Unadjusted indicator achievement rate from 0 to 1'
+    indicators.numerator_count AS COUNT(DISTINCT CASE WHEN indicators.is_in_numerator THEN indicators.person_id END) COMMENT = 'People who meet the selected indicator achievement rule on the build date',
+    indicators.care_gap_count AS COUNT(DISTINCT CASE WHEN NOT indicators.is_in_numerator THEN indicators.person_id END) COMMENT = 'People who do not meet the selected indicator achievement rule on the build date. Personalised care adjustments are not applied.',
+    indicators.achievement_rate AS COUNT(DISTINCT CASE WHEN indicators.is_in_numerator THEN indicators.person_id END) / NULLIF(COUNT(DISTINCT indicators.person_id), 0) COMMENT = 'Unadjusted rate of people meeting the selected indicator achievement rule, from 0 to 1. Not final QOF performance.'
 )
 
-COMMENT = 'OLIDS NICE Indicators Semantic View - shared achievement and care-gap status across NICE measures. Grain: one row per person per indicator on the reporting date. Every row is already in the denominator; do not filter is_in_denominator. Filter or group by indicator_id before rates because a person can appear in more than one indicator. Personalised care adjustments are not applied. Secondary-use consumers must apply National Data Opt-Out and Type 1 opt-out filtering themselves. Never return person_id or sk_patient_id.'
-AI_SQL_GENERATION 'Filter indicator_id, or group by indicator_id, before using metrics because a person can appear in more than one indicator. Every row is already a denominator person; denominator_count is COUNT DISTINCT person_id after that selection, not a filter on is_in_denominator. Use AGG(achievement_rate), or AGG(numerator_count) / AGG(denominator_count), for the selected indicator. Group by indicator_status or is_in_numerator for achievement and care-gap reason breakdowns; use only the accepted indicator_status tokens and do not invent new ones. The upstream status population is already currently registered, living and non-test, so filtering is_active = TRUE is belt-and-braces, not a second eligibility rule. Do not describe these as final QOF performance because personalised care adjustments are not applied. Secondary-use opt-out filtering is a consumer concern and is not applied in this view. Never return person_id or sk_patient_id in final results. Small-cell suppression is an application concern; do not return person-level rows. Example: SELECT indicator_id, borough_registered, AGG(denominator_count), AGG(numerator_count), AGG(achievement_rate) FROM SEM_OLIDS_NICE_INDICATORS WHERE is_active = TRUE GROUP BY indicator_id, borough_registered. LINKAGE: first filter to one indicator and reduce to one row per person before joining another semantic view on person_id; never return person_id in final results.'
-AI_QUESTION_CATEGORIZATION 'Use this view for shared NICE indicator achievement, care-gap counts and inequalities by practice, PCN, geography, ethnicity or deprivation across the measures in fct_person_nice_indicator_status. For NICE IND239-246 blood pressure readings, thresholds and measurement context use sem_olids_bp_indicators. For diabetes care-process completion and triple targets use sem_olids_diabetes_care. For general latest BP values use sem_olids_observations.'
+COMMENT = 'Current NICE indicator results. One row per eligible person and indicator, assessed on the build date. People must be currently registered, living and non-test, and meet the individual indicator population rules. Every row is already in the denominator; do not filter is_in_denominator. Filter or group by indicator_id before rates because a person can appear in more than one indicator. indicator_status is the reason when the achievement rule is not met. Family measures hold readings, thresholds and evidence. Personalised care adjustments are not applied. Secondary-use consumers must apply National Data Opt-Out and Type 1 opt-out filtering themselves. Never return person_id or sk_patient_id.'
+AI_SQL_GENERATION 'Filter indicator_id, or group by indicator_id, before using metrics because a person can appear in more than one indicator and each indicator has its own population and time window. Every row is already a denominator person; denominator_count is COUNT DISTINCT person_id after that selection, not a filter on is_in_denominator. Use AGG(achievement_rate), or AGG(numerator_count) / AGG(denominator_count), for the selected indicator. Group by indicator_status or is_in_numerator for achievement and unachieved-reason breakdowns. Accepted indicator_status tokens only: ACHIEVED, ABOVE_TARGET, NOT_RECORDED_IN_PERIOD, NOT_ASSESSABLE, NOT_TREATED_IN_PERIOD, NEVER_TREATED, VKA_WITHOUT_DOAC_EXCEPTION, DOAC_WHERE_VKA_INDICATED, OUT_OF_RANGE. Do not invent tokens. An invalid latest result in the measurement window is NOT_ASSESSABLE and is not replaced by an older result; how a valid latest result is selected stays on the family measure. The upstream status population is already currently registered, living and non-test, so filtering is_active = TRUE is belt-and-braces, not a second eligibility rule. Do not describe these as final QOF performance because personalised care adjustments are not applied. Secondary-use opt-out filtering is a consumer concern and is not applied in this view. Never return person_id or sk_patient_id in final results. Small-cell suppression is an application concern; do not return person-level rows. Example: SELECT indicator_id, borough_registered, AGG(denominator_count), AGG(numerator_count), AGG(achievement_rate) FROM SEM_OLIDS_NICE_INDICATORS WHERE is_active = TRUE GROUP BY indicator_id, borough_registered. LINKAGE: first filter to one indicator and reduce to one row per person before joining another semantic view on person_id; never return person_id in final results.'
+AI_QUESTION_CATEGORIZATION 'Use this view for current NICE indicator achievement, unachieved reasons and inequalities by practice, PCN, geography, ethnicity or deprivation across the people-level results in fct_person_nice_indicator_status. Each indicator keeps its own population, time window and clinical criteria; join def_indicator for names, categories and clinical definitions rather than inventing rules here. For IND239 to IND246 blood pressure readings, targets and measurement context use sem_olids_bp_indicators. For diabetes care-process completion and triple targets use sem_olids_diabetes_care; those care-process counts are outside this person-level status view. For general latest biomarker values use sem_olids_observations.'
