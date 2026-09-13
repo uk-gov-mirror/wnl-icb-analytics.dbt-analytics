@@ -20,6 +20,11 @@ models:
       Filter or group by indicator_id before using metrics because a
       person can appear in more than one indicator.
 
+      The upstream status population is already currently registered,
+      living and non-test. Filtering is_active = TRUE on the
+      demographics join is belt-and-braces, not a second eligibility
+      rule.
+
       Secondary-use consumers must apply National Data Opt-Out and
       Type 1 opt-out filtering themselves. This view does not join
       opt-out models.
