@@ -5,4 +5,3 @@ select
     cast(effective_to as date) as effective_to
 from {{ ref('raw_sus_commissioner_reference_lsoa_commissioner') }}
 where cast(effective_from as date) <= cast(effective_to as date)
-a

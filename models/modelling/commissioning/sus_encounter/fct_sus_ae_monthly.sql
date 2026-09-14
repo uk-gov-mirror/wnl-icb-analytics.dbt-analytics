@@ -196,7 +196,7 @@ derived as (
                 and em_department_type in ('01', '1') then 'RAS01'
             when organisation_code_code_of_provider = 'RAS'
                 and em_department_type in ('03', '3') then 'RAS02'
-            when organisation_code_code_of_provider = 'NTP'
+            when provider_site_code = 'NTP'
                 and em_department_type in ('03', '3')
                 then left(organisation_code_code_of_provider, 5)
             when organisation_code_code_of_provider = 'RV8'
@@ -381,7 +381,7 @@ select
 
 from contract_typed d
 left join sla_matched s
-    on d.organisation_code_code_of_commissioner = s.ccg
+    on left(d.organisation_code_code_of_commissioner,3) = s.ccg
     and d.organisation_code_code_of_provider = s.provider
     and d.z_financial_year = s.z_financial_year
 -- [TODO] SP step 5 -- once index_of_multiple_deprivation_2015 is a source:

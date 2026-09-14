@@ -38,7 +38,7 @@ models:
           Surrogate key for the attendance. One row per value -- this is the
           model's grain, and the tests below are the fan-out guard for the
           care home join.
-        tests:
+        data_tests:
           - unique
           - not_null
 
@@ -77,8 +77,6 @@ models:
 
       - name: z_em_duration_datetime
         description: >
-          [PARITY BUG -- DO NOT USE] Not a usable timestamp.
-
           em_duration_time is a duration in MINUTES (values cluster at 239/240,
           i.e. the four-hour A&E target). The legacy stored procedure treated it
           as a 1900-anchored datetime and used T-SQL datetime addition, which
@@ -123,7 +121,7 @@ models:
           same code can carry different flags in different years. This model
           recomputes every row against the current seed, which is internally
           consistent but will not match legacy row for row.
-        tests:
+        data_tests:
           - not_null
           - accepted_values:
               arguments:
@@ -146,7 +144,7 @@ models:
           but the column also holds '3' at volume. Those attendances fall
           through to UNKNOWN instead of BAND 5. Reproduced here for parity;
           raise with the SUS reporting owner, as POD bands drive payment.
-        tests:
+        data_tests:
           - accepted_values:
               arguments:
                 values:
@@ -190,7 +188,7 @@ models:
       # ---------------------------------------------------------------
       - name: arrival_date
         description: Date the patient arrived at the A&E department.
-        tests:
+        data_tests:
           - not_null:
               config:
                 severity: warn
