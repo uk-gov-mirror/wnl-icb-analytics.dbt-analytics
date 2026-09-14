@@ -12,18 +12,39 @@ select distinct file_date
 from {{ ref('stg_myria_rfl_submission_patients') }}
 --from STAGING.MYRIA.STG_MYRIA_RFL_SUBMISSIon_PATIENTS
 )
---Collect the HEX_ID from the submissions rather than regenerate
-,rfl_pop as (
-select distinct hospital_number, hex_id
-from {{ ref('stg_myria_rfl_submission_patients') }}
---from STAGING.MYRIA.STG_MYRIA_RFL_SUBMISSION_PATIENTS
+-- CREATE TOTAL POOL OF ELIGIBLE PATIENTS ON EACH SUBMISSION DATE, INCLUDING CONTROL GROUP
+, total_pool as (
+select patient_id, local_authority, most_recent_nel_admission_date, 
+nel_ip_admissions_last_24_months, nel_ip_admissions_last_12_months, 
+barnet_hospital_flag, barnet_hospital_count, rfl_flag, rfl_count, 
+total_high_risk_conditions, alcohol_dependence, atrial_fibrillation, 
+bronchiectasis, cerebrovascular_disease, chronic_kidney_disease, 
+chronic_liver_disease, copd, coronary_heart_disease, dementia, 
+end_stage_renal_failure, frailty_falls, heart_failure, hypertension, 
+liver_failure, osteoporosis, parkinsons_disease, peripheral_vascular_disease,
+pulmonary_heart_disease, rheumatoid_arthritis, severe_interstitial_lung_disease,
+dbt_valid_from, dbt_valid_to, 'submission_patients' as patient_type
+from {{ ref('fct_person_myria_high_risk_patients_published_snapshot') }}
+union all 
+select patient_id, local_authority, most_recent_nel_admission_date, 
+nel_ip_admissions_last_24_months, nel_ip_admissions_last_12_months, 
+barnet_hospital_flag, barnet_hospital_count, rfl_flag, rfl_count, 
+total_high_risk_conditions, alcohol_dependence, atrial_fibrillation, 
+bronchiectasis, cerebrovascular_disease, chronic_kidney_disease, 
+chronic_liver_disease, copd, coronary_heart_disease, dementia, 
+end_stage_renal_failure, frailty_falls, heart_failure, hypertension, 
+liver_failure, osteoporosis, parkinsons_disease, peripheral_vascular_disease,
+pulmonary_heart_disease, rheumatoid_arthritis, severe_interstitial_lung_disease,
+dbt_valid_from, dbt_valid_to, 'control_group' as patient_type
+from {{ ref('fct_person_myria_control_group_published_snapshot') }}
 )
---JOIN BY FILE_DATE TO RFL_SUBMISSIon_PATIENTS and GET HEX_ID from THIS FILE Distinct patients (n=6395 inc June)
+-- FIND THE INFORMATION FOR ELIGIBLE PATIENTS ON THE FIRST (SUBMISSION) DATE THEY BECAME ELIGIBLE
 ,eligible_patients AS ( 
 select
     d.file_date as first_file_date,
     s.patient_id,
-    r.hex_id,
+    {{ hxflake_pseudo_generation('s.patient_id') }} as hex_id,
+    s.patient_type,
     s.local_authority,
         date(s.most_recent_nel_admission_date) as most_recent_nel_admission_date,
         datediff('day', s.most_recent_nel_admission_date, d.file_date) days_since_nel_admission,
@@ -55,17 +76,15 @@ select
         s.rheumatoid_arthritis,
         s.severe_interstitial_lung_disease
 from submission_dates d
-join {{ ref('fct_person_myria_high_risk_patients_published_snapshot') }} s
---join modelling.dbt_snapshots.fct_person_myria_high_risk_patients_published_snapshot s
+join total_pool s
 --Return rows that were active immediately before the start of the day after each FILE_DATE
     on s.dbt_valid_from < dateadd(day, 1, d.file_date)
    and (
         s.dbt_valid_to >= dateadd(day, 1, d.file_date)
         or s.dbt_valid_to is null
        )
-left join rfl_pop r using (hospital_number)
 --select earliest appearance of person in the snapshots
-    qualify row_number() over(partition by patient_id order by file_date) = 1
+qualify row_number() over(partition by patient_id order by file_date) = 1
 )
 --USING OLIDS match HISTORICAL DEMOGRAPHICS RATHER THAN CURRENT 
 , demographic_information as (
@@ -76,7 +95,7 @@ left join rfl_pop r using (hospital_number)
         case when pds.sk_patient_id is not null and p.sk_patient_id is not null then 1 else 0 end as is_match_olids,
         case when p.is_active then 1 else 0 end as is_active ,
         p.inactive_reason,
-         case when p.is_deceased then 1 else 0 end as is_deceased,
+        case when p.is_deceased then 1 else 0 end as is_deceased,
         p.death_date_approx as death_date,
         p.gender, -- expected: 'male', 'female' or 'unknown'
         --Calculating age by: Taking the year difference, Subtracting 1 if the birthday hasn’t occurred yet this year- expected: 0-100 or null 
@@ -109,6 +128,7 @@ select
     d.inactive_reason,
     d.death_date,
     d.first_file_date,
+    d.patient_type,
     d.local_authority,
     -- Myria status fields
     case when m.enrolled_date is not null then 1 else 0 end as enrolled,
