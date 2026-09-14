@@ -1,13 +1,15 @@
 # MHSDS domain models
 
-The source facts and relationships keep MHSDS records at their submitted level
-of detail. Derived models support analysis and provide inputs to cross-system
-event and clinical record models.
+The source facts and relationships preserve recorded MHSDS events and links,
+but their columns and names are designed for analysts. They do not reproduce
+every numbered source table or every source field. Derived models support
+analysis and provide inputs to cross-system event and clinical record models.
 
 Definitions follow the current
 [MHSDS v6 ETOS](https://digital.nhs.uk/data-and-information/data-collections-and-data-sets/data-sets/mental-health-services-data-set/tools-and-guidance).
-Historical records retain their submitted MHSDS version because fields and
-relationships change between versions.
+Historical field mappings are checked against the archived v4.1 and v5 ETOS.
+Records retain their submitted MHSDS version because fields and relationships
+change between versions.
 
 ## How monthly submissions and repeated rows are handled
 
@@ -30,7 +32,7 @@ What happens next depends on the type of table:
 |---|---|---|
 | Records updated in later submissions | The newest reported version of each record. | Referrals, care contacts, referral-team relationships, legal-status periods, hospital spells and ward stays. |
 | Monthly history | Rows from every accepted month. | MHS001 patient history, MHS005 patient indicators, MHS204 indirect activity and MHS902/MHS903 reference snapshots. |
-| Repeated rows needing a table-specific rule | One row using identifiers and ordering defined for that table. | MHS604 uses referral and diagnosis timestamp; MHS903 uses provider, submission and ward code. |
+| Repeated rows needing a table-specific rule | One row using identifiers and ordering defined for that use. | Currency diagnosis uses referral and timestamp; clinical diagnosis also retains scheme, code and person boundaries. MHS903 uses provider, submission and ward code. |
 
 The choice is made from the meaning of the source table. A referral, contact,
 legal-status period, spell or ward stay can be reported again with corrected or
@@ -53,7 +55,7 @@ The reporting month and receipt time determine which version is newer. The
 remaining fields make the result repeatable when those dates are equal; they do
 not imply that one row is clinically more reliable. Source row order runs
 descending, treating the last row for a key in a file as the later correction.
-MHS604 diagnosis is the exception: when diagnosis timestamps are equal it reads
+Currency diagnosis is the exception: when diagnosis timestamps are equal it reads
 source record and row numbers ascending, following the NHS England grouper
 order.
 
@@ -65,18 +67,28 @@ first three steps directly in their SQL.
 link versions across months. Referral, contact, spell and ward-stay identifiers
 are used where the source provides them.
 
+Spell and ward-stay identifiers are unique within an accepted submission, but
+the available history contains rare cases where a provider reuses an identifier
+for different people or start dates. The staging and fact models treat these as
+revisions and retain the newest source state. They are therefore suitable for
+analysis of the latest reported record, but they do not guarantee a complete
+lifetime event history where an identifier has been reused.
+
 ### 4. Rules applied by the current staging models
 
 | Staging model | Rows treated as the same record | Rows retained |
 |---|---|---|
 | `stg_mhsds_referral` | Same unique service request | Newest submitted referral |
-| `stg_mhsds_carecontact` | Same service request and unique care contact | Newest submitted contact |
+| `stg_mhsds_carecontact` | Same reporting period, service request and unique care contact | Every accepted period record; `int_mhsds_latest_care_contact` selects the newest state for existing contact models |
+| `stg_mhsds_care_activity` | Same reporting period and unique care activity | Every accepted MHS202 activity; identifiers are reused between periods |
+| `stg_mhsds_staff_activity` | Same submission, care activity and professional | Every accepted v6 MHS206 relationship, including rows whose parent was not received |
+| `stg_mhsds_staff_details` | Same submission and professional | One MHS901 snapshot; duplicate source groups retain the last source row and a quality flag |
 | `stg_mhsds_other_service_or_team_type` | Same referral and available service or team identifier | Newest relationship; rows without a service or team identifier are excluded |
 | `stg_mhsds_servicetype` | Same referral | Newest referral service information, supplemented from MHS101, MHS102 and MHS902 |
 | `stg_mhsds_mhactperiod` | Same unique Mental Health Act episode | Newest submitted legal-status period |
 | `stg_mhsds_spell` | Same unique hospital-provider spell number | Newest submitted spell, including a later discharge |
 | `stg_mhsds_mhs502wardstay` | Same unique ward-stay identifier | Newest submitted ward stay, including a later end date |
-| `stg_mhsds_primdiag` | Same referral and diagnosis timestamp | One primary diagnosis using source and NHS England grouper ordering; rows without a timestamp are excluded |
+| `int_mhsds_currency_primary_diagnosis` | Same referral and diagnosis timestamp | Currency-scoped primary diagnosis using NHS England grouper ordering; rows without a timestamp are excluded |
 | `stg_mhsds_mpi_history` | No matching across months | Every MHS001 row from accepted files, identified by its submitted-row id |
 | `stg_mhsds_patientindicators` | No matching across months | Every MHS005 row from accepted files because the reporting period is its only time reference |
 | `stg_mhsds_indirectactivity` | No matching across months | Every MHS204 row from accepted files because it is activity for that reporting period |
@@ -132,19 +144,64 @@ plausible clinical dates and are exposed as null.
 
 Reference models supply current UKHFD descriptions for submitted codes. Their
 `_history` models retain definition revisions. This includes referral, contact,
-language, safeguarding and inpatient classification codes. Descriptions remain
-null when a submitted code is absent from UKHFD; this is most common for
-historical consultation-medium codes. Specialised mental health service
-categories remain code-only because their reference list is published outside
-UKHFD and is not yet modelled in dbt.
+language, safeguarding and inpatient codes. The inpatient lookup combines
+current admission and discharge dictionaries with their retired predecessors,
+so historical MHSDS records keep useful labels. It selects the latest definition
+for each code, including a retired definition, and prefers the current dictionary
+when current and predecessor dictionaries contain the same code. Descriptions
+remain null when a submitted code is absent from UKHFD. The specialised mental
+health service reference list is published outside UKHFD, so the ward-stay fact
+exposes the source-derived name explicitly rather than presenting it as a UKHFD
+label.
+
+Care professional staff group, main specialty, registration body and job role
+labels come from UKHFD. Their history model retains every UKHFD revision, and
+the current lookup keeps the newest definition for each code even when the
+concept is retired. NHS Occupation Codes are not available in UKHFD, so the
+occupation labels come from the NHS England Occupation Code Manual v22.1. The
+seed includes valid and retired codes and is generated by a checked-in script.
+Descriptions remain null for invalid submitted values rather than assigning a
+plausible label to an unknown code.
+
+The care activity fact retains its procedure, finding, observation and unit
+fields for the clinical-record model. Procedure descriptions use SNOMED CT.
+Finding and observation descriptions use the submitted scheme, while retired
+Read codes also expose the source-pipeline SNOMED CT mapping. Finding and
+observation schemes come from UKHFD. Unit names use the warehouse unit
+dictionary and its known aliases. Each field has a label-status column so
+analysts can distinguish missing codes, invalid values, post-coordinated SNOMED
+expressions and coding systems without a local reference.
 
 ## Published interfaces
+
+The clinical-record fact combines recorded diagnoses, assessment questions or
+dimensions, and populated care-activity components. It keeps different codes
+at the same time, unlike currency diagnosis selection. Repeated dated diagnoses
+use their latest accepted row, with person identity included to avoid combining
+different people's histories. Undated records and assessment occurrences remain
+separate. First and last reporting periods describe submission evidence, not
+clinical onset or resolution.
+
+`fct_mhsds_clinical_record` is for clinical-item and outcome analysis, not
+encounter counts or questionnaire counts. Use `clinical_record_type` and
+`clinical_label_status` when interpreting descriptions. Assessment values remain
+as submitted text alongside a NUMBER(38,9) value and parse status. MHS606 retains
+the assessor identifiers needed for same-clinician pairing. MHS607 uses its
+same-submission care activity for time and flags conflicting recorded links.
+
+See the [clinical-record design and validation](mhsds-clinical-record-plan.md).
 
 | Model | One row represents | Use |
 |---|---|---|
 | [`fct_mhsds_referral`](../models/reporting/mental_health/fct_mhsds_referral.sql) | One unique service request | Referral receipt, decision, discharge planning, rejection, closure, organisations and primary service context. |
 | [`rel_mhsds_referral_service_team`](../models/reporting/mental_health/rel_mhsds_referral_service_team.sql) | One referral, relationship role and service or team | Primary, referred-to and additional teams without multiplying the referral fact. |
 | [`fct_mhsds_care_contact`](../models/reporting/mental_health/fct_mhsds_care_contact.sql) | One unique service request and care contact | Patient contact timing, attendance, delivery method, location, booking, accessibility and service context. |
+| [`fct_mhsds_care_activity`](../models/reporting/mental_health/fct_mhsds_care_activity.sql) | One provider reporting period and care activity | Same-submission contact timing, service and commissioner context, duration and populated clinical-component flags. |
+| [`fct_mhsds_clinical_record`](../models/reporting/mental_health/fct_mhsds_clinical_record.sql) | One retained diagnosis, assessment question/dimension or activity component | Submitted codes and labels, values, direct relationships, time provenance and source-quality flags. |
+| [`dim_mhsds_care_professional_period`](../models/reporting/mental_health/dim_mhsds_care_professional_period.sql) | One accepted reporting period and care professional | Period-specific staff group, specialty, occupation and job role without applying current details to historical activity. |
+| [`rel_mhsds_care_activity_staff`](../models/reporting/mental_health/rel_mhsds_care_activity_staff.sql) | One recorded care activity and professional relationship | Pre-v6 direct MHS202 staff and v6 MHS206 many-to-many relationships, including missing-parent states. |
+| [`fct_mhsds_hospital_provider_spell`](../models/reporting/mental_health/fct_mhsds_hospital_provider_spell.sql) | One provider-qualified hospital spell | Recorded admission and discharge, route, planned discharge, provider, commissioner and referral context. Missing discharge is recorded source state, not current occupancy. |
+| [`fct_mhsds_ward_stay`](../models/reporting/mental_health/fct_mhsds_ward_stay.sql) | One provider-qualified ward stay | Recorded movement through wards, timings, site, ward characteristics, admitted-patient classification, specialised service and distance from home. |
 | [`fct_mhsds_referral_episodes`](../models/reporting/mental_health/fct_mhsds_referral_episodes.sql) | One referral | Currency-scoped summary of contacts, indirect activity and inpatient use. Use the source facts when individual records are needed. |
 | [`fct_mhsds_currency_contacts`](../models/reporting/mental_health/currencies/fct_mhsds_currency_contacts.sql) | One referral and care contact | Mental health contact currency and proxy cost. |
 | [`fct_mhsds_currency_bed_days`](../models/reporting/mental_health/currencies/fct_mhsds_currency_bed_days.sql) | One hospital spell and financial year | Mental health bed-day currency and proxy cost. |
@@ -156,6 +213,26 @@ Join a contact to its recorded referral using
 fct_mhsds_referral.source_record_id`. A valid contact can refer to a service
 request absent from the retained referral population, so use a left join.
 
+MHS501 renamed five admission and discharge fields in version 5. The spell fact
+uses the general hospital-provider-spell fields through version 4.1 and the
+mental-health-specific fields from version 5. The source pipeline duplicates
+the values into both field sets, so specification version decides the source.
+
+Join a ward stay to its retained spell using
+`fct_mhsds_ward_stay.hospital_provider_spell_source_record_id =
+fct_mhsds_hospital_provider_spell.source_record_id`. The ward-stay fact retains
+rows whose recorded parent is absent and reports the link state. Before version
+6 it uses ward characteristics submitted on MHS502. From version 6 it uses the
+MHS903 record with the same specification-defined ward key in the accepted
+submission. Source-pipeline convenience fields do not decide this mapping.
+
+MHS903 is monthly ward configuration and capacity, not patient activity.
+Available and closed bed days are not copied onto ward stays because doing so
+would invite false sums. The current feed populates those measures on only a
+minority of ward snapshots, so MHS903 remains supporting staging. A future
+capacity model should have an explicit provider, ward and reporting-month
+grain and a confirmed analytical use.
+
 The referral and contact facts retain the source-derived ICB commissioner and
 publish a resolved ICB commissioner. When the source derivation is blank but
 the submitted commissioner has the ODS ICB role, the resolved fields use the
@@ -165,6 +242,38 @@ route supplied the value.
 `is_wnl_commissioner` provides a present-day footprint filter. It includes the
 current WNL ICB, the legacy NCL and NWL ICB and sub-ICB codes, and their 13
 predecessor CCGs. It does not classify the London Commissioning Hub as WNL.
+
+MHS202 activity identifiers are unique within a reporting period, not across
+the received history. The care activity fact therefore includes provider and
+reporting period in its key. It uses the MHS201 parent from the same accepted
+submission for timing and service context. Using the latest contact state would
+attach a different person's contact to 1,247 historical activities in the
+current data. The same-submission join has no person mismatches and leaves 303
+activities with a visible missing-parent state.
+
+Those 303 activities retain a valid `dmicActivityDate` on their selected source
+row. The fact uses it as a date-only fallback when the submitted contact date
+is unavailable, provided it is after 1900 and within the reporting period.
+`care_activity_time_basis = 'source_derived_activity_date'` identifies this
+route; contact linkage remains missing. Clinical components and compatible
+activity assessments inherit the same date and provenance.
+
+On 11 September, all 18,043,373 dated activity controls with a populated derived
+date agreed with their submitted contact date. Another 143 undated activities
+had an agreeing historical contact date, although those contact submissions
+were inactive. The fallback uses the selected activity's derived date rather
+than attaching an inactive parent or the latest contact for another person.
+
+Date-only records belong on their recorded day in a longitudinal timeline.
+Their precision does not establish ordering among events on the same day;
+midnight in a timestamp representation must not be treated as a supplied time.
+
+Before v6, MHS202 held one care professional directly. V6 moved the
+many-to-many relationship to MHS206. The relationship model combines both
+routes and never fills a missing historical MHS901 row from a later reporting
+period. This matters because 7,808 received MHS206 relationships without a
+same-submission professional snapshot have that professional in another
+period, while 4,802 have no MHS901 snapshot in the accepted history.
 
 ## Nearby source facts
 
@@ -212,9 +321,11 @@ the referral or contact facts:
   indicators, care coordination, disability, care plans, social circumstances
   and fit notes. These are person context, not healthcare events.
 - MHS401–MHS405: Mental Health Act and community treatment order periods.
-- MHS501–MHS518: hospital spells, ward stays, leave, incidents and discharge
-  readiness.
-- MHS601–MHS609: diagnoses, presenting complaints, assessments and prescribing.
+- MHS501–MHS502 are the published spell and ward-stay facts. MHS503–MHS518
+  contain care-professional assignments, discharge delays, leave, incidents
+  and discharge readiness, which need their own event or relationship models.
+- MHS601/MHS603–MHS607 now feed the clinical-record fact. MHS608 anonymous
+  assessments remain outside the person-linked model; MHS609 awaits #1033.
 - MHS701–MHS702: Care Programme Approach episodes and reviews.
 - MHS901–MHS903: staff, service/team and ward reference entities.
 
