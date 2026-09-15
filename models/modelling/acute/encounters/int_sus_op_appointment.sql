@@ -92,7 +92,7 @@ select
 
     /* Commissioning information */
     , iff(core.spec_comm is null, 'N','Y') as spec_comm_flag -- Adding Spec_comm   
-    , core.spec_comm as spec_comm
+    , core.spec_comm as spec_comm_code
     , dict_pss_sc.spec_comm_desc
     , core.pss_service_line_code as pss_service_line_code
     , dict_pss_sl.service_line_number_desc as pss_service_line_desc

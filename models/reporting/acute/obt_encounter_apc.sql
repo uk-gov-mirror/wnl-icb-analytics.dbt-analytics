@@ -43,7 +43,7 @@ select
     , core_hrg_chapter
     , core_hrg_chapter_desc
     , spec_comm_flag
-    , spec_comm
+    , spec_comm_code
     , spec_comm_desc
     , pss_service_line_code
     , pss_service_line_desc

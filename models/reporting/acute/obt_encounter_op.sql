@@ -40,7 +40,7 @@ select
     , referral_acuity
     , referral_acuity_desc
     , spec_comm_flag
-    , spec_comm
+    , spec_comm_code
     , core_hrg_code
     , core_hrg_desc
     , core_hrg_chapter
