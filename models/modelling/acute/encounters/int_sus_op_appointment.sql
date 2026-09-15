@@ -93,6 +93,9 @@ select
     /* Commissioning information */
     , iff(core.spec_comm is null, 'N','Y') as spec_comm_flag -- Adding Spec_comm   
     , core.spec_comm as spec_comm
+    , dict_pss_sc.spec_comm_desc
+    , core.pss_service_line_code as pss_service_line_code
+    , dict_pss_sl.service_line_number_desc as pss_service_line_desc
     , core.appointment_commissioning_grouping_core_hrg as core_hrg_code -- consider changing to something more aligned with team understanding
     , dict_hrg.hrg_description as core_hrg_desc
     , dict_hrg.hrg_chapter_key as core_hrg_chapter
@@ -175,3 +178,11 @@ left join ethnicity_codes as eth
 
 left join gender_codes as gen
     on core.appointment_patient_identity_gender = gen.gender_code
+
+left join
+    {{ ref('pss_spec_comm')}} as dict_pss_sc
+    on core.spec_comm = dict_pss_sc.spec_comm_code
+
+left join
+    {{ ref('pss_service_line')}} as dict_pss_sl
+    on core.pss_service_line_code = dict_pss_sl.service_line_number_code

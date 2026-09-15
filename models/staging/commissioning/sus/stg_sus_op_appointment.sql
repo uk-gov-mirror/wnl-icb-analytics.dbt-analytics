@@ -52,6 +52,7 @@ select  primarykey_id,
     appointment_commissioning_grouping_core_hrg,
     //Added Spec Comm
     appointment_commissioning_pss_grouping_national_programme_code as spec_comm,
+    appointment_commissioning_pss_grouping_prescribed_service_line_code as pss_service_line_code,
     appointment_commissioning_tariff_calculation_final_price
 from {{ ref('raw_sus_op_appointment') }} as core
 left join organisation_codes as provider
