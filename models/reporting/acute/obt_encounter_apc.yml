@@ -237,6 +237,18 @@ models:
         data_type: varchar
         description: "Specialised Commission Code"
 
+      - name: spec_comm_desc
+        data_type: varchar
+        description: "Specialised Commission description"
+
+      - name: pss_service_line_code
+        data_type: varchar
+        description: "Prescribed Specialised Services service line code"
+
+      - name: pss_service_line_desc
+        data_type: varchar
+        description: "Prescribed Specialised Services service line description"
+
       - name: type
         data_type: varchar
         description: "An amalgamation of admission_type and sub_type where type = 'NON'."
