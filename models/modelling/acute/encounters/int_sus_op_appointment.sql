@@ -91,8 +91,8 @@ select
     , dict_appt_priority.priority_type_desc as referral_acuity_desc
 
     /* Commissioning information */
-    , iff(core.spec_comm is null, 'N','Y') as spec_comm_flag -- Adding Spec_comm   
-    , core.spec_comm as spec_comm_code
+    , iff(core.spec_comm_code is null, 'N','Y') as spec_comm_flag -- Adding Spec_comm   
+    , core.spec_comm_code as spec_comm_code
     , dict_pss_sc.spec_comm_desc
     , core.pss_service_line_code as pss_service_line_code
     , dict_pss_sl.service_line_number_desc as pss_service_line_desc
@@ -181,7 +181,7 @@ left join gender_codes as gen
 
 left join
     {{ ref('pss_spec_comm')}} as dict_pss_sc
-    on core.spec_comm = dict_pss_sc.spec_comm_code
+    on core.spec_comm_code = dict_pss_sc.spec_comm_code
 
 left join
     {{ ref('pss_service_line')}} as dict_pss_sl
