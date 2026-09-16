@@ -68,6 +68,10 @@ they share an attendance.
 
 ## Validation
 
+The subsequent [coverage and correctness review](ecds-measurement-review.md)
+separates source fidelity from clinical validity and records the refresh, unit
+and patient-linkage limitations found by profiling.
+
 The DEV build on 16 September 2026 preserved 62,256,079 observations and 42,857,394 scored
 assessments, matching their staging row counts. All records linked to an
 attendance. Grain tests passed at staging, reference and fact level.
