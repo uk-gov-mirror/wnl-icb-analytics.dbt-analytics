@@ -17,12 +17,12 @@ seeds:
     columns:
       - name: commissioner_code
         description: Organisation code as it appears in SUS.
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: code_format
         description: Whether this row is the 3-char or 5-char form of the code.
-        tests:
+        data_tests:
           - accepted_values:
               arguments:
                 values: ['3-char', '5-char']
@@ -32,5 +32,5 @@ seeds:
         description: >
           Set false to retire a code without deleting the row, so the history
           of what was in scope is preserved.
-        tests:
+        data_tests:
           - not_null

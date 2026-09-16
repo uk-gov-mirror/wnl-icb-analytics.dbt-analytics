@@ -67,7 +67,7 @@ select
     -- original otherwise, which is what the coalesce does.
     ------------------------------------------------------------------
     ,coalesce(pm.provto, ae.organisation_code_code_of_provider)
-        as z_organisation_code_code_of_provider_merged
+        as organisation_code_code_of_provider_merged
 
 from ae
 

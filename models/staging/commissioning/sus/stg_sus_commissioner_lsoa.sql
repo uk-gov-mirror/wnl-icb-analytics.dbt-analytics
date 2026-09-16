@@ -1,7 +1,7 @@
 select
-    trim(oa_code) as lsoa_code,
-    trim(organisation_code_commissioner) as commissioner_code,
-    cast(effective_from as date) as effective_from,
-    cast(effective_to as date) as effective_to
+    trim(oacode) as lsoa_code,
+    trim(organisationcode_commissioner) as commissioner_code,
+    cast(effectivefrom as date) as effective_from,
+    cast(effectiveto as date) as effective_to
 from {{ ref('raw_sus_commissioner_reference_lsoa_commissioner') }}
-where cast(effective_from as date) <= cast(effective_to as date)
+where cast(effectivefrom as date) <= cast(effectiveto as date)

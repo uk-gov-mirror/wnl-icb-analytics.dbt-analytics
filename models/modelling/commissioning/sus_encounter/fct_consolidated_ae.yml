@@ -49,19 +49,20 @@ models:
         description: >
           Provider organisation code with mergers applied, from the legacy
           scalar function dbo.getProvMerge. Returns the replacement code where
-          the provider has been merged, otherwise the original code.
+          the provider has been merged, otherwise the original code. Null when
+          the attendance has no submitted provider code: the legacy view only
+          dropped those rows because of its join to proc_consolidate2, and that
+          filter is not reproduced here.
 
           NOTE: the merger lookup is retroactive. The legacy function had
           date-aware logic so that a merger applied only from the period it took
           effect, but that logic was commented out, so merged providers are
           renamed across their entire history. Reproduced as-is.
-        data_tests:
-          - not_null
 
       - name: organisation_code_code_of_provider
         description: >
           Provider organisation code as submitted, truncated to three characters
-          upstream. See z_organisation_code_code_of_provider_merged for the
+          upstream. See organisation_code_code_of_provider_merged for the
           post-merger code.
 
       - name: applicable_costing_period

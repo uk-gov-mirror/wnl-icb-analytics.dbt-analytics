@@ -15,9 +15,11 @@ models:
       KNOWN PARITY ISSUES -- these reproduce defects in the legacy stored
       procedure deliberately, so that migrated output matches the legacy table.
       Each needs sign-off from the SUS reporting owner before being corrected:
-        * z_em_duration_datetime adds minutes as days (see column description)
         * z_pod_level_4 misses em_department_type = '3' (see column description)
         * z_commissioning_access is recomputed, where legacy was historical
+
+      z_em_duration_datetime does not reproduce the legacy day-addition defect.
+      It adds em_duration_time as minutes.
 
       RECONCILIATION STATUS (2019 sample, vs Staging.fact_ae_current):
         * in-area commissioners match to within 0.7%
@@ -77,15 +79,12 @@ models:
 
       - name: z_em_duration_datetime
         description: >
-          em_duration_time is a duration in MINUTES (values cluster at 239/240,
-          i.e. the four-hour A&E target). The legacy stored procedure treated it
-          as a 1900-anchored datetime and used T-SQL datetime addition, which
-          adds the DAY count -- so a 240-minute attendance was recorded as 240
-          days after arrival. Reproduced here for parity.
-
-          The correct expression is arrival plus em_duration_time minutes.
-          Nothing downstream can be relying on the real duration, because it has
-          never been populated. Raise with the SUS reporting owner.
+          Arrival plus em_duration_time minutes. em_duration_time is a duration
+          in minutes (values cluster at 239/240, i.e. the four-hour A&E target).
+          The legacy stored procedure treated it as a 1900-anchored datetime and
+          used T-SQL datetime addition, which adds the day count -- so a
+          240-minute attendance was recorded as 240 days after arrival. This
+          model does not reproduce that defect.
 
       - name: z_em_assessment_waiting_datetime
         description: >

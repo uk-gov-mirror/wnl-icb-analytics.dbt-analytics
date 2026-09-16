@@ -24,12 +24,12 @@ seeds:
           Superseded provider code. Must be unique -- the legacy scalar function
           assigned from a single-row select, so a duplicate would have returned
           an arbitrary result.
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: provto
         description: Provider code that replaced it.
-        tests:
+        data_tests:
           - not_null
       - name: fromfinperiodno
         description: >
