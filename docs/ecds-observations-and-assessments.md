@@ -3,7 +3,7 @@
 ECDS measurements and scores have their own record grains. A respiratory rate
 measurement carries a value and unit; its NEWS2 component score carries points.
 Neither belongs in the procedure model. These facts provide the missing domain
-models for later integration with the longitudinal clinical record.
+models consumed by the longitudinal clinical record.
 
 | Model | One row represents | Clinical timestamp |
 |---|---|---|
@@ -59,11 +59,32 @@ No score severity thresholds or QuickReport measures are derived.
 
 ## Longitudinal integration
 
-The facts are independent of the procedure and encounter clinical-code models.
-A later longitudinal adapter can consume them as observation and scored
-assessment records, retaining values, units, tool codes and timestamps.
-Encounter-level arrays can be considered separately. Do not deduplicate a
-measurement against its derived score or a related coded finding merely because
+`int_ecds_person_clinical_record` consumes both facts and publishes them through
+`fct_person_clinical_record` as `observation` and `scored_assessment`. Each source
+sequence remains a separate row, including records without a patient key.
+`source_model_name` and `source_record_id` link back to the fact and its detailed
+category, code-label provenance and unit-match status. Attendance remains parent
+context. These records do not enter the procedure model or encounter code arrays.
+
+Observation values, categorical labels and reported units populate the shared
+result fields. Resolved unit labels do not establish compatibility with the
+observation. Scores populate the raw and parsed result fields; the tool code is
+`source_code`, with its label in `assessment_tool_name`. A supplied score has
+`assessment_response_status = 'not_validated'`; an absent value is `value_missing`.
+`assessment_score_numeric` stays null because numeric parsing alone does not
+establish a usable tool-specific score.
+
+Clinical time is the observation's `observed_at` or the assessment's
+`validated_at`, with that basis recorded explicitly. Missing clinical times stay
+unknown. Attendance dates and delivery timestamps do not replace them.
+
+The adapter uses the existing parent-delivery watermark and withdrawal handling.
+Build the child facts before the adapter. A full refresh of the ECDS adapter is
+required on deployment because its stored schema gains result fields. Subsequent
+loads replay the boundary delivery; the existing monthly full refresh reconciles
+older corrections and reference changes. Coordinate source and attendance refreshes
+before building the facts, since a refresh can replace attendance identifiers.
+Do not deduplicate a measurement against a score or related finding merely because
 they share an attendance.
 
 ## Validation
@@ -95,3 +116,34 @@ hardcoded-reference, description and test-coverage checks passed. Ownership
 checks found no missing owners. The local verification helper's version check
 does not recognise the installed dbt 2.0.1 banner, so warehouse verification
 used the documented direct CLI commands with the tracked `dev` target.
+
+## Clinical-record integration validation
+
+On 16 September 2026, the refreshed facts supplied 62,278,119 observations and
+42,874,509 scored assessments. The
+[aggregate reconciliation](../analyses/acute/ecds_clinical_record_integration.sql)
+compared every source fact row with `fct_person_clinical_record`. Both record
+types had zero missing rows, unexpected rows or changed payloads. The comparison
+covers source identity, person and provider linkage, parent identity, codes,
+values, unit labels, tool labels, interpretation status and clinical timestamps.
+It also checks that unvalidated ECDS scores do not populate the usable-score field.
+A separate comparison with current staging also found zero missing, extra or
+changed source records across both refreshed facts.
+
+All 2,598,813 observations and 1,325,165 assessments without a patient key remain
+in the clinical record. These rows are discoverable by source and attendance;
+they cannot support person-linked analysis until the source supplies linkage.
+The seven-type ECDS adapter contains 201,391,188 rows. Its full refresh took
+63 seconds using the existing navigation warehouse hook. Adapter grain and
+SNOMED mapping checks passed, as did shared clinical-record grain and timestamp
+checks and the downstream coverage model's grain check.
+
+The prerequisite build initially found stale shared DEV staging definitions and
+older diagnosis, procedure and encounter-array snapshots. Rebuilding those
+existing models resolved both source-count reconciliation failures. Their SQL
+was not changed by this PR.
+
+The subsequent incremental replay took 127 seconds on the configured medium
+warehouse. Counts and whole-row fingerprints were unchanged across all seven
+record types and 201,391,188 rows, including both new types after the withdrawal
+hook ran. The replay build and its selected tests passed.

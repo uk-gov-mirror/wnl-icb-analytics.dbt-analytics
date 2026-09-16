@@ -1,6 +1,6 @@
 # ECDS measurement coverage and review
 
-Reviewed on 16 September 2026 against commit `c4c7f2ca`.
+Reviewed on 16 September 2026 against foundation commit `c8b2b25c`.
 
 The implementation faithfully preserves the submitted records. That conclusion
 is supported by an exhaustive comparison of 105,113,473 rows against the source
