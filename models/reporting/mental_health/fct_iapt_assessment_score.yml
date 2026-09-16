@@ -95,11 +95,11 @@ models:
       - name: is_care_activity_linked
         description: Whether the same submission holds the recorded activity. Null for IDS606.
       - name: is_care_activity_referral_consistent
-        description: Whether that activity records the same referral. Null when not applicable.
+        description: True when that activity records the same non-null referral. False when either identifier is missing or they differ. Null when not applicable.
       - name: is_care_activity_contact_consistent
-        description: Whether that activity records the same contact. Null when not applicable.
+        description: True when that activity records the same non-null contact. False when either identifier is missing or they differ. Null when not applicable.
       - name: is_care_activity_person_consistent
-        description: Whether that activity records the same Person_ID. Null when not applicable.
+        description: True when that activity records the same non-null Person_ID. False when either identifier is missing or they differ. Null when not applicable.
       - name: parent_record_type
         description: care_activity when the same-submission activity agrees on every link and the published fct_iapt_care_activity row comes from the same submission and names the same referral, contact, activity and non-null Person_ID; otherwise referral when the published fct_iapt_referral row names the same non-null Person_ID; otherwise null. Missing Person_IDs never establish a parent.
       - name: parent_record_id

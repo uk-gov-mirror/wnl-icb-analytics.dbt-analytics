@@ -45,12 +45,23 @@ with referral_assessments as (
     select
         a.*
         , t.care_activity_id is not null as is_care_activity_linked
-        , iff(t.care_activity_id is null, null, a.referral_id is not distinct from t.referral_id)
-            as is_care_activity_referral_consistent
-        , iff(t.care_activity_id is null, null, a.care_contact_id is not distinct from t.care_contact_id)
-            as is_care_activity_contact_consistent
-        , iff(t.care_activity_id is null, null, a.person_id is not distinct from t.person_id)
-            as is_care_activity_person_consistent
+        -- Missing identifiers are not a match: both-null must not inherit the activity date.
+        , iff(
+            t.care_activity_id is null
+            , null
+            , a.referral_id is not null and t.referral_id is not null and a.referral_id = t.referral_id
+        ) as is_care_activity_referral_consistent
+        , iff(
+            t.care_activity_id is null
+            , null
+            , a.care_contact_id is not null and t.care_contact_id is not null
+                and a.care_contact_id = t.care_contact_id
+        ) as is_care_activity_contact_consistent
+        , iff(
+            t.care_activity_id is null
+            , null
+            , a.person_id is not null and t.person_id is not null and a.person_id = t.person_id
+        ) as is_care_activity_person_consistent
         , t.clinical_date_status as activity_date_status
         , t.clinical_date as activity_date
         , t.clinical_time as activity_time

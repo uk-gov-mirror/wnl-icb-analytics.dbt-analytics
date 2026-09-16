@@ -32,10 +32,17 @@ with activities as (
         , a.person_id
         , a.dmic_activity_date as source_derived_date
         , c.care_contact_id is not null as is_submitted_contact_linked
-        , iff(c.care_contact_id is null, null, a.referral_id is not distinct from c.referral_id)
-            as is_submitted_contact_referral_consistent
-        , iff(c.care_contact_id is null, null, a.person_id is not distinct from c.person_id)
-            as is_submitted_contact_person_consistent
+        -- Missing identifiers are not a match: both-null must not inherit the contact date.
+        , iff(
+            c.care_contact_id is null
+            , null
+            , a.referral_id is not null and c.referral_id is not null and a.referral_id = c.referral_id
+        ) as is_submitted_contact_referral_consistent
+        , iff(
+            c.care_contact_id is null
+            , null
+            , a.person_id is not null and c.person_id is not null and a.person_id = c.person_id
+        ) as is_submitted_contact_person_consistent
         , case
             when c.care_contact_id is null then 'parent_not_linked'
             when not (is_submitted_contact_referral_consistent and is_submitted_contact_person_consistent)
