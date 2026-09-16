@@ -38,7 +38,7 @@ limit to eligible group 66K rows by inner join with member spine. Added date ran
 , ae_encounter_summary as (
     select
         uec.sk_patient_id
-        ,m.hex_id
+        , m.hex_id
         , start_date as activity_date
         , end_date as end_date
         , date(start_date) as activity_date_range
@@ -46,7 +46,7 @@ limit to eligible group 66K rows by inner join with member spine. Added date ran
         , pod as activity_subtype
         , count(*) as encounters
         , sum(cost) as cost
-        , sum(duration) as duration
+        , sum(duration) as duration -- in minutes
     from {{ ref("obt_encounter_uec") }} uec
     --from REPORTING.COMMISSIonING_REPORTING.OBT_ENCOUNTER_UEC uec
         inner join member_spine m on uec.sk_patient_id = m.patient_id
@@ -62,7 +62,7 @@ limit to eligible group 66K rows by inner join with member spine. Added date ran
 , op_encounter_summary as (
     select
         op.sk_patient_id
-        ,m.hex_id
+        , m.hex_id
         , start_date as activity_date
         , start_date as end_date
         , date(start_date) as activity_date_range
@@ -89,7 +89,7 @@ Ongoing admissions up to current_date and Non-overlapping admissions dropped (no
 , apc_encounter_summary as(
    select
         apc.sk_patient_id
-        ,m.hex_id
+        , m.hex_id
         , apc.start_date as activity_date
         , apc.end_date
         , d.date as activity_date_range
@@ -122,7 +122,7 @@ includes all kinds of clinical activity including triage  - keep all for now
 ,gp_encounter_summary as (
  select
         TO_VARCHAR(p.sk_patient_id) as sk_patient_id
-       ,m.hex_id
+        , m.hex_id
         , date(start_date) as activity_date
         , date(start_date) as end_date
         , date(start_date) as activity_date_range
@@ -181,7 +181,6 @@ August evaluation - add in Elective Costs
         , sum(case when activity_type = 'Inpatient' and activity_subtype = 'Elective' then duration else 0 end) as ip_elective_duration
     from combined
     group by all
-    order by 1
 )
 /*This creates a annual time series per patient, even if they had no activity. Build a complete date spine, then attach costs/activity
 Enables longitudinal analysis: Track cost over time, Align patients around intervention date, Compare pre vs post
