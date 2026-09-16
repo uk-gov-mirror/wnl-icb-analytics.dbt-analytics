@@ -1,0 +1,25 @@
+version: 2
+
+seeds:
+  - name: cancer_opcs_treatment_modality
+    description:
+      Table to map OPCS codes to cancer treatment modalities.
+    config:
+      column_types:
+        opcs_code: varchar(64)
+        treatment_type: varchar(255)
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - opcs_code
+              - treatment_type
+    columns:
+      - name: opcs_code
+        description: OPCS Code representing a clinical procedure.
+        data_tests:
+          - not_null
+      - name: treatment_type
+        description: Grouping of cancer treatment modality.
+        data_tests:
+          - not_null
