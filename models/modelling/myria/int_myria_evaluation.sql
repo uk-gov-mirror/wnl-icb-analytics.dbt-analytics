@@ -50,7 +50,7 @@ limit to eligible group 66K rows by inner join with member spine. Added date ran
     from {{ ref("obt_encounter_uec") }} uec
     --from REPORTING.COMMISSIonING_REPORTING.OBT_ENCOUNTER_UEC uec
         inner join member_spine m on uec.sk_patient_id = m.patient_id
-        inner join date_range d on d.date >= uec.start_date  and d.date <= coalesce(uec.end_date, current_date)
+        inner join date_range d on d.date = uec.start_date
     where 
         sk_patient_id is not null and sk_patient_id != '1' 
         and start_date <= dateadd(dd, -7, current_date)
@@ -74,7 +74,7 @@ limit to eligible group 66K rows by inner join with member spine. Added date ran
     from {{ ref("obt_encounter_op") }} op
     --from REPORTING.COMMISSIonING_REPORTING.OBT_ENCOUNTER_OP op
         inner join member_spine m on op.sk_patient_id = m.patient_id
-        inner join date_range d on d.date >= op.start_date  and d.date <= coalesce(op.start_date, current_date)
+        inner join date_range d on d.date = op.start_date
     where 
         sk_patient_id is not null and sk_patient_id != '1' 
         and start_date <= dateadd(dd, -7, current_date)
@@ -136,7 +136,7 @@ includes all kinds of clinical activity including triage  - keep all for now
     --inner join REPORTING.OLIDS_PERSON_DEMOGRAPHICS.DIM_PERSON_DEMOGRAPHICS p using (person_id)
     inner join {{ ref("dim_person_demographics") }} p using (person_id)
    inner join member_spine m on TO_VARCHAR(p.sk_patient_id) = m.patient_id
-    inner join date_range d on d.date >= date(gp.start_date)  and d.date <= coalesce(date(gp.start_date), current_date)
+    inner join date_range d on d.date = date(gp.start_date)
     where 
         p.sk_patient_id is not null and p.sk_patient_id != '1' 
         and start_date <= dateadd(dd, -7, current_date) and is_attended
