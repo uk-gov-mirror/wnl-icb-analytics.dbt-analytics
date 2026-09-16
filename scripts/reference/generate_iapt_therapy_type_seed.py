@@ -103,7 +103,7 @@ def etos_rows(path, version, guidance):
         legacy = {'legacy_therapy_type_code': '', 'legacy_therapy_type_description': '', 'legacy_code_source': ''}
         for count_row, uid, name, codes in counts:
             peers = [guidance[c] for c in codes if c in guidance]
-            if code in codes and len({p['legacy_therapy_type_code'] for p in peers}) == 1 and peers[0]['legacy_therapy_type_code']:
+            if code in codes and len(peers) == 1 and peers[0]['legacy_therapy_type_code']:
                 legacy = {
                     'legacy_therapy_type_code': peers[0]['legacy_therapy_type_code'],
                     'legacy_therapy_type_description': peers[0]['legacy_therapy_type_description'],
