@@ -5,6 +5,8 @@ with contacts as (
     select
         *
         , nullif(ltrim(attend_or_dna_code, '0'), '') as attendance_code_normalised
+        -- UKHFD appointment_type codes are two-character; pad so a submitted 2 matches 02.
+        , iff(app_type is null, null, lpad(upper(app_type), 2, '0')) as appointment_type_code_normalised
         -- v2.1 replaced consultation medium used with consultation mechanism under the same item, I201070.
         -- Take the field the file's data set version names; the warehouse holds the same value in both.
         , iff(
@@ -84,7 +86,11 @@ select
     end as care_contact_time_precision
     , c.app_type as appointment_type_code
     , appointment_type.description as appointment_type_name
-    , iff(c.app_type is null, null, lpad(c.app_type, 2, '0') in ('02', '03', '05')) as is_treatment_appointment_type
+    , iff(
+        c.appointment_type_code_normalised is null
+        , null
+        , c.appointment_type_code_normalised in ('02', '03', '05')
+    ) as is_treatment_appointment_type
     , c.attend_or_dna_code as attendance_code
     , attendance.description as attendance_name
     , c.is_attended
@@ -169,7 +175,7 @@ left join {{ ref('attendance_status') }} as attendance
     on c.attendance_code_normalised = attendance.code
 left join {{ ref('iapt_code_lookup') }} as appointment_type
     on appointment_type.code_set_name = 'appointment_type'
-    and upper(c.app_type) = appointment_type.code
+    and c.appointment_type_code_normalised = appointment_type.code
 left join {{ ref('iapt_code_lookup') }} as cancellation
     on cancellation.code_set_name = 'short_notice_cancellation_indicator'
     and upper(c.cancellation) = cancellation.code

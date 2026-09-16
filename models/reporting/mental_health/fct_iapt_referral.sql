@@ -12,7 +12,7 @@ with versions as (
         *
         , min(reporting_period_end_date) over (partition by referral_id) as first_reported_period_end_date
         , max(reporting_period_end_date) over (partition by referral_id) as last_reported_period_end_date
-        , count(*) over (partition by referral_id) as reported_period_count
+        , count(distinct reporting_period_end_date) over (partition by referral_id) as reported_period_count
         -- Versions can name different people; each record keeps its own identity.
         , min(person_id) over (partition by referral_id)
             <> max(person_id) over (partition by referral_id) as has_person_identifier_changed
