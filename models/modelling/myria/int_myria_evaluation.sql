@@ -213,7 +213,9 @@ Revised calculation person level n~1200
         round (sum (ifnull(c.gp_encounters,0)), 10) as gp_encounters,
         -- bed days
         round (sum (ifnull(c.ip_nel_emergency_duration,0)), 10) as ip_nel_emergency_duration,
-        round (sum (ifnull(c.ip_elective_duration,0)), 10) as ip_elective_duration
+    round (sum (ifnull(c.ip_elective_duration,0)), 10) as ip_elective_duration,
+    -- deaths
+    max(case when d.date = m.death_date then 1 else 0 end) as death_flag
     from member_spine as m
     left join date_range as d -- date spine between 1 year before eligibility date and date of death/current date - 7 days (to allow for incomplete data)
         on d.date between dateadd(dd, -365, eligibility_date) 
