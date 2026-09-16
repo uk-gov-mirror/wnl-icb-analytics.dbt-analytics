@@ -1,6 +1,6 @@
 models:
   - name: int_myria_evaluation
-    description: A table holding aggregated cost and activity data for control and intervention pre and post onboarding (67 days+) using the PROPENSITY matched cohort.
+    description: A table holding patient by period level aggregated cost and activity data for control and intervention pre and post onboarding (67 days+) using the PROPENSITY matched cohort.
 
     config:
       meta:
