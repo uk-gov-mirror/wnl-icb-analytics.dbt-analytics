@@ -28,9 +28,9 @@ with date_range as (-- Generate days for 2 years
         mp.death_date,
         case when mp.group_value = 1 then 'Onboarded 60+ days' else 'Not onboarded' end as myria_status
     from {{ ref('stg_myria_matched_patients') }} mp
-  --from STAGING.MYRIA.STG_MYRIA_MATCHED_PATIENTS mp
-     where file_date = (select max(file_date) from {{ ref('stg_myria_matched_patients') }})
-   --WHERE file_date = (select max(first_file_date) from STAGING.MYRIA.STG_MYRIA_MATCHED_PATIENTS) -- DON'T Need this for testing
+    --from STAGING.MYRIA.STG_MYRIA_MATCHED_PATIENTS mp
+    where file_date = (select max(file_date) from {{ ref('stg_myria_matched_patients') }})
+    --WHERE file_date = (select max(first_file_date) from STAGING.MYRIA.STG_MYRIA_MATCHED_PATIENTS) -- DON'T Need this for testing
 )
  /*Build activity data (A&E): ae_encounter_summary as Counts:encounters, cost,duration
 limit to eligible group 66K rows by inner join with member spine. Added date range limits to reduce rows from 15 million!
@@ -135,7 +135,7 @@ includes all kinds of clinical activity including triage  - keep all for now
     from {{ ref("int_appointment_gp_clinical") }} gp
     --inner join REPORTING.OLIDS_PERSON_DEMOGRAPHICS.DIM_PERSON_DEMOGRAPHICS p using (person_id)
     inner join {{ ref("dim_person_demographics") }} p using (person_id)
-   inner join member_spine m on TO_VARCHAR(p.sk_patient_id) = m.patient_id
+    inner join member_spine m on TO_VARCHAR(p.sk_patient_id) = m.patient_id
     inner join date_range d on d.date = date(gp.start_date)
     where 
         p.sk_patient_id is not null and p.sk_patient_id != '1' 
@@ -187,39 +187,39 @@ Enables longitudinal analysis: Track cost over time, Align patients around inter
 Because of the date spine + left join: Patients with no activity still appear. Their cost = 0, avoids bias when calculating averages.
 Revised calculation person level n~1200
  */
-    select
-        m.hex_id ,
-        m.local_authority,
-        m.myria_status,
-        case when d.date <= m.eligibility_date then 'Pre-intervention' else 'Post-intervention' end as activity_status,
-        count(d.date) as n_days,
+select
+    m.hex_id ,
+    m.local_authority,
+    m.myria_status,
+    case when d.date <= m.eligibility_date then 'Pre-intervention' else 'Post-intervention' end as activity_status,
+    count(d.date) as n_days,
     count(d.date) / 365.0 as n_years,
     case 
         when count(d.date) = 0 then null
         else 365.0 / count(d.date) 
         end as annualisation_factor,
-        -- cost
-        round (sum (ifnull(c.ip_nel_emergency_cost,0)), 10) as ip_nel_emergency_cost,
-        round (sum (ifnull(c.ip_elective_cost,0)), 10) as ip_elective_cost,
-        round (sum (ifnull(c.ae_cost,0)), 10) as ae_cost,
-        round (sum (ifnull(c.op_cost,0)), 10) as op_cost,
-        round (sum (ifnull(c.gp_cost,0)), 10) as gp_cost,
-        -- encounters
-        round (sum (ifnull(c.ip_nel_emergency_encounters,0)), 10) as ip_nel_emergency_encounters,
-        round (sum (ifnull(c.ip_elective_encounters,0)), 10) as ip_elective_encounters,
-        round (sum (ifnull(c.ae_encounters,0)), 10) as ae_encounters,
-        round (sum (ifnull(c.op_encounters,0)), 10) as op_encounters,
-        round (sum (ifnull(c.gp_encounters,0)), 10) as gp_encounters,
-        -- bed days
-        round (sum (ifnull(c.ip_nel_emergency_duration,0)), 10) as ip_nel_emergency_duration,
+    -- cost
+    round (sum (ifnull(c.ip_nel_emergency_cost,0)), 10) as ip_nel_emergency_cost,
+    round (sum (ifnull(c.ip_elective_cost,0)), 10) as ip_elective_cost,
+    round (sum (ifnull(c.ae_cost,0)), 10) as ae_cost,
+    round (sum (ifnull(c.op_cost,0)), 10) as op_cost,
+    round (sum (ifnull(c.gp_cost,0)), 10) as gp_cost,
+    -- encounters
+    round (sum (ifnull(c.ip_nel_emergency_encounters,0)), 10) as ip_nel_emergency_encounters,
+    round (sum (ifnull(c.ip_elective_encounters,0)), 10) as ip_elective_encounters,
+    round (sum (ifnull(c.ae_encounters,0)), 10) as ae_encounters,
+    round (sum (ifnull(c.op_encounters,0)), 10) as op_encounters,
+    round (sum (ifnull(c.gp_encounters,0)), 10) as gp_encounters,
+    -- bed days
+    round (sum (ifnull(c.ip_nel_emergency_duration,0)), 10) as ip_nel_emergency_duration,
     round (sum (ifnull(c.ip_elective_duration,0)), 10) as ip_elective_duration,
     -- deaths
     max(case when d.date = m.death_date then 1 else 0 end) as death_flag
-    from member_spine as m
-    left join date_range as d -- date spine between 1 year before eligibility date and date of death/current date - 7 days (to allow for incomplete data)
-        on d.date between dateadd(dd, -365, eligibility_date) 
-            and case when m.death_date < dateadd(dd, -7, current_date()) then m.death_date else dateadd(dd, -7, current_date()) end
-    left join fct_person_activity_by_day as c 
-        on m.hex_id = c.hex_id
-        and d.date = c.activity_date_range
-     group by all
+from member_spine as m
+left join date_range as d -- date spine between 1 year before eligibility date and date of death/current date - 7 days (to allow for incomplete data)
+    on d.date between dateadd(dd, -365, eligibility_date) 
+        and case when m.death_date < dateadd(dd, -7, current_date()) then m.death_date else dateadd(dd, -7, current_date()) end
+left join fct_person_activity_by_day as c 
+    on m.hex_id = c.hex_id
+    and d.date = c.activity_date_range
+group by all
