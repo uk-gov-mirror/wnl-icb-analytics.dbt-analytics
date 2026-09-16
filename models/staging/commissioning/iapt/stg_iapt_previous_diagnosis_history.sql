@@ -8,7 +8,7 @@
 select
     s.submission_id
     , r.unique_id_ids601::varchar as source_row_id
-    , upper(trim(r.org_id_provider)) as provider_organisation_code
+    , upper(nullif(trim(r.org_id_provider), '')) as provider_organisation_code
     , nullif(trim(r.person_id), '') as person_id
     , nullif(trim(r.unique_local_patient_id), '') as unique_local_patient_id
     , nullif(upper(trim(r.diag_scheme_in_use)), '') as diag_scheme_in_use

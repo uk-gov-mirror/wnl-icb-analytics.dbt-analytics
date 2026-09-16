@@ -8,7 +8,7 @@
 select
     s.submission_id
     , r.unique_id_ids606::varchar as source_row_id
-    , upper(trim(r.org_id_provider)) as provider_organisation_code
+    , upper(nullif(trim(r.org_id_provider), '')) as provider_organisation_code
     , nullif(trim(r.person_id), '') as person_id
     , nullif(trim(r.unique_service_request_id), '') as referral_id
     , nullif(trim(r.pathway_id), '') as pathway_id
