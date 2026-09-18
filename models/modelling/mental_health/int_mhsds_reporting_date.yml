@@ -1,0 +1,15 @@
+version: 2
+models:
+- name: int_mhsds_reporting_date
+  description: Latest accepted MHSDS reporting period. One row for the dataset, shared by current reporting
+    summaries. This is an observation date, not proof that every provider has submitted through it.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: as_of_date
+    description: Maximum reporting-period end date in accepted submissions.
+    data_tests:
+    - not_null
+    - unique

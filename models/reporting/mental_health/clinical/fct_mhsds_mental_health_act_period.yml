@@ -1,0 +1,35 @@
+version: 2
+models:
+- name: fct_mhsds_mental_health_act_period
+  description: 'Recorded Mental Health Act legal-status periods, one row per unique MHSDS period. Retains
+    all latest accepted periods, including unknown codes and missing people. Detention classification
+    and current-status rules are unchanged from the former person profile: an open detained period, unexpired
+    at the dataset observation date, last reported within two calendar months of that date. Concurrent
+    community orders are not reclassified.'
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: mental_health_act_period_id
+    description: MHSDS legal-status period identifier.
+    data_tests:
+    - not_null
+    - unique
+  - name: legal_status_code
+    description: Source-cleaned NHSD legal-status code.
+  - name: legal_status_description
+    description: Authoritative UKHFD description; null for unmatched codes.
+  - name: is_classified_legal_status
+    description: Whether the maintained detention classification contains the source code.
+  - name: is_detention_period
+    description: Existing project classification of recorded detention. Unknown or unclassified codes
+      are false.
+  - name: is_current_detention_period
+    description: Detention evidence meeting the established open, unexpired and recent-submission rule.
+  - name: as_of_date
+    description: Latest accepted dataset reporting-period end used to assess expiry and recency.
+  - name: last_submission_period_end_date
+    description: Last accepted reporting-period end for this legal-status period.
+  - name: legal_status_expiry_date
+    description: Recorded expiry date; the period remains current through this date.

@@ -1,11 +1,10 @@
 /*
 People currently occupying a mental health bed.
 
-A spell counts as current when int_mhsds_spell_encounters classifies it as
+A spell counts as current when int_mhsds_inpatient_occupancy classifies it as
 'open': no discharge date, and the spell appears in an active submission
-within 2 reporting periods of the latest — the strongest available evidence
-of continuing occupancy. Orphaned undischarged spells (stopped being
-submitted) are excluded.
+within two calendar months of the latest staged spell period. Undischarged
+spells that stopped being submitted are excluded.
 
 Upstream occupancy rules retain at most one current spell per person.
 */

@@ -1,0 +1,27 @@
+version: 2
+models:
+- name: fct_mhsds_service_activity_monthly
+  description: Monthly contact activity by provider, recorded service/team identifiers and team type.
+    One row per that combination and calendar month of the contact date. Includes all attendance states,
+    future dates and an unknown-month group for missing dates. Counts use latest revised contact records.
+    Distinct people cannot be added across teams or months.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: service_activity_month_id
+    data_tests:
+    - not_null
+    - unique
+  - name: activity_month
+    description: First day of the contact calendar month; null for undated contacts.
+  - name: n_contacts
+    description: Recorded contacts across all attendance states.
+  - name: n_people_with_recorded_identity
+    description: Distinct non-null MHSDS people within this row only. Not additive across rows.
+  - name: recorded_attended_duration_minutes
+    description: Sum of submitted duration for attended contacts. Null when no attended duration is supplied;
+      not staff time, capacity or whole-treatment duration.
+  - name: n_attended_contacts_with_missing_duration
+    description: Attended contacts without a recorded duration, to interpret incomplete duration totals.

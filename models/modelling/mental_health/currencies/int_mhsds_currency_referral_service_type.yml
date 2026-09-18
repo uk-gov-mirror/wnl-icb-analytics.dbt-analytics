@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: stg_mhsds_servicetype
+  - name: int_mhsds_currency_referral_service_type
     description: >
       MHSDS service types for referral currency grouping. Grain: one row per
       uniq_serv_req_id. Population: all referrals in MHS101. Time semantics:

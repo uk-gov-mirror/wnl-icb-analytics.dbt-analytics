@@ -1,0 +1,35 @@
+version: 2
+models:
+- name: int_mhsds_person_evidence
+  description: Identifiable people in modelled MHSDS evidence. One row per person and evidence type, with
+    a record count and observed reporting-period range. Includes referrals, contacts, activities, clinical
+    items, recorded spells, ward stays, legal-status periods, patient indicators, MPI snapshots, activity/staff
+    links, accepted MHS102 relationships, referral and contact submission history and indirect activity. The patient bridge supplies identity mapping
+    only and does not create population members.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: person_id
+    description: Non-null recorded MHSDS person identifier.
+    data_tests:
+    - not_null
+  - name: evidence_type
+    description: Named evidence family contributing to the person population.
+    data_tests:
+    - not_null
+  - name: n_records
+    description: Records in that family at its documented grain. Counts cannot be added to obtain encounters
+      or conditions.
+  - name: first_reporting_period_end_date
+    description: Earliest reporting-period end among the retained records in this evidence family. Not
+      necessarily the first ever submission or clinical event.
+  - name: last_reporting_period_end_date
+    description: Latest reporting-period end among the retained records in this evidence family.
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - person_id
+        - evidence_type

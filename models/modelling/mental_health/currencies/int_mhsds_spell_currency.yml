@@ -15,6 +15,8 @@ models:
       today for open spells. Cross-cutting crisis spells publish as MAZ99Z:
       they stay in the nationally published MAZ99 family, and the family's
       A-D suffixes name crisis service settings rather than bed types.
+      Equal ward end and start dates use the latest reporting period, source-file
+      receipt, submission identifier and ward-stay identifier, in that order.
       Bed-day pricing is resolved separately.
     config:
       meta:
@@ -41,9 +43,9 @@ models:
       - name: start_date_hosp_prov_spell
         description: Spell admission date.
       - name: end_date
-        description: Reused encounter end date.
+        description: End date from the shared occupancy interval.
       - name: end_date_source
-        description: Reused encounter end date source.
+        description: End-date reason from the shared occupancy interval.
       - name: age_hosp_start_date
         description: MHSDS-derived age at admission.
       - name: is_cyp

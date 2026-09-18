@@ -8,7 +8,7 @@
 with mhs102 as (
     {{
         select_latest_mhsds_record(
-            mhsds_table = ref('raw_mhsds_mhs102servicetypereferredto'),
+            mhsds_table = ref('stg_mhsds_referral_service_team_history'),
             partition_cols = ['uniq_serv_req_id'],
             tie_breaker_cols = ['mhs102_uniq_id']
         )
@@ -25,12 +25,10 @@ with mhs102 as (
         m.uniq_serv_req_id
         , t.serv_team_type_mh
         , t.serv_team_int_age_group
-    from {{ ref('raw_mhsds_mhs102servicetypereferredto') }} as m
-    inner join {{ ref('raw_mhsds_activesubmission') }} as a
-        on m.uniq_submission_id = a.uniq_submission_id
+    from {{ ref('stg_mhsds_referral_service_team_history') }} as m
     -- v5 rows carry the team id in care_prof_team_local_id, v6 in
     -- other_care_prof_team_local_id
-    inner join {{ ref('raw_mhsds_mhs902serviceteamdetails') }} as t
+    inner join {{ ref('stg_mhsds_service_or_team_details') }} as t
         on coalesce(m.care_prof_team_local_id, m.other_care_prof_team_local_id)
             = t.care_prof_team_local_id
         and m.uniq_submission_id = t.uniq_submission_id

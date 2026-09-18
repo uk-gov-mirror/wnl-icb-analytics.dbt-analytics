@@ -1,0 +1,37 @@
+version: 2
+models:
+- name: dq_mhsds_provider_submission
+  description: Accepted submission evidence by provider and reporting period. One row per provider/period
+    present in ActiveSubmission, with submitted referral, contact and patient row counts before latest-record
+    selection. Missing periods are absent. Zero rows in a source section do not establish a failed or
+    incomplete submission.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: provider_organisation_code
+    data_tests:
+    - not_null
+  - name: reporting_period_end_date
+    data_tests:
+    - not_null
+  - name: n_accepted_submissions
+    description: Accepted files listed for this provider and reporting period.
+  - name: n_referral_source_records
+    description: Accepted MHS101 rows in the period, not newly received referrals.
+  - name: n_contact_source_records
+    description: Accepted MHS201 rows in the period, not contacts occurring in the period.
+  - name: n_patient_source_records
+    description: Accepted MHS001 rows in the period, not distinct people.
+  - name: provider_months_behind_dataset
+    description: Calendar-month difference between this provider's latest accepted period and the latest
+      accepted period for any provider. Describes relative freshness, not a completeness judgement.
+  - name: is_latest_provider_period
+    description: Use to select one row per provider for current submission freshness.
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - provider_organisation_code
+        - reporting_period_end_date

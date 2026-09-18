@@ -1,0 +1,39 @@
+version: 2
+models:
+- name: int_mhsds_inpatient_occupancy
+  description: Inferred inpatient occupancy intervals, one row per retained hospital spell. Preserves
+    the established latest-evidence selection for equal person/admission dates, containment removal and
+    truncation at a later admission. Undischarged spells within two calendar months of the latest staged
+    spell period remain open; older spells end at the later of their last submission period and admission
+    plus one day. Selection uses the run date for open interval comparisons. No currency classification
+    or costing.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: uniq_hosp_prov_spell_num
+    description: Established spell number used by encounter and currency models; one retained occupancy
+      interval.
+    data_tests:
+    - not_null
+    - unique
+  - name: uniq_hosp_prov_spell_id
+    description: Provider-qualified key joining to source_record_id in the recorded hospital-spell fact.
+  - name: person_id
+    description: Recorded MHSDS person. Missing identifiers retain the existing spell-key fallback.
+  - name: end_date
+    description: Recorded or inferred exclusive interval end for bed-day analysis. Null for a retained
+      open interval.
+  - name: end_date_source
+    description: discharged, open, last_submission or superseded. A later admission can truncate a recorded
+      discharge.
+  - name: latest_period_end
+    description: Maximum reporting-period end among staged spells, preserving the existing occupancy freshness
+      anchor.
+  - name: reporting_period_end_date
+    description: Last submission evidence for the retained spell.
+  - name: sk_patient_id
+    description: Cross-system patient key; null when no bridge exists.
+  - name: calculation_date
+    description: Run date used to evaluate open interval comparisons and supersession.

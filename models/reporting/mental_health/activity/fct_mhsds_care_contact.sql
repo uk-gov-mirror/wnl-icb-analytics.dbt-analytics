@@ -26,6 +26,9 @@ select
     , c.clin_cont_dur_of_care_cont as clinical_contact_duration_minutes
     , c.attend_status as attendance_status_code
     , ats.description as attendance_status_description
+    , lpad(c.attend_status, 2, '0') in ('05', '06') as is_attended
+    , lpad(c.attend_status, 2, '0') in ('03', '07') as is_dna
+    , lpad(c.attend_status, 2, '0') in ('02', '04') as is_cancelled
     , c.cons_type as consultation_type_code
     , consultation_type.description as consultation_type_description
     , c.cons_mechanism_mh as consultation_mechanism_code

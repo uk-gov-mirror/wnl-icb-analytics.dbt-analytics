@@ -1,0 +1,16 @@
+version: 2
+models:
+- name: sem_mhsds
+  description: MHSDS semantic view over the general reporting domain. Metrics retain referral, contact,
+    recorded-spell, occupancy-interval, diagnosis-item, assessment-observation, legal-status-period, person
+    and submission grains. Person relationships support current-evidence cohorts. Currency definitions,
+    confirmed caseload and outcome measures are outside this view. Underlying primary keys are tested
+    in their domain models; the semantic test reconciles entity counts without returning identifiers.
+  config:
+    materialized: semantic_view
+    schema: SEMANTIC
+    meta:
+      owner:
+        name: Eddie Davison
+  data_tests:
+  - mhsds_semantic_counts
