@@ -21,9 +21,10 @@ models:
 
   - name: int_ltc_lcs_cf_ckd_64_base
     description: >
-      ICB_CF_CKD_64_BASE parent: currently-registered patients aged at least 17, not in
-      ICS_METABOLIC_LTC, requiring an eGFR code recorded in the last 1 year
-      (ckd_case_finding_vs1). Does not exclude CF_NHSHC2Y.
+      ICB_CF_CKD_64_BASE parent for CKD case finding. One row per currently registered,
+      living person aged at least 17 who is not in ICS_METABOLIC_LTC and has no eGFR code
+      (ckd_case_finding_vs1) recorded within the last 1 year, so the population is people
+      not recently eGFR-tested. Does not exclude CF_NHSHC2Y.
     config:
       meta:
         owner:

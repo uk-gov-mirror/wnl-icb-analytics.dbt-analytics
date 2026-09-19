@@ -2,13 +2,17 @@
 models:
   - name: fct_person_myria_control_group_published
     description: >
-      Patient-level dataset identifying individuals with at least one high-risk condition
-      (e.g., heart failure, COPD, dementia, renal failure, etc.) or multimorbidity
-      flags.
-      Includes count of non-elective admissions. (Time periods for NEL
-      counts, flags and inclusion criteria are based on discharge date).
-      Restricted to NCL-registered patients alive at time of running, >=18 years of age at last admission and
-      at least one NEL admission at any provider since 1-Jan-2025 (based on discharge date).
+      Myria control group, one row per patient, published as a view over
+      fct_person_myria_control_group. Includes people whose GP practice on their most
+      recent SUS activity is in Barnet, Enfield, Camden, Islington or Haringey, who were
+      aged 18 or over at their most recent non-elective admission, are not recorded as
+      dead in PDS or the death registry, and had at least one non-elective admission at
+      any provider discharged between 1 January 2025 and the start of the current month.
+      They must have at least one of the 18 listed high-risk conditions (ICD-10 diagnoses
+      on inpatient, outpatient or A&E SUS activity before the current month);
+      hypertension and frailty/falls are shown but do not qualify on their own. People
+      in the Myria high-risk cohort (fct_person_myria_high_risk_patients) are excluded,
+      so the two cohorts do not overlap.
     config:
       meta:
         owner:

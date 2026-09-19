@@ -1,7 +1,17 @@
 ﻿models:
   - name: int_smi_ltc_profile
-    description: Person Level Intermediate table holding LTC data for people on 
-      the SMI register. This includes registers and associated tests
+    description: >
+      Long-term condition profile for the SMI programme population. One row per person
+      in int_smi_population_base: currently registered, living people with any SMI
+      diagnosis code on record (including those whose latest diagnosis is followed by a
+      resolved code) or an active lithium route (a lithium order within the last 6
+      months with no later LITSTP_COD stop code). has_active_smi_diagnosis and
+      is_on_lithium show which route applies. Adds the count and list of QOF LTC
+      registers from fct_person_ltc_summary (excluding SMI, obesity, palliative care and
+      non-diabetic hyperglycaemia), antipsychotic orders within the last 6 months, latest
+      mental health care plan, medication review, QRISK, total and LDL cholesterol, NDPP
+      referral, pulmonary rehabilitation, diabetes triple target and eight care processes
+      for people with diabetes, and BP control for people with hypertension.
 
     config:
       meta:
