@@ -1,15 +1,14 @@
 models:
   - name: int_covid_diabetes
     description: >
-      COVID clinical risk group: diabetes. One row per person and campaign for every
-      campaign in covid_reported_campaign_ids(). A person qualifies with any ADDIS_COD
-      (Addison disease or pan-hypopituitarism) record, or where their latest DIAB_COD
-      record is later than their latest DMRES_COD (diabetes resolved) record or no
-      resolved record exists. Only records on or before the campaign audit end date count,
-      using the terminology version pinned for the campaign, and the person must be aged 5
-      or over at the campaign reference date. Gestational diabetes is not included. Rows
-      are built for every campaign whether or not it offered this group; the offer is
-      applied in int_covid_under_65_at_risk (currently COVID Autumn 2024 only).
+      COVID diabetes risk group, excluding gestational diabetes. One row per person and
+      campaign, built for every reported campaign whether or not it offered this group. A
+      person qualifies with any ADDIS_COD Addison disease or pan-hypopituitarism record, or
+      where their latest DIAB_COD record is later than their latest DMRES_COD resolved
+      record or no resolved record exists. Records must be on or before the campaign audit
+      end date, using the campaign's pinned terminology version. Minimum age is 5 at the
+      campaign reference date. int_covid_under_65_at_risk applies the campaign offer,
+      currently COVID Autumn 2024 only.
     tests:
       - cluster_ids_exist:
           arguments:
