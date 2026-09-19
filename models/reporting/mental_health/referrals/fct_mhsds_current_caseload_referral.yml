@@ -1,0 +1,30 @@
+version: 2
+models:
+- name: fct_mhsds_current_caseload_referral
+  description: Current recorded caseload, one open referral evidenced in the dataset latest accepted reporting
+    month. Includes referrals before first attendance and community as well as inpatient care. Uses fct_mhsds_latest_provider_caseload_referral,
+    restricted to providers whose latest period matches the dataset reporting date. Older provider evidence
+    remains in that separate model and must not be treated as confirmed discharges. This is a monthly recorded
+    population, not a live or clinically confirmed treatment list. Receipt, rejection, discharge and attendance
+    definitions are owned by Eddie Davison.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: referral_period_id
+    description: Unique open referral-period key.
+    data_tests:
+    - unique
+    - not_null
+  - name: recorded_caseload_contact_state
+    description: No attendance recorded, attended in the latest provider period, or attendance only in an earlier
+      period. This does not prove an active treatment plan.
+  - name: days_since_last_attended_contact
+    description: Calendar days from the latest evidenced attended contact to the provider period end. Null
+      when no attendance is evidenced.
+  - name: provider_months_behind_dataset
+    description: Difference in calendar months from this provider evidence date to the dataset latest period.
+      Zero is aligned; larger values show older evidence.
+  - name: days_since_referral_received
+    description: Calendar days since receipt at the provider evidence date.

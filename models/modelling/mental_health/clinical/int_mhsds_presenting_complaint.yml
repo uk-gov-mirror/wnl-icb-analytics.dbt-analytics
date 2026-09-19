@@ -1,0 +1,16 @@
+version: 2
+models:
+- name: int_mhsds_presenting_complaint
+  description: Recorded presenting complaints, one latest accepted row per provider, referral, person,
+    finding scheme, code and recorded date. Missing identity or date retains each source row. A complaint
+    can be a symptom and is not a formal diagnosis.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: source_record_id
+    description: Unique retained evidence key.
+    data_tests:
+    - unique
+    - not_null

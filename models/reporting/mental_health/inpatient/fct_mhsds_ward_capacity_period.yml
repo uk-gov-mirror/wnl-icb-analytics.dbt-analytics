@@ -1,0 +1,37 @@
+version: 2
+models:
+- name: fct_mhsds_ward_capacity_period
+  description: Ward capacity and recorded stay evidence, one ward per accepted submission. MHS903 monthly available
+    bed days include occupied and unoccupied staffed beds; temporarily closed bed days are separate. Dividing
+    by reporting-period days gives average beds, not end-of-month or live availability. Recorded ward-stay
+    midnights use same-submission MHS502 intervals and retain leave, missing-data and overlap caveats. The
+    ratio is descriptive and is not a validated physical occupancy rate or the existing inferred occupancy
+    measure. A commissioning extract may contain only part of a provider's patients while ward capacity covers
+    the whole ward.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: ward_capacity_period_id
+    description: Unique key at the documented grain.
+    data_tests:
+    - not_null
+    - unique
+  - name: available_bed_days
+    description: Reported monthly available staffed bed days. Missing is unknown, not zero.
+  - name: temporarily_closed_bed_days
+    description: Reported monthly staffed bed days temporarily closed to admission and unoccupied. Permanently
+      closed beds are outside this measure.
+  - name: average_available_beds
+    description: Available bed days divided by inclusive reporting-period days. Sum wards only within a common
+      period.
+  - name: recorded_ward_stay_midnights
+    description: Sum of recorded ward-stay intervals for this submission and ward. Includes leave; no matched
+      stays gives zero recorded evidence, not proof of an empty ward.
+  - name: recorded_stay_midnights_per_available_bed_day
+    description: Recorded stay midnights divided by positive available bed days, only with matching stays and
+      no invalid/overlapping intervals. Null otherwise. Retains values above one; incomplete extract scope
+      can understate use. Do not average ward ratios.
+  - name: has_matching_ward_stay_evidence
+    description: At least one same-submission ward stay matches. False does not establish zero actual occupancy.

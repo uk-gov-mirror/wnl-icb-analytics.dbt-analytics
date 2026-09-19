@@ -1,0 +1,20 @@
+version: 2
+models:
+- name: rel_mhsds_referral_service_team_period
+  description: One recorded referral, team and relationship role per accepted submission. Primary v6 and
+    additional or legacy referred-to teams use the same submission for their labels. Repeated relationship
+    versions retain the latest source receipt and source record. Relationship open/closed state describes
+    submitted dates, not eligibility or active caseload. Join to referral periods using submission and
+    referral together; several teams can belong to one referral.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: referral_service_team_period_id
+    description: Key for submission, referral, role and team.
+    data_tests:
+    - unique
+    - not_null
+  - name: reporting_period_end_date
+    description: Accepted provider period represented by this relationship.

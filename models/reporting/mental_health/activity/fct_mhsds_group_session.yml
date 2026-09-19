@@ -1,0 +1,47 @@
+version: 2
+models:
+- name: fct_mhsds_group_session
+  description: Group-session activity not attributable to named patients. One row per accepted MHS301 session
+    occurrence in a provider reporting period. A session is counted once; recorded participants are anonymous
+    attendances, not distinct people. Do not join this fact to the person summary or add its participant count
+    to identified contact counts.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: group_session_id
+    description: Unique identifier at the documented model grain.
+    data_tests:
+    - not_null
+    - unique
+  - name: group_session_source_id
+    description: Submitted group session source id.
+  - name: group_session_date
+    description: Submitted group session date.
+  - name: group_session_type_code
+    description: Submitted group session type code.
+  - name: session_duration_minutes
+    description: Submitted session duration minutes.
+  - name: recorded_participant_count
+    description: Submitted recorded participant count.
+  - name: treatment_site_code
+    description: Submitted treatment site code.
+  - name: service_or_team_type_code
+    description: Submitted service or team type code.
+  - name: lead_professional_id
+    description: Submitted lead professional id.
+  - name: commissioner_organisation_code
+    description: Submitted commissioner organisation code.
+  - name: group_session_type_description
+    description: National label, including historical codes; null when no definition matches.
+  - name: reporting_period_end_date
+    description: Period of the accepted source evidence; may be later than the clinical event.
+  - name: source_file_received_at
+    description: Source file receipt timestamp, not a clinical time.
+  - name: treatment_site_name
+    description: Authoritative organisation name for the corresponding source code; null when the code is missing
+      or unmatched.
+  - name: commissioner_organisation_name
+    description: Authoritative organisation name for the corresponding source code; null when the code is missing
+      or unmatched.

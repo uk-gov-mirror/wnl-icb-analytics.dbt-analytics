@@ -1,0 +1,34 @@
+version: 2
+models:
+- name: fct_mhsds_assessment_instance
+  description: Assessment response groups, one row per person/provider, tool, assessment context, recorded
+    time and assessor, with referral/activity or source clustering-assessment identity where available. MHS606/607
+    have no general questionnaire instance identifier, so coincident responses can be ambiguous. Undated observations
+    without a source assessment identifier remain separate. Counts describe recorded responses and never assert
+    questionnaire completeness.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: assessment_instance_id
+    description: Key for the documented response group.
+    data_tests:
+    - not_null
+    - unique
+  - name: instance_identity_basis
+    description: Source clustering identity and tool where available; otherwise shared tool/context/time/assessor
+      or an undated individual observation.
+  - name: n_observations
+    description: Number of retained response observations, including repeated concepts.
+  - name: n_distinct_concepts
+    description: Distinct submitted question, dimension or total-score concepts. This is not an expected item
+      count.
+  - name: n_numeric_scores
+    description: Responses accepted by the maintained scale/response definitions. No scores are added across
+      concepts.
+  - name: has_repeated_or_missing_concepts
+    description: More observations than non-null distinct concepts. The group may contain duplicated submissions
+      or multiple coincident administrations.
+  - name: assessment_recorded_at
+    description: Completion or linked activity time; null when no usable date is available.

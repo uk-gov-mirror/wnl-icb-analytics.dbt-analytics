@@ -1,0 +1,16 @@
+version: 2
+models:
+- name: stg_mhsds_community_treatment_order
+  description: Accepted MHS404 community treatment order evidence across provider reporting periods. One
+    row per submitted source record. Repeated period versions remain available; source dates before 1901
+    are null.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: mhs404_uniq_id
+    description: Identifier of the accepted source record.
+    data_tests:
+    - not_null
+    - unique

@@ -1,11 +1,12 @@
 version: 2
 models:
 - name: sem_mhsds
-  description: MHSDS semantic view over the general reporting domain. Metrics retain referral, contact,
-    recorded-spell, occupancy-interval, diagnosis-item, assessment-observation, legal-status-period, person
-    and submission grains. Person relationships support current-evidence cohorts. Currency definitions,
-    confirmed caseload and outcome measures are outside this view. Underlying primary keys are tested
-    in their domain models; the semantic test reconciles entity counts without returning identifiers.
+  description: MHSDS semantic view over tested reporting entities for people, period demographics, referrals,
+    current recorded caseload, contacts, indirect/group activity, circumstances, care plans, assessments, inpatient
+    care, capacity, legal restrictions and submission quality. Counts preserve each entity grain. Temporal
+    demographic relationships use person/provider/period keys; current person attributes describe current evidence
+    only. Anonymous sessions and drop-ins have no person relationship. Score changes remain descriptive and
+    capacity is monthly, not live bed availability. Entity counts are reconciled to their reporting facts.
   config:
     materialized: semantic_view
     schema: SEMANTIC

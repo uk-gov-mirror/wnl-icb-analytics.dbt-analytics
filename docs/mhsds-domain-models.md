@@ -2,7 +2,7 @@
 
 Use `REPORTING.MENTAL_HEALTH` for recorded care, clinical evidence and analytical
 summaries. Models are grouped into `referrals`, `activity`, `inpatient`,
-`clinical`, `person`, `quality` and `currencies` folders. These folders retain the
+`clinical`, `circumstances`, `person`, `quality` and `currencies` folders. These folders retain the
 same warehouse schema. Development uses `DEV__REPORTING.MENTAL_HEALTH`.
 
 ## Choose a model for the question
@@ -13,7 +13,7 @@ same warehouse schema. Development uses `DEV__REPORTING.MENTAL_HEALTH`.
 | How much care followed each referral, and when was its first attended contact? | `fct_mhsds_referral_summary` | Referral with contact, service and recorded-spell measures |
 | Which teams were involved, and in which roles? | `rel_mhsds_referral_service_team` | Referral, team and relationship role |
 | What contacts were recorded, including DNAs and cancellations? | `fct_mhsds_care_contact` | Latest recorded referral/contact pair |
-| How does activity vary by service and month? | `fct_mhsds_service_activity_monthly` | Provider, resolved team identifiers, team type and contact month |
+| How does activity vary by service and month? | `fct_mhsds_contact_activity_monthly` | Provider, resolved team identifiers, team type and contact month |
 | What work and clinical components were submitted within a contact? | `fct_mhsds_care_activity` | Accepted provider-period activity occurrence |
 | Which professionals were linked to an activity? | `rel_mhsds_care_activity_staff` | Recorded activity/professional relationship |
 | What were the professional's attributes at that time? | `dim_mhsds_care_professional_period` | Accepted professional snapshot |
@@ -25,6 +25,25 @@ same warehouse schema. Development uses `DEV__REPORTING.MENTAL_HEALTH`.
 | What assessment responses were recorded? | `fct_mhsds_assessment_observation` | Accepted assessment question, dimension or score occurrence |
 | What legal-status periods were recorded? | `fct_mhsds_mental_health_act_period` | Latest recorded legal-status period |
 | What evidence and recent activity do we have for each person? | `fct_mhsds_person_summary` | Identifiable MHSDS person |
+| What was the recorded monthly referral state? | `fct_mhsds_referral_period` | Referral and accepted submission |
+| Which teams were involved in that period? | `rel_mhsds_referral_service_team_period` | Submission, referral, team and relationship role |
+| Who is on the current recorded caseload? | `fct_mhsds_current_caseload_referral`, `fct_mhsds_current_caseload_person` | Open referral, or person/provider, in the dataset latest month |
+| What was each provider's latest caseload evidence, including old submissions? | `fct_mhsds_latest_provider_caseload_referral` | Open referral in that provider's latest period |
+| What RTT clocks were submitted? | `fct_mhsds_referral_to_treatment_period` | Accepted RTT source occurrence |
+| Who receives care by age, ethnicity, gender and deprivation? | `dim_mhsds_person_provider_period` | Person, provider and accepted period |
+| What care happened without the patient present? | `fct_mhsds_indirect_activity` | Accepted indirect-activity occurrence |
+| What anonymous group activity and drop-ins were reported? | `fct_mhsds_group_session`, `fct_mhsds_drop_in_contact` | Accepted session or anonymous contact |
+| Which patients had group-therapy contacts? | `fct_mhsds_group_therapy_contact` | Group-marked referral/contact pair, with attendance state |
+| What accommodation, employment, disability and circumstances were recorded? | `fct_mhsds_accommodation_observation`, `fct_mhsds_employment_observation`, `fct_mhsds_disability_observation`, `fct_mhsds_social_circumstance_observation` | Accepted circumstance evidence occurrence |
+| What plans and agreements were recorded? | `fct_mhsds_care_plan_period`, `fct_mhsds_care_plan_agreement` | Plan snapshot or agreement occurrence |
+| What symptoms or complaints were presented? | `fct_mhsds_presenting_complaint` | Retained complaint evidence item |
+| Which assessment responses belong together, and how did scores change? | `fct_mhsds_assessment_instance`, `fct_mhsds_assessment_score_change` | Response group or adjacent eligible score pair |
+| What community legal restrictions and hospital recalls occurred? | `fct_mhsds_community_treatment_order`, `fct_mhsds_community_treatment_order_recall` | Order or recall period |
+| What restrictive incidents and interventions occurred? | `fct_mhsds_restrictive_intervention_incident`, `fct_mhsds_restrictive_intervention_type` | Incident or intervention type |
+| What leave was recorded? | `fct_mhsds_home_leave`, `fct_mhsds_leave_of_absence`, `fct_mhsds_absence_without_leave` | Retained leave period |
+| Who commissioned an admission during each period? | `fct_mhsds_spell_commissioner_period` | Recorded commissioner assignment period |
+| Why did discharge wait after readiness? | `fct_mhsds_discharge_readiness_period` | Recorded readiness/reason period |
+| What ward capacity was reported, and what stays were evidenced alongside it? | `fct_mhsds_ward_capacity_period` | Ward and accepted submission |
 | How recent are each provider's accepted submissions? | `dq_mhsds_provider_submission` | Provider and accepted reporting period |
 
 `fct_mhsds_clinical_record` remains the full clinical-item history, combining
@@ -237,6 +256,7 @@ Domain models test the primary keys used by the relationships.
 | `dim_person_mh_profile` | `fct_mhsds_person_summary`, with broader population and explicit measure names |
 | `fct_mhsds_referral_episodes` | `fct_mhsds_referral_summary` for general access; `fct_mhsds_currency_referral_summary` for classifications |
 | `stg_mhsds_servicetype` | `int_mhsds_currency_referral_service_type` in modelling |
+| `fct_mhsds_service_activity_monthly` | `fct_mhsds_contact_activity_monthly`, which makes its contact-only scope explicit |
 | Currency-enriched `fct_mhsds_current_inpatients` | General census keeps this name; currency output moves to `fct_mhsds_currency_current_inpatients` |
 
 The profile's `n_*_ever` names are replaced by recorded-history counts.
@@ -249,8 +269,96 @@ column names. There are no compatibility views.
 dbt does not drop the retired relations automatically. After deployment,
 warehouse cleanup should remove `REPORTING.MENTAL_HEALTH.DIM_PERSON_MH_PROFILE`,
 `REPORTING.MENTAL_HEALTH.FCT_MHSDS_REFERRAL_EPISODES` and
-`STAGING.MHSDS.STG_MHSDS_SERVICETYPE`, plus their DEV equivalents. Until removed,
+`STAGING.MHSDS.STG_MHSDS_SERVICETYPE` and
+`REPORTING.MENTAL_HEALTH.FCT_MHSDS_SERVICE_ACTIVITY_MONTHLY`, plus their DEV equivalents. Until removed,
 those copies are stale and unsupported. Deploy the replacements before cleanup.
 
 For the source clinical interpretation and its limits, see the
 [clinical-record design](mhsds-clinical-record-plan.md).
+
+## Current caseload and historical access
+
+Eddie Davison owns the recorded-state and descriptive assessment definitions in
+this expansion. Open means referral receipt by period end and no rejection or
+discharge by that date. It includes referrals before first attendance. Current
+caseload uses the dataset latest accepted month. The separate latest-provider
+model retains older submissions; their absence from current caseload is not a
+discharge decision. Provider freshness belongs beside caseload totals.
+
+Referral-period attendance uses only evidence with both reporting period and
+contact date no later than the selected period. The stable referral identifier
+links attendance across national person-ID changes, with disagreements flagged.
+Accepted refreshes can revise history, so these are not archived publication-day
+snapshots. First attendance, active treatment and national waiting-list eligibility
+are different questions. RTT facts retain the submitted clocks and status labels.
+
+Period demographics use the same person/provider/reporting-period key as referral
+periods, indirect activity and care-plan snapshots. Missing demographics do not
+remove the fact. IMD 2019 and IMD 2025 are fixed reference editions; applying the
+2025 edition to older care is a retrospective geographical classification.
+
+## Group activity and assessment changes
+
+MHS301 anonymous sessions and MHS302 drop-ins have no patient link. Identifiable
+group therapy is recorded as MHS201 contacts. `fct_mhsds_group_therapy_contact`
+provides that patient/contact view and preserves attendance states. There is no
+shared session identifier in these contacts. Date, site or team cannot establish
+which contacts belong to the same session. These contacts already contribute to
+the contact fact; do not add them again. Anonymous participant totals count
+participations, not distinct people.
+
+Historical MHS802 responses retain one latest provider/assessment/concept version.
+Their completion date comes from the same-submission MHS801 parent. Response
+counts expose the original monthly repetition. Source-identified clustering
+assessments differ from MHS606/MHS607 response groups, which have no general
+questionnaire identifier. Repeated concepts flag ambiguous groups. No model
+claims questionnaire completeness.
+
+Score changes pair adjacent eligible numeric observations within person,
+provider, referral, context, concept and recorded assessor. Missing dates,
+same-time ambiguity, invalid/non-score values and changed clustering identities
+are excluded before pairing. An unknown assessor does not prove the same
+clinician. Current minus previous score has no universal clinical direction.
+Select one concept and instrument before summarising changes.
+
+## Legal restrictions and ward capacity
+
+A community treatment order permits treatment outside hospital under Mental
+Health Act conditions with a power of hospital recall. MHS404 records the order;
+MHS405 records each recall. A CTO is not an ordinary community referral or proof
+of continuous inpatient detention. Renewals change expiry; recalls remain
+separate periods. Neither replaces the existing detention or occupancy rules.
+
+Ward capacity uses MHS903 available and temporarily closed bed days. Available
+includes staffed beds whether occupied or empty; permanently closed beds are
+outside these counts. Monthly bed days divided by period days give average beds,
+not live availability. Missing capacity remains unknown.
+
+The same-submission ward-stay comparison counts recorded midnight intervals,
+clipped to the reporting period. It includes leave and can contain overlaps.
+The descriptive ratio is omitted where dates or overlaps make it inconsistent.
+Our commissioning extract may cover fewer patients than a ward's full capacity.
+It therefore does not establish a physical occupancy rate. Values above one
+remain visible rather than being capped. Existing inferred occupancy is unchanged.
+
+The [NHS bed-day guidance](https://digital.nhs.uk/data-and-information/data-collections-and-data-sets/data-sets/mental-health-services-data-set/submit-data/available-bed-days-and-closed-bed-days-in-mhsds)
+defines the capacity fields. The
+[MHSDS guidance](https://digital.nhs.uk/binaries/content/assets/website-assets/data-and-information/datasets/mhsds/tools-and-guidance/mhsdsv6.0_userguidance_v6.0.4_published_150126.pdf)
+describes the source sections, and the
+[Mental Health Act submission guide](https://digital.nhs.uk/data-and-information/data-collections-and-data-sets/data-sets/mental-health-services-data-set/submit-data/quick-guide-to-submitting-mental-health-act-data)
+describes order and recall recording.
+
+## Code labels and source ambiguity
+
+Employment combines the general employment status list with the mental-health
+extension. Accommodation can contain legacy status codes in the newer type field;
+`accommodation_type_label_basis` identifies the reference used without converting
+those codes to a modern category. Missing and unmatched codes remain distinct.
+
+Presenting complaints use the submitted finding scheme. The
+[MHSDS dictionary](https://archive.datadictionary.nhs.uk/DD%20Release%20May%202024/data_sets/clinical_data_sets/mental_health_services_data_set.html)
+specifies finding-scheme numbering for MHS609. It differs from diagnosis-scheme
+numbering. Read v2 and CTV3 labels use case-sensitive code matches. Some submitted
+scheme/code pairs also match the diagnosis interpretation; candidate fields
+expose that possibility without substituting it. A populated label alone does
+not confirm that the provider submitted the correct scheme.

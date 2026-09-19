@@ -1,11 +1,14 @@
 version: 2
 models:
 - name: int_mhsds_person_evidence
-  description: Identifiable people in modelled MHSDS evidence. One row per person and evidence type, with
-    a record count and observed reporting-period range. Includes referrals, contacts, activities, clinical
-    items, recorded spells, ward stays, legal-status periods, patient indicators, MPI snapshots, activity/staff
-    links, accepted MHS102 relationships, referral and contact submission history and indirect activity. The patient bridge supplies identity mapping
-    only and does not create population members.
+  description: Identifiable people in modelled MHSDS evidence. One row per person and evidence type, with a
+    record count and observed reporting-period range. Includes referrals, contacts, activities, clinical items,
+    recorded spells, ward stays, legal-status periods, patient indicators, MPI snapshots, activity/staff links,
+    accepted MHS102 relationships, referral and contact submission history and indirect activity. The patient
+    bridge supplies identity mapping only and does not create population members. Includes accommodation, employment,
+    disability, social circumstances, care plans and agreements, RTT, CTO/recall, restriction, leave, commissioner
+    and discharge-readiness evidence, plus historical clustering headers. Anonymous group sessions and drop-ins
+    have no person key and cannot contribute.
   config:
     meta:
       owner:
@@ -23,8 +26,8 @@ models:
     description: Records in that family at its documented grain. Counts cannot be added to obtain encounters
       or conditions.
   - name: first_reporting_period_end_date
-    description: Earliest reporting-period end among the retained records in this evidence family. Not
-      necessarily the first ever submission or clinical event.
+    description: Earliest reporting-period end among the retained records in this evidence family. Not necessarily
+      the first ever submission or clinical event.
   - name: last_reporting_period_end_date
     description: Latest reporting-period end among the retained records in this evidence family.
   data_tests:

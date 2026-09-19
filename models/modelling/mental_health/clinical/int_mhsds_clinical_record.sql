@@ -1,3 +1,4 @@
+with existing_records as (
 select
     d.source_record_id as source_record_id
     , d.source_row_id as source_row_id
@@ -338,3 +339,121 @@ select
     , a.is_care_contact_person_consistent as is_care_contact_person_consistent
 from {{ ref('fct_mhsds_care_activity') }} as a
 where a.has_observation
+
+)
+select
+    e.*
+    , null::varchar as source_assessment_id
+    , null::boolean as is_assessment_parent_linked
+    , null::boolean as is_assessment_parent_person_consistent
+from existing_records as e
+
+union all
+
+select
+    a.source_record_id as source_record_id
+    , a.mhs802_uniq_id::varchar as source_row_id
+    , 'MHS802' as source_table
+    , 'clustering_assessment' as clinical_record_type
+    , a.person_id as person_id
+    , null::varchar as local_patient_id
+    , null::varchar as referral_source_record_id
+    , null::varchar as uniq_care_cont_id
+    , null::varchar as care_activity_source_record_id
+    , null::varchar as uniq_care_act_id
+    , null::varchar as care_prof_local_id
+    , null::varchar as uniq_care_prof_local_id
+    , iff(a.assessment_time is null, a.assessment_date::timestamp_ntz, timestamp_ntz_from_parts(a.assessment_date,a.assessment_time)) as clinical_at
+    , iff(a.assessment_date is null, null, iff(a.assessment_time is null,'date','timestamp')) as clinical_time_precision
+    , 'same_submission_clustering_completion' as clinical_time_basis
+    , null::timestamp_ntz as source_timestamp
+    , a.assessment_date as source_derived_date
+    , null::boolean as is_source_date_inconsistent
+    , null::varchar as coding_scheme_code
+    , 'fixed_snomed' as coding_scheme_kind
+    , 'SNOMED CT' as source_coding_scheme_description
+    , a.coded_ass_tool_type as clinical_code
+    , null::varchar as source_clinical_description
+    , null::varchar as source_clinical_label_status
+    , null::varchar as standardised_snomed_code
+    , null::varchar as source_standardised_snomed_description
+    , a.pers_score as clinical_value
+    , null::varchar as unit_of_measurement_code
+    , null::varchar as unit_of_measurement_description
+    , null::varchar as unit_of_measurement_label_status
+    , a.org_id_prov as provider_organisation_code
+    , a.uniq_submission_id as uniq_submission_id
+    , a.reporting_period_start_date as reporting_period_start_date
+    , a.reporting_period_end_date as reporting_period_end_date
+    , a.dmic_dataset as mhsds_version
+    , a.effective_from as source_file_received_at
+    , null::timestamp_ntz as source_loaded_at
+    , a.first_reported_period_end_date as first_reported_period_end_date
+    , a.last_reported_period_end_date as last_reported_period_end_date
+    , a.accepted_source_record_count as accepted_source_record_count
+    , a.reported_period_count as reported_period_count
+    , a.has_person_identifier_changed as has_person_identifier_changed
+    , null::boolean as is_care_activity_linked
+    , null::boolean as is_care_activity_person_consistent
+    , null::boolean as is_care_activity_referral_consistent
+    , null::boolean as is_care_activity_contact_consistent
+    , null::boolean as is_care_contact_person_consistent
+    , a.uniq_clust_id as source_assessment_id
+    , a.is_assessment_parent_linked as is_assessment_parent_linked
+    , a.is_assessment_parent_person_consistent as is_assessment_parent_person_consistent
+from {{ ref('int_mhsds_clustering_assessment_response') }} as a
+
+union all
+
+select
+    a.source_record_id as source_record_id
+    , a.mhs609_uniq_id::varchar as source_row_id
+    , 'MHS609' as source_table
+    , 'presenting_complaint' as clinical_record_type
+    , a.person_id as person_id
+    , null::varchar as local_patient_id
+    , a.uniq_serv_req_id as referral_source_record_id
+    , null::varchar as uniq_care_cont_id
+    , null::varchar as care_activity_source_record_id
+    , null::varchar as uniq_care_act_id
+    , null::varchar as care_prof_local_id
+    , null::varchar as uniq_care_prof_local_id
+    , a.pres_comp_date::timestamp_ntz as clinical_at
+    , iff(a.pres_comp_date is not null,'date',null) as clinical_time_precision
+    , 'presenting_complaint_recorded' as clinical_time_basis
+    , null::timestamp_ntz as source_timestamp
+    , a.pres_comp_date as source_derived_date
+    , null::boolean as is_source_date_inconsistent
+    , a.find_scheme_in_use as coding_scheme_code
+    , 'finding' as coding_scheme_kind
+    , a.finding_scheme_description as source_coding_scheme_description
+    , a.pres_comp as clinical_code
+    , a.complaint_description as source_clinical_description
+    , case when a.pres_comp is null then 'code_missing' when a.complaint_description is not null then 'labelled' when a.finding_scheme_description is null then 'coding_scheme_unrecognised' else 'code_unmatched' end as source_clinical_label_status
+    , null::varchar as standardised_snomed_code
+    , null::varchar as source_standardised_snomed_description
+    , null::varchar as clinical_value
+    , null::varchar as unit_of_measurement_code
+    , null::varchar as unit_of_measurement_description
+    , null::varchar as unit_of_measurement_label_status
+    , a.org_id_prov as provider_organisation_code
+    , a.uniq_submission_id as uniq_submission_id
+    , a.reporting_period_start_date as reporting_period_start_date
+    , a.reporting_period_end_date as reporting_period_end_date
+    , a.dmic_dataset as mhsds_version
+    , a.effective_from as source_file_received_at
+    , null::timestamp_ntz as source_loaded_at
+    , a.first_reported_period_end_date as first_reported_period_end_date
+    , a.last_reported_period_end_date as last_reported_period_end_date
+    , a.accepted_source_record_count as accepted_source_record_count
+    , a.reported_period_count as reported_period_count
+    , false as has_person_identifier_changed
+    , null::boolean as is_care_activity_linked
+    , null::boolean as is_care_activity_person_consistent
+    , null::boolean as is_care_activity_referral_consistent
+    , null::boolean as is_care_activity_contact_consistent
+    , null::boolean as is_care_contact_person_consistent
+    , null::varchar as source_assessment_id
+    , null::boolean as is_assessment_parent_linked
+    , null::boolean as is_assessment_parent_person_consistent
+from {{ ref('int_mhsds_presenting_complaint') }} as a

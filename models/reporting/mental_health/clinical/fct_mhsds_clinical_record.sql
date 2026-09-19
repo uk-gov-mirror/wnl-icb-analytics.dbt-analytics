@@ -13,7 +13,7 @@ with labelled as (
             r.source_standardised_snomed_description, mapped.preferred_term
         ) as standardised_snomed_description
         , case
-            when r.source_table = 'MHS202' then coalesce(
+            when r.source_table in ('MHS202', 'MHS609') then coalesce(
                 r.source_clinical_description
                 , iff(r.source_clinical_label_status = 'mapped_to_snomed',
                     r.source_standardised_snomed_description, null)
@@ -26,7 +26,7 @@ with labelled as (
                 then mapped.preferred_term
         end as clinical_description
         , case
-            when r.source_table = 'MHS202' then case
+            when r.source_table in ('MHS202', 'MHS609') then case
                 when r.source_clinical_label_status = 'code_unmatched'
                     then 'code_or_expression_unmatched'
                 when r.source_clinical_label_status = 'labelled_snomed_scheme_missing'
@@ -56,7 +56,7 @@ with labelled as (
         , response.specification_version as assessment_response_definition_version
         , response.is_non_score_response as is_assessment_response_non_score
         , case
-            when r.source_table not in ('MHS606', 'MHS607') then null
+            when r.source_table not in ('MHS606', 'MHS607', 'MHS802') then null
             when r.clinical_value is null then 'value_missing'
             when response.is_non_score_response then 'known_non_score'
             when response.response_code is not null then 'enumerated_response'
@@ -91,10 +91,10 @@ with labelled as (
     left join {{ ref('clinical_unit_of_measurement') }} as unit
         on trim(r.unit_of_measurement_code) = unit.code
     left join {{ ref('mhsds_assessment_scale') }} as scale
-        on r.source_table in ('MHS606', 'MHS607')
+        on r.source_table in ('MHS606', 'MHS607', 'MHS802')
         and trim(r.clinical_code) = scale.concept_code
     left join {{ ref('mhsds_assessment_response') }} as response
-        on r.source_table in ('MHS606', 'MHS607')
+        on r.source_table in ('MHS606', 'MHS607', 'MHS802')
         and trim(r.clinical_code) = response.concept_code
         and (trim(r.clinical_value) = response.response_code
             or try_to_double(r.clinical_value) = response.numeric_response_value::double)
@@ -150,6 +150,9 @@ select
 
     , provider_organisation_code
     , provider_organisation_name
+    , source_assessment_id
+    , is_assessment_parent_linked
+    , is_assessment_parent_person_consistent
     , person_id
     , local_patient_id
     , referral_source_record_id

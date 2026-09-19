@@ -1,10 +1,11 @@
 version: 2
 models:
 - name: fct_mhsds_assessment_observation
-  description: Assessment observations from MHS606 and MHS607, one row per accepted assessment question,
-    dimension or score occurrence. Includes all accepted periods, unknown responses and missing times
-    or relationships. These rows are not questionnaire completions or paired outcomes. Response interpretation
-    reuses the shared clinical history.
+  description: Assessment observations from MHS606, MHS607 and historical MHS802. One row per accepted referral/activity
+    response occurrence or latest provider/clustering-assessment/concept response. Historical clustering resubmissions
+    are versions, not repeated new observations; represented source counts remain visible. Includes unknown
+    responses and missing relationships. Observations are not questionnaire completions. Instance grouping
+    and descriptive score changes are separate facts.
   config:
     meta:
       owner:
@@ -16,19 +17,19 @@ models:
     - not_null
     - unique
   - name: assessment_context
-    description: referral_assessment or activity_assessment.
+    description: referral_assessment, activity_assessment or historical clustering_assessment.
   - name: assessment_concept_code
     description: Submitted SNOMED assessment observable or tool code.
   - name: assessment_concept_description
     description: Authoritative label where available.
   - name: assessment_recorded_at
-    description: Supported observation time, from referral assessment completion or inherited activity/contact timing.
+    description: Referral completion, supported activity time, or the same-submission clustering parent completion.
       Null when no supported clinical time exists.
   - name: submitted_response
     description: Unmodified source response text.
   - name: assessment_score_numeric
-    description: Numeric score only for a recognised enumerated or in-range response. Null for non-score,
-      unmatched or missing responses.
+    description: Numeric score only for a recognised enumerated or in-range response. Null for non-score, unmatched
+      or missing responses.
   - name: assessment_response_status
     description: Existing response interpretation, including known_non_score, enumerated_response, within_published_range
       and unmatched states.
@@ -36,3 +37,16 @@ models:
     description: Source-derived assessor identifier where supplied. No inference from activity staff links.
   - name: submission_id
     description: Accepted submission containing this observation.
+  - name: source_assessment_id
+    description: Historical clustering assessment identifier; null when the source does not supply an instance
+      identifier.
+  - name: is_assessment_parent_linked
+    description: Historical MHS802 has a same-submission MHS801 parent; null for other contexts.
+  - name: is_assessment_parent_person_consistent
+    description: Historical response and same-submission parent person identifiers agree; null when not comparable.
+  - name: has_person_identifier_changed
+    description: Historical response versions include more than one non-null national person identifier. These
+      observations are excluded from descriptive score pairing.
+  - name: accepted_source_record_count
+    description: Number of accepted source rows represented by this observation. Historical clustering can
+      represent repeated monthly versions.

@@ -1,0 +1,47 @@
+version: 2
+models:
+- name: fct_mhsds_accommodation_observation
+  description: Recorded accommodation evidence. One row per accepted MHS003 source observation across provider
+    periods. Repeated observations are retained, not counted as new accommodation episodes. Legacy status and
+    newer accommodation type remain separate; unknown codes are not interpreted as unsettled accommodation.
+    The source type field also contains legacy accommodation-status codes. Exact legacy labels are supplied
+    only where no type label exists; the label basis remains explicit and no conversion to a modern type is
+    inferred.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: accommodation_observation_id
+    description: Unique identifier at the documented model grain.
+    data_tests:
+    - not_null
+    - unique
+  - name: legacy_accommodation_status_code
+    description: Submitted legacy accommodation status code.
+  - name: accommodation_type_code
+    description: Submitted accommodation type code.
+  - name: settled_accommodation_code
+    description: Submitted settled accommodation code.
+  - name: legacy_status_recorded_date
+    description: Submitted legacy status recorded date.
+  - name: type_recorded_date
+    description: Submitted type recorded date.
+  - name: accommodation_start_date
+    description: Submitted accommodation start date.
+  - name: accommodation_end_date
+    description: Submitted accommodation end date.
+  - name: legacy_accommodation_status_description
+    description: National label, including historical codes; null when no definition matches.
+  - name: accommodation_type_description
+    description: National label, including historical codes; null when no definition matches.
+  - name: settled_accommodation_description
+    description: National label, including historical codes; null when no definition matches.
+  - name: reporting_period_end_date
+    description: Period of the accepted source evidence; may be later than the clinical event.
+  - name: source_file_received_at
+    description: Source file receipt timestamp, not a clinical time.
+  - name: accommodation_type_label_basis
+    description: accommodation_type for a current type-list match, legacy_accommodation_status for an exact
+      historical-list match, or code_missing/code_unmatched. A historical label does not assert validity for
+      the submitted version.

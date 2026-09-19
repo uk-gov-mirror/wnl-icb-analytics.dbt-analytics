@@ -4,7 +4,19 @@ with population as (
         , min(first_reporting_period_end_date) as first_evidence_reporting_period_end_date
         , max(last_reporting_period_end_date) as last_evidence_reporting_period_end_date
         , count(*) as n_evidence_types
+        , sum(iff(evidence_type = 'indirect_activity', n_records, 0)) as n_indirect_activity_occurrences
+        , sum(iff(evidence_type = 'care_plan_period', n_records, 0)) as n_care_plan_snapshots
+        , sum(iff(evidence_type = 'community_treatment_order', n_records, 0)) as n_recorded_community_treatment_orders
     from {{ ref('int_mhsds_person_evidence') }}
+    group by person_id
+)
+, caseload as (
+    select person_id
+        , count(*) as n_current_caseload_providers
+        , sum(n_open_referrals) as n_current_caseload_referrals
+        , sum(n_open_referrals_without_attendance) as n_current_caseload_referrals_without_attendance
+        , max(evidence_date) as current_caseload_evidence_date
+    from {{ ref('fct_mhsds_current_caseload_person') }}
     group by person_id
 )
 , referrals as (
@@ -143,6 +155,14 @@ select
     , p.n_evidence_types
     , coalesce(r.n_recorded_referrals, 0) as n_recorded_referrals
     , coalesce(r.n_referrals_without_recorded_end, 0) as n_referrals_without_recorded_end
+    , coalesce(cl.n_current_caseload_providers, 0) as n_current_caseload_providers
+    , coalesce(cl.n_current_caseload_referrals, 0) as n_current_caseload_referrals
+    , coalesce(cl.n_current_caseload_referrals_without_attendance, 0) as n_current_caseload_referrals_without_attendance
+    , coalesce(cl.n_current_caseload_referrals > 0, false) as has_current_recorded_caseload
+    , cl.current_caseload_evidence_date
+    , p.n_indirect_activity_occurrences
+    , p.n_care_plan_snapshots
+    , p.n_recorded_community_treatment_orders
     , r.first_referral_date
     , r.latest_referral_date
     , coalesce(c.n_recorded_contacts, 0) as n_recorded_contacts
@@ -188,6 +208,7 @@ select
 from population as p
 cross join {{ ref('int_mhsds_reporting_date') }} as d
 left join {{ ref('stg_mhsds_bridging') }} as b on p.person_id = b.person_id
+left join caseload as cl on p.person_id = cl.person_id
 left join referrals as r on p.person_id = r.person_id
 left join contacts as c on p.person_id = c.person_id
 left join recorded_spells as s on p.person_id = s.person_id

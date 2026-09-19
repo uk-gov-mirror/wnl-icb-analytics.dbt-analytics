@@ -1,0 +1,40 @@
+version: 2
+models:
+- name: fct_mhsds_community_treatment_order_recall
+  description: A community treatment order recall is a return to hospital for treatment while a CTO is
+    in force. The underlying order permits treatment in the community under Mental Health Act conditions
+    with a power of recall. Recorded CTO recalls, one row per provider, legal-status period and recall
+    start date/time. Multiple recalls within an order remain separate. A missing start time remains unknown.
+    The newest accepted version is selected by reporting period, receipt, submission and source row. Missing
+    identity components retain separate source records. These are recorded periods/events, not inferred
+    current state.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: community_treatment_order_recall_id
+    description: Unique identifier at the documented model grain.
+    data_tests:
+    - not_null
+    - unique
+  - name: mental_health_act_period_id
+    description: Submitted mental health act period id.
+  - name: recall_start_date
+    description: Submitted recall start date.
+  - name: recall_start_time
+    description: Submitted recall start time.
+  - name: recall_end_date
+    description: Submitted recall end date.
+  - name: recall_end_time
+    description: Submitted recall end time.
+  - name: n_accepted_source_records
+    description: Accepted submitted versions of this identity across all periods, including repeats.
+  - name: is_identity_incomplete
+    description: A required identity component is missing; the source row is retained separately.
+  - name: first_submission_period_end_date
+    description: First accepted reporting period containing this identity, not the clinical start date.
+  - name: reporting_period_end_date
+    description: Period of the accepted source evidence; may be later than the clinical event.
+  - name: source_file_received_at
+    description: Source file receipt timestamp, not a clinical time.

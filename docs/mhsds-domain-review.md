@@ -1,99 +1,122 @@
 # MHSDS analytical coverage review
 
-Reviewed on 19 September 2026 against the refactored models and accepted source
-data through July 2026. Counts below are submitted rows, not distinct events or
-people. They demonstrate available evidence, not completeness or validity.
+Reviewed on 19 September 2026 against accepted evidence through July 2026.
+All profiling uses non-identifying aggregate results.
 
-## Judgement
+## Structure and analyst questions
 
-Keep the reporting families: referrals, activity, inpatient, clinical, person,
-quality and currencies. They give analysts recognisable subjects and explicit
-grains. Modelling should continue to own shared interpretation, such as accepted
-contact context, occupancy inference and clinical-item identity. Reporting can
-read staging directly when the source already represents the required entity.
-Moving every source-shaped fact into modelling would add indirection without
-changing what analysts can answer.
+The reporting families now cover referrals, activity, inpatient care, clinical
+evidence, circumstances, people and data quality. Currencies remain separate.
+Shared selection and interpretation belong in modelling; analyst-facing facts
+have explicit entity or period grains. These folders retain the existing
+warehouse schemas and schedules.
 
-The domain is useful but incomplete. Of 71 raw MHSDS models, 23 have a staging
-consumer. This is an inventory, not a coverage percentage: the remainder includes
-retired sections as well as populated sections with substantial analytical value.
+The person summary is an entry point for current evidence and cohorts. Temporal
+facts answer what was recorded during a particular period. Mixing those jobs in
+one profile would obscure changing demographics, referral states and service
+relationships.
 
-## What works now
+The review's additions are implemented:
 
-- Referral facts and summaries answer recorded demand, referral reasons,
-  rejection/discharge, contact volumes and descriptive first-attendance waits.
-- Contacts and activities distinguish attendance from the work recorded within
-  a contact. Team attribution uses the contact's submission, with explicit
-  provenance. Staff relationships retain their separate many-to-many grain.
-- Recorded spells and wards support admissions and movements. Inferred
-  occupancy is separate, with its existing recency and overlap rules visible.
-- Diagnosis, assessment and legal-status facts retain evidence without claiming
-  current clinical diagnoses, completed questionnaires or treatment outcomes.
-- The person summary includes all modelled evidence families and does not require
-  a cross-system bridge. Currency classifications remain separate.
+| Analyst question | Reporting provision |
+|---|---|
+| Who receives care? | Person/provider/period demographics with ethnicity, separate legacy gender and gender identity, source ages, residence and fixed-edition deprivation. |
+| What demand and waiting evidence existed each month? | Referral-period access state, same-period team relationships and submitted RTT clocks. Attendance never uses later-period evidence. |
+| Who is on the current recorded caseload? | Open referrals and person/provider counts in the dataset latest month. Older provider evidence remains separately available with its age. |
+| What work is absent from contact totals? | Indirect activity, anonymous group sessions and drop-ins, plus identifiable group-therapy contacts as a subset of contacts. |
+| Why are people remaining in hospital? | Discharge-readiness/reason periods, separate leave periods and commissioner assignments. Existing inferred occupancy is unchanged. |
+| What needs and plans were recorded? | Accommodation, employment, disability, social circumstances, care-plan snapshots, agreements and presenting complaints. |
+| How did recorded scores change? | Historical clustering responses, assessment response groups and descriptive paired numeric observations within the same concept and context. |
+| What legal restrictions and restrictive interventions occurred? | CTO periods, recalls, restrictive incidents and intervention types. |
+| What inpatient capacity is reported? | Ward available/closed bed days and same-submission recorded ward-stay midnights, with missingness and overlap flags. |
 
-The current summaries are reasonable analyst entry points. They should not
-become substitutes for temporal facts or containers for every available field.
+The semantic view exposes these entities without combining different grains into
+a generic activity total. `fct_mhsds_contact_activity_monthly` now states its
+contact-only scope. Shared contact models moved into `modelling/mental_health/activity`
+and clinical transformations into `modelling/mental_health/clinical`.
 
-## Recommended next additions
+## What profiling changed
 
-| Priority and analyst question | Addition and grain | Evidence and remaining decision |
-|---|---|---|
-| 1. Who receives care, and who is missing it? | A person/provider/reporting-period demographic dimension, with labelled age, ethnicity, sex/gender fields and residence/deprivation context. Extend the existing MPI staging interface. | MPI already supplies these fields, but staging retains little demographic context. Keep conflicting provider submissions visible and define selection within a period. Do not require cross-system bridging or apply today's demographics to historical care. Population access rates also need an external denominator. |
-| 2. What demand and waiting population did each service have each month? | A referral-period fact over accepted referral history and same-period team relationships. | The history is now available. Latest referrals alone cannot reconstruct previous monthly state. Define recorded open referrals separately from agreed active caseload and waiting-list populations; interpret MHS104 RTT clocks before publishing target compliance. July has 5,466 MHS104 rows. |
-| 3. What work is absent from contact reporting? | An indirect-activity fact at the accepted activity occurrence grain, with duration, procedure, professional and same-submission team context. Separate group-session and drop-in facts. | July has 20,083 indirect-activity rows, 8,356 group-session rows and 5,765 drop-in rows. Indirect activity currently contributes only source-row counts to summaries. Establish event identity before deduplication, and distinguish session counts from participant contacts. |
-| 4. Why are people remaining in hospital? | Discharge-readiness periods linked to recorded spells; leave periods as separate facts. Derive a period summary only after agreeing occupied-day and delayed-day rules. | July has 632 MHS518 readiness rows and 2,826 MHS510 leave rows. Existing inferred occupancy does not establish physical bed use or days delayed after readiness. Preserve the agreed occupancy rules while adding the underlying evidence. |
-| 5. What needs, circumstances and care plans were recorded? | Dated circumstance, disability and care-plan facts, plus presenting-complaint evidence kept distinct from diagnoses. | July includes 117,134 accommodation rows, 159,556 employment rows, 34,427 disability rows, 126,007 care-plan-type rows and 44,764 presenting-complaint rows. These are repeated submitted evidence, not new events. Keep effective periods and unknown states visible instead of adding undated flags to the person summary. |
-| 6. Did measured outcomes change? | Instrument-specific assessment instances and paired observations, retaining items, completeness and assessor context. | The current assessment fact provides responses and interpretable scores, not completed instruments. Older MHS802 clustering assessments contain 133.5 million accepted historical rows outside this family, with none in July. Establish their distinct observations before integration. Define completion, pairing, timing and score direction per instrument with an accountable clinical owner. |
-| 7. What restrictions and safety events occurred? | Separate community-treatment-order periods, recall events, restrictive-intervention incidents and intervention types. | July has 1,232 CTO rows and 1,324 restrictive-intervention incident rows. An incident can have several intervention types. Legal-status periods alone do not cover this subject; shared incident/period identities and labels come before rates. |
+- Historical clustering contained 133,518,587 accepted response rows. Source
+  assessment/concept identity reduces these to 9,829,795 retained responses.
+  Every retained response has a same-submission parent with matching person
+  evidence. Changed national person IDs across versions remain flagged.
+- All 1,524,789 care-plan agreements link to a same-submission plan with matching
+  person evidence. Indirect activity also has no conflicting same-submission
+  referral identities; a small number of parents are absent.
+- Of 20,805,298 referral-period rows, 20,803,947 link to period demographics.
+  Missing demographics preserve the referral rather than shrinking the population.
+- Latest-provider open-referral evidence includes 71,593 referrals from periods
+  more than two months behind the dataset. The current caseload therefore uses
+  the dataset latest month, with older provider evidence in a separate model.
+- July 2026 has 651 reported ward-periods; 347 contain available bed days.
+  Capacity coverage is insufficient for a blanket provider utilisation claim.
+  The commissioning extract can omit patients while capacity covers a whole ward.
+- Four entirely empty reporting fields were removed: drop-in end time and
+  receiving organisation, RTT pathway identifier, and the restrictive-type ward
+  stay identifier. Their source interfaces retain the evidence.
+- Employment needs both the general employment code list and the mental-health
+  extension. Together they label 11,578,627 of 11,578,686 records. The remaining
+  codes have no authoritative match and remain explicitly unmatched.
+- Accommodation type contains legacy accommodation-status codes. The historical
+  reference labels 4,393,609 more records, with the reference basis exposed.
+  Missing and unmatched codes remain distinct.
+- Presenting complaints now use the existing Read v2/CTV3 reference when declared.
+  This adds 5,537 labels, giving 37,668 labelled records out of 47,703 retained
+  complaints. All 15,563 records declaring Read v2 also match ICD-10; a small
+  number declare a scheme outside the finding code list. Alternative labels
+  expose possible source namespace errors without silently changing the scheme.
+  Code overlap alone does not establish which interpretation is correct.
 
-Priorities 1 and 2 would most improve general analysis. Indirect activity is the
-next practical extension. Discharge readiness is the strongest focused inpatient
-addition. These recommendations are not implemented models or agreed clinical
-measure definitions.
+Earlier profiling also corrected contact team attribution. Explicit local team
+pointers take precedence; v6 contacts without one use the same-submission primary
+referral team. Source-derived identifiers alone do not prove a submitted pointer.
+National person-ID changes do not automatically invalidate historical referral
+attendance.
 
-Commissioner analysis also needs period context: July has 2,804 MHS512 spell
-commissioner-assignment rows. A single source-derived commissioner on the latest
-spell cannot describe every change of responsibility during an admission.
+## Boundaries that remain
 
-## Structure to retain and tighten
+Eddie Davison owns the recorded-state and descriptive measure definitions.
+The source supports open referral state and recorded attendance. It does not
+make every open referral a clinically active treatment episode or establish all
+national waiting-list eligibility rules.
 
-Keep new temporal entities alongside their existing families. A small
-`circumstances` family is justified when those models exist. Do not create an
-empty folder hierarchy or another broad mental-health profile.
+Assessment groups are not confirmed completed questionnaires. Numeric response
+validation uses the maintained published definitions, and score differences
+remain specific to the concept. Clinical improvement and reliable change need
+instrument-specific interpretation. Historical responses without a matching
+definition remain visible and do not silently become scores.
 
-Within modelling, move shared contact context and latest-contact selection into
-an `activity` folder, and clinical-item/diagnosis transformations into `clinical`
-when those families next change. Keep shared organisation and reporting-date
-helpers at the domain root. These are navigation improvements, not warehouse
-schema changes or prerequisites for correct results.
+Anonymous MHS301 sessions have no patient link. Identifiable group therapy appears
+in MHS201, but those contacts have no shared session identifier. The patient view
+cannot reconstruct definitive session membership by matching date or location.
 
-`fct_mhsds_service_activity_monthly` currently measures contacts only. If indirect
-activity or group reporting is added, rename it to
-`fct_mhsds_contact_activity_monthly` and provide separately named activity
-measures. Never add counts with different grains into a generic activity total.
+Recorded stay midnights include leave and may contain overlapping intervals.
+Their comparison with reported staffed capacity is descriptive, not live bed
+availability or a validated physical occupancy rate. Discharge-readiness end
+dates do not necessarily mean discharge.
 
-Extend the semantic view after each new entity has tested keys and agreed
-measures. Provider-period demographic relationships need temporal keys;
-joining historical facts to the current person summary is insufficient.
-Outcome, waiting-list and caseload measures need their own definitions, not
-optimistic names over existing counts.
+Other source sections, including self-harm, assaults, police assistance and
+digital interventions, still need their own source and analytical review. External
+population denominators are also needed for population access rates. The
+implemented models answer the agreed expansion; they do not claim complete
+coverage of every MHSDS section.
 
-## What the profiling changes
+The [domain guide](mhsds-domain-models.md) lists the models, definitions and joins.
 
-The missing contact team type was partly our modelling omission. V6 primary
-referral-team fallback addresses it without replacing explicit contact teams.
-Person-ID differences across submissions require visible temporal context, not
-automatic reassignment or exclusion. Person counts remain distinct recorded
-MHSDS IDs; changing IDs can split one individual's history.
+## Validation
 
-Missing durations, unmatched parents and bridge gaps remain visible. Most
-unmatched assessment responses are outside the published numeric ranges. They
-must not silently become scores. Unclassified legal-status evidence in this
-profile has missing codes or the source sentinel; no additional detention rule
-is justified by that finding.
+The downstream DEV build processed 136 models, 403 tests and two configured
+snapshots. All MHSDS tests passed. The one failing check compares annual
+segmentation with current demographics. Its existing monthly population spine
+has 792 fewer current people and 1,432 people no longer in current demographics,
+a net row-count difference of 640. Those population inputs are independent of
+the MHSDS refactor; the mismatch remains for the segmentation refresh workflow.
 
-The [domain guide](mhsds-domain-models.md) describes the implemented interfaces.
-The [MHSDS v6 guidance](https://digital.nhs.uk/binaries/content/assets/website-assets/data-and-information/datasets/mhsds/tools-and-guidance/mhsdsv6.0_userguidance_v6.0.4.pdf)
-describes the source sections and expected assessment values. Source presence
-does not by itself settle analytical populations or clinical measure definitions.
+The subsequent label fixes built 21 models and passed all 59 selected tests,
+including complaint Read labels, employment reference coverage and semantic
+entity-count reconciliation. Final complaint identity and ward overlap checks
+built 13 models and passed 37 tests. The final person-evidence build passed all
+eight tests across three models. Semantic breakdowns by period demographics
+preserve referral, caseload, indirect-activity and care-plan totals. Profiling
+returned aggregates only.

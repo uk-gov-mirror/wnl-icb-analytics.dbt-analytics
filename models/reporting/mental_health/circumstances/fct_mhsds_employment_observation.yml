@@ -1,0 +1,39 @@
+version: 2
+models:
+- name: fct_mhsds_employment_observation
+  description: Recorded employment evidence. One row per accepted MHS004 observation across provider periods.
+    Status, effective dates, recorded date and weekly hours remain distinct. Repeated submissions do not establish
+    new jobs or changes in employment.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: employment_observation_id
+    description: Unique identifier at the documented model grain.
+    data_tests:
+    - not_null
+    - unique
+  - name: employment_status_code
+    description: Submitted employment status code.
+  - name: employment_status_start_date
+    description: Submitted employment status start date.
+  - name: employment_status_end_date
+    description: Submitted employment status end date.
+  - name: employment_status_recorded_date
+    description: Submitted employment status recorded date.
+  - name: employment_contract_type_code
+    description: Submitted employment contract type code.
+  - name: weekly_hours_worked
+    description: Submitted weekly hours worked.
+  - name: employment_status_description
+    description: National label, including historical codes; null when no definition matches.
+  - name: employment_contract_type_description
+    description: National label, including historical codes; null when no definition matches.
+  - name: reporting_period_end_date
+    description: Period of the accepted source evidence; may be later than the clinical event.
+  - name: source_file_received_at
+    description: Source file receipt timestamp, not a clinical time.
+  - name: employment_status_label_status
+    description: labelled when a general or mental-health-specific national code has a reference label; code_missing
+      or code_unmatched otherwise.

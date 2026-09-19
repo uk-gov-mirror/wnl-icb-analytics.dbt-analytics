@@ -1,0 +1,15 @@
+version: 2
+models:
+- name: stg_mhsds_disability
+  description: Accepted MHS007 disability evidence across provider reporting periods. One row per submitted
+    source record. Repeated period versions remain available; source dates before 1901 are null.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: mhs007_uniq_id
+    description: Identifier of the accepted source record.
+    data_tests:
+    - not_null
+    - unique

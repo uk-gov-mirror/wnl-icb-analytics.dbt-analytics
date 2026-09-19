@@ -1,5 +1,10 @@
 select
     clinical_record_id as assessment_observation_id
+    , source_assessment_id
+    , is_assessment_parent_linked
+    , is_assessment_parent_person_consistent
+    , has_person_identifier_changed
+    , accepted_source_record_count
     , person_id
     , sk_patient_id
     , referral_source_record_id
@@ -29,4 +34,4 @@ select
     , source_row_id
     , uniq_submission_id as submission_id
 from {{ ref('fct_mhsds_clinical_record') }}
-where clinical_record_type in ('referral_assessment', 'activity_assessment')
+where clinical_record_type in ('referral_assessment', 'activity_assessment', 'clustering_assessment')

@@ -7,16 +7,10 @@ with contact_context as (
         , r.referral_request_received_date as same_submission_referral_received_date
         , r.mhs101_uniq_id is not null as is_same_submission_referral_linked
         , c.person_id = r.person_id as is_same_submission_referral_person_consistent
-        -- Derived team IDs can be populated without a submitted local team pointer.
-        , case
-            when c.other_care_prof_team_local_id is not null then 'contact_additional_team'
-            when c.care_prof_team_local_id is not null then 'contact_legacy_team'
-            -- In v6 the contact pointer identifies an additional team, not the primary team.
-            when try_to_decimal(s.dat_set_ver::varchar, 10, 2) >= 6
-                and try_to_decimal(s.dat_set_ver::varchar, 10, 2) < 7
-                and r.care_prof_team_local_id is not null then 'referral_primary_team'
-            else 'unresolved'
-        end as service_or_team_attribution_basis
+        , {{ mhsds_delivering_team_basis(
+            'c.other_care_prof_team_local_id', 'c.care_prof_team_local_id',
+            'r.care_prof_team_local_id', 's.dat_set_ver'
+        ) }} as service_or_team_attribution_basis
         , case service_or_team_attribution_basis
             when 'contact_additional_team' then c.uniq_other_care_prof_team_local_id
             when 'contact_legacy_team' then c.uniq_care_prof_team_id

@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: fct_mhsds_disability_observation
+  description: Recorded disability and perceived impact. One row per accepted MHS007 observation. Multiple
+    disabilities and repeated provider-period evidence remain separate. No onset date or clinical severity
+    is inferred from the reporting period.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: disability_observation_id
+    description: Unique identifier at the documented model grain.
+    data_tests:
+    - not_null
+    - unique
+  - name: disability_code
+    description: Submitted disability code.
+  - name: disability_impact_code
+    description: Submitted disability impact code.
+  - name: disability_description
+    description: National label, including historical codes; null when no definition matches.
+  - name: disability_impact_description
+    description: National label, including historical codes; null when no definition matches.
+  - name: reporting_period_end_date
+    description: Period of the accepted source evidence; may be later than the clinical event.
+  - name: source_file_received_at
+    description: Source file receipt timestamp, not a clinical time.
