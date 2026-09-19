@@ -65,8 +65,14 @@ DIMENSIONS(
     referrals.referral_priority AS clinical_response_priority_description COMMENT = 'Recorded priority label.',
     referrals.referral_age AS age_at_referral COMMENT = 'Source age at referral; source special values remain visible.',
     contacts.contact_date AS care_contact_date COMMENT = 'Recorded contact date; cancelled contacts retain their scheduled date.',
-    contacts.contact_team_type AS service_or_team_type_description COMMENT = 'Team type recorded for the contact, not inherited from the referral.',
-    contacts.contact_team_id AS service_or_team_id COMMENT = 'Recorded provider-qualified team identifier.',
+    contacts.contact_team_type AS service_or_team_type_description COMMENT = 'Team type resolved within the contact submission: explicit contact team, otherwise the v6 primary referral team.',
+    contacts.contact_team_id AS service_or_team_id COMMENT = 'Provider-qualified team identifier resolved within the contact submission.',
+    contacts.contact_team_attribution_basis AS service_or_team_attribution_basis COMMENT = 'Explicit additional or legacy contact team, same-submission v6 primary referral team, or unresolved.',
+    contacts.contact_referral_received_date AS same_submission_referral_received_date COMMENT = 'Referral receipt recorded in the contact submission, not the latest referral revision.',
+    contacts.contact_same_submission_referral_linked AS is_same_submission_referral_linked COMMENT = 'Whether the referral is present in the contact submission.',
+    contacts.contact_same_submission_person_consistent AS is_same_submission_referral_person_consistent COMMENT = 'Contact and same-submission referral person IDs agree; null if either identity is missing.',
+    contacts.contact_latest_referral_person_consistent AS is_latest_referral_person_consistent COMMENT = 'Comparison with latest referral identity. False can reflect a later national person-ID change, not a wrong patient.',
+    referrals.referral_has_contact_person_disagreement AS has_contact_referral_person_disagreement COMMENT = 'At least one contact has a different person ID from the latest referral; counts and intervals still follow the stable referral key.',
     contacts.contact_attendance AS attendance_status_description COMMENT = 'Recorded attendance label.',
     contacts.is_attended AS is_attended COMMENT = 'Attendance 05 or 06; null when missing.',
     contacts.contact_medium AS consultation_mechanism_description COMMENT = 'Recorded delivery mechanism.',
@@ -98,23 +104,23 @@ DIMENSIONS(
 )
 
 METRICS(
-    people.person_count AS COUNT(people.person_id) COMMENT = 'Identifiable people in all documented modelled MHSDS evidence, including clinical-only records.',
+    people.person_count AS COUNT(people.person_id) COMMENT = 'Distinct recorded MHSDS person IDs in all modelled evidence, including clinical-only records. National ID changes can split an individual across rows.',
     people.current_inpatient_person_count AS COUNT_IF(people.is_current_inpatient) COMMENT = 'People with inferred current occupancy evidence.',
     people.currently_detained_person_count AS COUNT_IF(people.is_currently_detained) COMMENT = 'People meeting the unchanged detention-currentness rule.',
     referrals.referral_count AS COUNT(referrals.source_record_id) COMMENT = 'Recorded referrals, including those without person identity.',
-    referrals.referral_person_count AS COUNT(DISTINCT referrals.person_id) COMMENT = 'Distinct identified people with selected referrals.',
+    referrals.referral_person_count AS COUNT(DISTINCT referrals.person_id) COMMENT = 'Distinct recorded MHSDS person IDs with selected referrals; not a reconciled longitudinal patient count.',
     referrals.mean_days_to_first_attended_contact AS AVG(referrals.days_to_first_attended_contact) COMMENT = 'Mean over referrals with a valid recorded interval. Excludes unobserved waits; not target compliance.',
     referrals.referrals_with_observed_first_attendance AS COUNT(referrals.days_to_first_attended_contact) COMMENT = 'Denominator for the observed mean interval.',
     contacts.contact_count AS COUNT(contacts.source_record_id) COMMENT = 'All recorded contact attendance states.',
     contacts.attended_contact_count AS COUNT_IF(contacts.is_attended) COMMENT = 'Recorded attended contacts.',
     contacts.dna_contact_count AS COUNT_IF(contacts.is_dna) COMMENT = 'Recorded DNA contacts.',
     contacts.cancelled_contact_count AS COUNT_IF(contacts.is_cancelled) COMMENT = 'Recorded cancelled contacts.',
-    contacts.contact_person_count AS COUNT(DISTINCT contacts.person_id) COMMENT = 'Distinct identified people with selected contacts, not a sum of monthly distinct counts.',
+    contacts.contact_person_count AS COUNT(DISTINCT contacts.person_id) COMMENT = 'Distinct recorded MHSDS person IDs with selected contacts. IDs can change over time; do not add monthly distinct counts.',
     spells.recorded_spell_count AS COUNT(spells.source_record_id) COMMENT = 'Recorded provider spells before occupancy inference.',
     occupancy.occupancy_interval_count AS COUNT(occupancy.occupancy_interval_id) COMMENT = 'Retained inferred intervals, not recorded provider spells.',
     occupancy.current_occupancy_count AS COUNT_IF(occupancy.is_current_inpatient) COMMENT = 'Retained intervals classified as open.',
     diagnoses.diagnosis_record_count AS COUNT(diagnoses.diagnosis_record_id) COMMENT = 'Retained diagnosis records, not distinct conditions or current diagnoses.',
-    diagnoses.diagnosis_person_count AS COUNT(DISTINCT diagnoses.person_id) COMMENT = 'Identifiable people with selected diagnosis evidence.',
+    diagnoses.diagnosis_person_count AS COUNT(DISTINCT diagnoses.person_id) COMMENT = 'Distinct recorded MHSDS person IDs with selected diagnosis evidence; IDs can change over time.',
     assessments.assessment_observation_count AS COUNT(assessments.assessment_observation_id) COMMENT = 'Accepted question, dimension or score occurrences; not completed questionnaires.',
     assessments.scored_observation_count AS COUNT(assessments.assessment_score_numeric) COMMENT = 'Observations with an interpreted numeric score, not outcomes or improvement.',
     legal_status.legal_status_period_count AS COUNT(legal_status.mental_health_act_period_id) COMMENT = 'Recorded periods across all statuses.',
@@ -124,5 +130,5 @@ METRICS(
 )
 
 COMMENT = 'MHSDS recorded care and current evidence. Each metric retains its declared entity grain. General reporting is independent of currency classifications.'
-AI_SQL_GENERATION 'Choose the entity matching the question. Recorded spells differ from inferred occupancy. Open referral status does not define active caseload; first attended contact intervals are descriptive, not national waiting standards. Diagnosis records are not current diagnoses, assessment observations are not completed questionnaires, and no improvement measure is defined. Use event dates for activity and submission periods for freshness. Person current-state dimensions describe the latest feed and must not be applied as historical state. Filtering on person attributes restricts analysis to identifiable people. For cross-entity cohorts, reduce each fact to the intended person or referral grain before joining. Never multiply contacts through staff or team relationships. Return aggregates only, never person or patient identifiers. Currency classification and costing are separate models.'
+AI_SQL_GENERATION 'Choose the entity matching the question. Recorded spells differ from inferred occupancy. Open referral status does not define active caseload; first attended contact intervals are descriptive, not national waiting standards. Diagnosis records are not current diagnoses, assessment observations are not completed questionnaires, and no improvement measure is defined. Use event dates for activity and submission periods for freshness. Person current-state dimensions describe the latest feed and must not be applied as historical state. Filtering on person attributes restricts analysis to identifiable people. For cross-entity cohorts, reduce each fact to the intended person or referral grain before joining. Never multiply contacts through staff or team relationships. Contact and referral person IDs can change between submissions. Use same-submission context for historical team attribution and inspect latest-referral person consistency before interpreting cross-entity person cohorts. Return aggregates only, never person or patient identifiers. Currency classification and costing are separate models.'
 AI_QUESTION_CATEGORIZATION 'Use for MHSDS referral access, attendance and service activity, recorded admissions, inferred current occupancy, recorded diagnoses, assessment observations, legal-status periods, person summaries and submission freshness. Do not claim clinical outcomes, national waiting-time compliance, confirmed caseload or real-time bed occupancy.'

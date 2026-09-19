@@ -7,14 +7,16 @@ models:
     use explicit source observation dates. Contact recency excludes dates after as_of_date. Diagnosis
     counts describe records, never a clinically current condition. Occupancy and detention definitions
     are unchanged; absent qualifying evidence returns zero or false, while missing clinical values and
-    patient indicators remain null.
+    patient indicators remain null. National person-ID changes can split an individual's history across
+    rows; this is not a reconciled longitudinal patient register.
   config:
     meta:
       owner:
         name: Eddie Davison
   columns:
   - name: person_id
-    description: Non-null MHSDS person identifier from any documented evidence family.
+    description: Non-null MHSDS person identifier from any documented evidence family. National matching
+      changes can assign different IDs to the same individual over time.
     data_tests:
     - not_null
     - unique

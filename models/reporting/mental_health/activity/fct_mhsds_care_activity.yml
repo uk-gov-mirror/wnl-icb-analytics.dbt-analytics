@@ -152,11 +152,11 @@ models:
   - name: service_or_team_local_id
     description: Provider-local identifier for the team linked to the care contact.
   - name: service_or_team_type_code
-    description: MHS902 service or team type code.
+    description: Team type resolved within the linked contact submission.
   - name: service_or_team_type_description
     description: Published description for the service or team type, including retired codes.
   - name: source_service_or_team_type_name
-    description: Service or team name supplied by the provider.
+    description: Source-derived service type name; not a distinct local team name.
   - name: service_or_team_intended_age_group_code
     description: Intended patient age group recorded for the service or team.
   - name: service_or_team_intended_age_group_description
@@ -186,3 +186,6 @@ models:
     description: Timestamp when the source file was received.
   - name: source_loaded_at
     description: Timestamp when the source row was loaded.
+  - name: service_or_team_attribution_basis
+    description: >-
+      Source of the selected team pointer, even if its team details are missing.

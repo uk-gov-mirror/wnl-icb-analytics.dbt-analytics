@@ -6,6 +6,11 @@ with activity as (
         , service_or_team_type_code
         , date_trunc(month, care_contact_date)::date as activity_month
         , count(*) as n_contacts
+        , count_if(service_or_team_attribution_basis = 'referral_primary_team')
+            as n_contacts_attributed_to_referral_primary_team
+        , count_if(service_or_team_attribution_basis = 'unresolved')
+            as n_contacts_without_resolved_team
+        , count_if(service_or_team_type_code is null) as n_contacts_without_team_type
         , count(distinct person_id) as n_people_with_recorded_identity
         , count_if(person_id is null) as n_contacts_without_person
         , count_if(is_attended) as n_attended_contacts
@@ -32,6 +37,9 @@ select
     , team.description as service_or_team_type_description
     , a.activity_month
     , a.n_contacts
+    , a.n_contacts_attributed_to_referral_primary_team
+    , a.n_contacts_without_resolved_team
+    , a.n_contacts_without_team_type
     , a.n_people_with_recorded_identity
     , a.n_contacts_without_person
     , a.n_attended_contacts

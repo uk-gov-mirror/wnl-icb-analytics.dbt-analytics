@@ -13,7 +13,7 @@ same warehouse schema. Development uses `DEV__REPORTING.MENTAL_HEALTH`.
 | How much care followed each referral, and when was its first attended contact? | `fct_mhsds_referral_summary` | Referral with contact, service and recorded-spell measures |
 | Which teams were involved, and in which roles? | `rel_mhsds_referral_service_team` | Referral, team and relationship role |
 | What contacts were recorded, including DNAs and cancellations? | `fct_mhsds_care_contact` | Latest recorded referral/contact pair |
-| How does activity vary by service and month? | `fct_mhsds_service_activity_monthly` | Provider, recorded team identifiers, team type and contact month |
+| How does activity vary by service and month? | `fct_mhsds_service_activity_monthly` | Provider, resolved team identifiers, team type and contact month |
 | What work and clinical components were submitted within a contact? | `fct_mhsds_care_activity` | Accepted provider-period activity occurrence |
 | Which professionals were linked to an activity? | `rel_mhsds_care_activity_staff` | Recorded activity/professional relationship |
 | What were the professional's attributes at that time? | `dim_mhsds_care_professional_period` | Accepted professional snapshot |
@@ -105,6 +105,32 @@ A contact joins its recorded referral using
 `referral_source_record_id = fct_mhsds_referral.source_record_id`. Use a left join
 when retaining contacts whose referral is absent.
 
+That join supplies the latest referral revision. The contact fact also exposes
+the referral person and receipt date from its own submission, with separate
+linkage and person-consistency flags. MHSDS person identifiers can change after
+national matching or demographic changes. A later referral person disagreement
+does not establish that the historical contact belongs to a different patient.
+The referral summary counts those disagreements but keeps all linked contacts
+and its descriptive intervals. No person identifiers are remapped.
+
+`int_mhsds_care_contact_context` resolves the delivering team within each contact
+submission. An explicit additional-team pointer takes precedence, followed by
+the legacy contact pointer. In v6, a contact without either pointer uses the
+primary team on its same-submission referral. An explicit unmatched pointer
+stays unresolved rather than inheriting a different team's type. The contact
+and activity facts share this rule. Attribution basis and monthly missing-type
+counts distinguish a missing pointer from missing team details.
+Source-derived team identifiers can be populated when the submitted local
+pointer is blank; these do not establish a delivering team. The resolved team
+identifier follows the selected local pointer, rather than retaining an
+unsupported derived identifier. Original fields remain available in staging.
+
+These rules follow [MHSDS v6 user guidance, sections 4.1 and MHS201](https://digital.nhs.uk/binaries/content/assets/website-assets/data-and-information/datasets/mhsds/tools-and-guidance/mhsdsv6.0_userguidance_v6.0.4.pdf).
+The [provider and system change guidance](https://digital.nhs.uk/data-and-information/data-collections-and-data-sets/data-sets/mental-health-services-data-set/submit-data/guidance-on-changes-in-care-provider-provider-identifier-or-system-supplier)
+explains person-ID changes and carrying original referral dates across system
+changes. Long recorded referral intervals need investigation, not automatic
+exclusion.
+
 Activities use accepted provider-period identity and same-submission contact
 context. The latest contact fact has a different time grain. Joining activities
 to that fact deliberately substitutes revised contact context; it does not
@@ -133,6 +159,12 @@ record counts and observed periods. They include clinical-only records,
 legal-status-only records, MPI snapshots and orphan relationships. Bridging maps
 people to cross-system patient keys without requiring a bridge or creating
 population members.
+
+The grain is a recorded MHSDS person identifier. National identity changes can
+split one individual's history across identifiers. Distinct-person measures
+count those recorded IDs; they do not promise a reconciled longitudinal patient
+population. See the [coverage review](mhsds-domain-review.md) for useful source
+sections still outside these reporting families.
 
 Counts describe available recorded history, not lifetime care. In particular:
 

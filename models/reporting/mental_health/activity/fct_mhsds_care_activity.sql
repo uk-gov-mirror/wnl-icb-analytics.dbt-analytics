@@ -110,18 +110,13 @@ select
         treatment_site.organisation_name
         , treatment_service_provider.service_provider_name
     ) as treatment_site_name
-    , coalesce(
-        c.uniq_other_care_prof_team_local_id
-        , c.uniq_care_prof_team_id
-    ) as service_or_team_id
-    , coalesce(
-        c.other_care_prof_team_local_id
-        , c.care_prof_team_local_id
-    ) as service_or_team_local_id
-    , td.serv_team_type_mh as service_or_team_type_code
+    , ctx.service_or_team_id
+    , ctx.service_or_team_local_id
+    , ctx.service_or_team_type_code
     , team_type.description as service_or_team_type_description
-    , td.service_type_name as source_service_or_team_type_name
-    , td.serv_team_int_age_group as service_or_team_intended_age_group_code
+    , ctx.source_service_or_team_type_name
+    , ctx.service_or_team_intended_age_group_code
+    , ctx.service_or_team_attribution_basis
     , intended_age_group.description as service_or_team_intended_age_group_description
     , c.mhs201_uniq_id is not null as is_care_contact_linked
     , iff(
@@ -166,14 +161,12 @@ left join {{ ref('snomed_concept') }} as mapped_snomed_observation
         = mapped_snomed_observation.snomed_code
 left join {{ ref('clinical_unit_of_measurement') }} as unit_of_measurement
     on trim(a.unit_of_measurement_code) = unit_of_measurement.code
-left join {{ ref('stg_mhsds_service_or_team_details') }} as td
-    on coalesce(c.other_care_prof_team_local_id, c.care_prof_team_local_id)
-        = td.care_prof_team_local_id
-    and a.uniq_submission_id = td.uniq_submission_id
+left join {{ ref('int_mhsds_care_contact_context') }} as ctx
+    on c.mhs201_uniq_id = ctx.mhs201_uniq_id
 left join {{ ref('mhsds_service_or_team_type') }} as team_type
-    on upper(trim(td.serv_team_type_mh)) = team_type.code
+    on upper(trim(ctx.service_or_team_type_code)) = team_type.code
 left join {{ ref('mhsds_service_or_team_intended_age_group') }} as intended_age_group
-    on upper(trim(td.serv_team_int_age_group)) = intended_age_group.code
+    on upper(trim(ctx.service_or_team_intended_age_group_code)) = intended_age_group.code
 left join {{ ref('int_mhsds_organisation') }} as provider
     on upper(a.org_id_prov) = upper(provider.organisation_code)
 left join {{ ref('int_mhsds_organisation') }} as commissioner

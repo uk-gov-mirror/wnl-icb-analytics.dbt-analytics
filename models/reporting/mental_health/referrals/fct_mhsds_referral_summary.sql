@@ -6,6 +6,10 @@ with contacts as (
         , count_if(is_dna) as n_dna_contacts
         , count_if(is_cancelled) as n_cancelled_contacts
         , count_if(attendance_status_code is null) as n_contacts_with_missing_attendance_status
+        , count_if(is_latest_referral_person_consistent = false)
+            as n_contacts_with_different_referral_person
+        , count_if(is_latest_referral_person_consistent is null)
+            as n_contacts_without_comparable_referral_person
         , min(care_contact_date) as first_contact_date
         , max(care_contact_date) as latest_contact_date
         , min(iff(is_attended, care_contact_date, null))
@@ -38,6 +42,12 @@ select
     , coalesce(c.n_dna_contacts, 0) as n_dna_contacts
     , coalesce(c.n_cancelled_contacts, 0) as n_cancelled_contacts
     , coalesce(c.n_contacts_with_missing_attendance_status, 0) as n_contacts_with_missing_attendance_status
+    , coalesce(c.n_contacts_with_different_referral_person, 0)
+        as n_contacts_with_different_referral_person
+    , coalesce(c.n_contacts_without_comparable_referral_person, 0)
+        as n_contacts_without_comparable_referral_person
+    , coalesce(c.n_contacts_with_different_referral_person > 0, false)
+        as has_contact_referral_person_disagreement
     , c.first_contact_date
     , c.latest_contact_date
     , c.first_attended_contact_date

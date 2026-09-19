@@ -219,3 +219,12 @@ models:
     description: Elapsed days at as_of_date for a referral with no recorded rejection or discharge and
       no attended contact by that date. Missing or future referral dates return null. Describes recorded
       evidence, not an agreed waiting-list population.
+  - name: n_contacts_with_different_referral_person
+    description: >-
+      Contacts whose recorded person ID differs from the latest referral person ID. Both IDs must be present. Identity can change across submissions; these contacts still contribute to referral counts and intervals.
+  - name: n_contacts_without_comparable_referral_person
+    description: >-
+      Contacts where either contact or latest-referral person ID is missing; identity agreement cannot be assessed.
+  - name: has_contact_referral_person_disagreement
+    description: >-
+      At least one linked contact has a different recorded person ID from the latest referral. Does not establish that the contact belongs to a different patient.

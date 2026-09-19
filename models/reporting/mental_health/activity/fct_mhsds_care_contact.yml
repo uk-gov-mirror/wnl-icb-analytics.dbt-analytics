@@ -5,7 +5,8 @@ models:
     request and care contact across the available history. The newest reporting period is retained. The
     referral identifier is source-recorded and can point to a referral absent from the active referral
     fact. Cancelled contacts remain present at their scheduled date. Source missing-date sentinels before
-    1901 are null.
+    1901 are null. Team attribution uses the same-submission referral primary team for v6 contacts
+    without an explicit contact team. Later referral identity changes remain visible and do not remap contacts.
   config:
     meta:
       owner:
@@ -131,11 +132,11 @@ models:
   - name: service_or_team_local_id
     description: Provider-local identifier for the team delivering the contact.
   - name: service_or_team_type_code
-    description: MHS902 service or team type; null when no matching team detail is submitted.
+    description: Team type resolved within the contact submission; null when no supported type is available.
   - name: service_or_team_type_description
     description: Published description for the service or team type, including retired codes.
   - name: source_service_or_team_type_name
-    description: Service or team name supplied by the provider.
+    description: Source-derived service type name; not a distinct local team name.
   - name: service_or_team_intended_age_group_code
     description: Intended patient age group recorded for the service or team.
   - name: service_or_team_intended_age_group_description
@@ -205,3 +206,33 @@ models:
     description: Attendance code 03 or 07; null when attendance is missing.
   - name: is_cancelled
     description: Attendance code 02 or 04; null when attendance is missing.
+  - name: same_submission_referral_record_id
+    description: >-
+      MHS101 source row in the same submission; null when absent.
+  - name: same_submission_referral_person_id
+    description: >-
+      Referral person identifier in the contact submission, before later revisions.
+  - name: same_submission_referral_received_date
+    description: >-
+      Referral receipt date recorded in the contact submission; null if absent.
+  - name: is_same_submission_referral_linked
+    description: >-
+      Whether the contact has an MHS101 parent in its own submission.
+  - name: is_same_submission_referral_person_consistent
+    description: >-
+      Whether both recorded person IDs agree; null when either is missing.
+  - name: service_or_team_attribution_basis
+    description: >-
+      Source of the selected team pointer, even if its team details are missing.
+  - name: latest_referral_person_id
+    description: >-
+      Person ID on the latest referral revision; may differ after national identity matching changes. Contact person_id is unchanged.
+  - name: latest_referral_reporting_period_end_date
+    description: >-
+      Reporting period of the latest referral revision, which can be later than the contact submission.
+  - name: is_latest_referral_linked
+    description: >-
+      Whether the referral key resolves to the latest referral fact.
+  - name: is_latest_referral_person_consistent
+    description: >-
+      Whether contact and latest-referral person IDs agree; null when either ID is missing. False does not prove different patients.

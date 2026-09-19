@@ -9,6 +9,15 @@ select
     , c.care_contact_id
     , c.uniq_serv_req_id as referral_source_record_id
     , c.service_request_id
+    , ctx.same_submission_referral_record_id
+    , ctx.same_submission_referral_person_id
+    , ctx.same_submission_referral_received_date
+    , ctx.is_same_submission_referral_linked
+    , ctx.is_same_submission_referral_person_consistent
+    , r.person_id as latest_referral_person_id
+    , r.reporting_period_end_date as latest_referral_reporting_period_end_date
+    , r.source_record_id is not null as is_latest_referral_linked
+    , c.person_id = r.person_id as is_latest_referral_person_consistent
     , c.person_id
     , b.sk_patient_id
     , c.care_cont_date as care_contact_date
@@ -81,18 +90,13 @@ select
     , c.admin_cat_code as administrative_category_code
     , administrative_category.description as administrative_category_description
     , c.specialised_mh_service_code as specialised_mental_health_service_category_code
-    , coalesce(
-        c.uniq_other_care_prof_team_local_id
-        , c.uniq_care_prof_team_id
-    ) as service_or_team_id
-    , coalesce(
-        c.other_care_prof_team_local_id
-        , c.care_prof_team_local_id
-    ) as service_or_team_local_id
-    , td.serv_team_type_mh as service_or_team_type_code
+    , ctx.service_or_team_id
+    , ctx.service_or_team_local_id
+    , ctx.service_or_team_type_code
     , tt.description as service_or_team_type_description
-    , td.service_type_name as source_service_or_team_type_name
-    , td.serv_team_int_age_group as service_or_team_intended_age_group_code
+    , ctx.source_service_or_team_type_name
+    , ctx.service_or_team_intended_age_group_code
+    , ctx.service_or_team_attribution_basis
     , intended_age_group.description as service_or_team_intended_age_group_description
     , c.earliest_reason_offer_date as earliest_reasonable_offer_date
     , c.earliest_clin_app_date as earliest_clinically_appropriate_date
@@ -128,10 +132,10 @@ select
 from {{ ref('int_mhsds_latest_care_contact') }} as c
 left join {{ ref('stg_mhsds_bridging') }} as b
     on c.person_id = b.person_id
-left join {{ ref('stg_mhsds_service_or_team_details') }} as td
-    on coalesce(c.other_care_prof_team_local_id, c.care_prof_team_local_id)
-        = td.care_prof_team_local_id
-    and c.uniq_submission_id = td.uniq_submission_id
+left join {{ ref('int_mhsds_care_contact_context') }} as ctx
+    on c.mhs201_uniq_id = ctx.mhs201_uniq_id
+left join {{ ref('fct_mhsds_referral') }} as r
+    on c.uniq_serv_req_id = r.source_record_id
 left join {{ ref('attendance_status') }} as ats
     on c.attend_status = ats.code
 left join {{ ref('consultation_mechanism') }} as cm
@@ -139,7 +143,7 @@ left join {{ ref('consultation_mechanism') }} as cm
 left join {{ ref('activity_location_type') }} as alt
     on c.act_loc_type_code = alt.code
 left join {{ ref('mhsds_service_or_team_type') }} as tt
-    on td.serv_team_type_mh = tt.code
+    on ctx.service_or_team_type_code = tt.code
 left join {{ ref('mhsds_care_contact_code_lookup') }} as consultation_type
     on upper(trim(c.cons_type)) = consultation_type.code
     and consultation_type.code_set_name = 'consultation_type'
@@ -165,7 +169,7 @@ left join {{ ref('mhsds_care_contact_code_lookup') }} as administrative_category
     on upper(trim(c.admin_cat_code)) = administrative_category.code
     and administrative_category.code_set_name = 'administrative_category'
 left join {{ ref('mhsds_service_or_team_intended_age_group') }} as intended_age_group
-    on upper(trim(td.serv_team_int_age_group)) = intended_age_group.code
+    on upper(trim(ctx.service_or_team_intended_age_group_code)) = intended_age_group.code
 left join {{ ref('mhsds_care_contact_code_lookup') }} as cancellation_reason
     on upper(trim(c.care_cont_cancel_reas)) = cancellation_reason.code
     and cancellation_reason.code_set_name = 'care_contact_cancellation_reason'
