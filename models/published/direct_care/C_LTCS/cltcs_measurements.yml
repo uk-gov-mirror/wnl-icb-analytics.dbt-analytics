@@ -1,15 +1,13 @@
 models:
   - name: cltcs_measurements
     description: >
-      Biomarker measurements for patients in cltcs_patient_list, one row per retained
-      measurement (measurement_id and measurement_type). Covers HbA1c, systolic and
-      diastolic blood pressure, eGFR, urine ACR, total cholesterol, LDL cholesterol,
-      eosinophil count and eosinophil percentage recorded from 5 years before today up to
-      today. HbA1c, eGFR, urine ACR, total cholesterol and LDL cholesterol keep only
-      results flagged valid upstream; blood pressure and eosinophil results have no
-      validity filter in this model. Within each type, one row is kept per patient, date
-      and value (lowest measurement_id); HbA1c values are reported in IFCC mmol/mol and
-      results classed as IFCC upstream are preferred over DCCT results on the same date.
+      Biomarker measurements from the last 5 years for patients in cltcs_patient_list, one
+      row per measurement_id and measurement_type. Types are HbA1c, systolic and diastolic
+      blood pressure, eGFR, urine ACR, total and LDL cholesterol, eosinophil count and
+      eosinophil percentage. HbA1c, eGFR, urine ACR and cholesterol keep only results
+      flagged valid upstream. Blood pressure and eosinophil results have no validity filter.
+      One row is kept per patient, type, date and value. HbA1c is reported in IFCC mmol/mol,
+      and IFCC results are preferred over DCCT results on the same date.
     config:
       meta:
         owner:

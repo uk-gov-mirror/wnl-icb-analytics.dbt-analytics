@@ -9,13 +9,10 @@ models:
     description: >
 
       C-LTCS EMIS extract for direct care, one row per sk_patient_id and EMIS usual GP
-      practice_code from stg_cltcs_emis, enriched with the PDS registered practice
-      (dim_person_demographics_basic) and the OLIDS current practice (dim_person via
-      dim_person_pseudo), each with a mismatch flag. For each sk_patient_id, rows whose
-      practice_code matches the PDS registered practice are kept when any exist;
-      otherwise rows matching the OLIDS current practice are kept when any exist;
-      otherwise all rows are kept. A patient can therefore still have more than one row,
-      and sk_patient_id uniqueness is tested at warn severity only.
+      practice_code, with PDS and OLIDS practice mismatch flags. For each patient, rows
+      matching the PDS registered practice are kept if any exist, otherwise rows matching
+      the OLIDS current practice, otherwise all rows. A patient can still have more than one
+      row.
 
     columns:
 

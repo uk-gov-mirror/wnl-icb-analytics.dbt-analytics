@@ -1,15 +1,13 @@
 models:
   - name: int_valproate_base
     description: >
-      Valproate safety dashboard base population. One row per person in
-      dim_valproate_db_scope: people whose gender is not Male (Female or Unknown), aged 0
-      to 55 inclusive, with a valproate order within the last 6 months. Registration and
-      death are not filtered; is_active and is_deceased are provided instead. Combines
-      demographics with the latest valproate order date, Pregnancy Prevention Programme
-      status, Annual Risk Acknowledgement Form (ARAF) records, pregnancy, learning
-      disability register, neurology and psychiatry involvement, a derived risk group
-      and action order, and type 1 opt-out status (flagged in is_opted_out, not
-      filtered).
+      Valproate dashboard base, one row per non-male person aged 0 to 55 with a valproate
+      order in the last 6 months, type 1 opt-outs flagged not filtered. Non-male means
+      Female or Unknown gender. Scope comes from dim_valproate_db_scope. Registration and
+      death are not filtered, so use is_active and is_deceased. Adds the latest valproate
+      order date, Pregnancy Prevention Programme status, ARAF records, pregnancy, learning
+      disability register, neurology and psychiatry involvement, a derived risk group and
+      action order.
 
     config:
       meta:

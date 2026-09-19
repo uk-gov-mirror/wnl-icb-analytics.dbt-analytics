@@ -1,16 +1,14 @@
 models:
   - name: int_ltc_lcs_cf_base_population
     description: >
-      Shared base population for the LTC LCS case-finding indicators. One row per person
-      with an open registration in dim_person_current_practice who is not recorded as
-      deceased, with age from dim_person_age. No condition or health-check exclusions are
-      applied here: has_metabolic_excluding_condition (ICS_METABOLIC_LTC equivalent: AF,
-      CKD, CHD, hypertension, heart failure, stroke/TIA, PAD, NAFLD, diabetes of any type,
-      familial hypercholesterolaemia) and has_respiratory_excluding_condition
-      (ICS_RESP_LTC equivalent: COPD, asthma, CYP asthma) come from
-      int_ltc_lcs_cf_exclusions, and had_nhs_health_check_24m flags a completed NHS Health
-      Check (HEALTH_CHECK_COMP) recorded within the last 24 months. Each case-finding base
-      model applies the flags its EMIS search requires.
+      Currently registered, living people with age and exclusion flags for LTC LCS case
+      finding, one row per person. No condition or health-check exclusions are applied here.
+      Each case-finding base applies the flags its EMIS search requires.
+      has_metabolic_excluding_condition flags the ICS_METABOLIC_LTC conditions: AF, CKD,
+      CHD, hypertension, heart failure, stroke/TIA, PAD, NAFLD, diabetes of any type and
+      familial hypercholesterolaemia. has_respiratory_excluding_condition flags the
+      ICS_RESP_LTC conditions: COPD, asthma and CYP asthma. had_nhs_health_check_24m flags a
+      completed NHS Health Check, HEALTH_CHECK_COMP, in the last 24 months.
     tests:
       - dbt_utils.at_least_one:
           column_name: person_id
