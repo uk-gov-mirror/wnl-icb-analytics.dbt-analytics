@@ -1,20 +1,15 @@
 models:
   - name: int_covid_diabetes
-    description: 'COVID vaccination eligibility for people with diabetes mellitus.
-
-      Key Features:
-
-      • Single diagnosis pathway using DIAB_COD and DMRES_COD codes
-
-      • Earliest occurrence in medical history qualifies
-
-      • Age restriction: minimum 5 years for COVID vaccination
-
-      • Includes Type 1 and Type 2 diabetes mellitus
-
-      • Generates data for every campaign in covid_reported_campaign_ids()
-
-      Purpose: Identify people eligible for COVID vaccination due to diabetes mellitus requiring immunisation.'
+    description: >
+      COVID clinical risk group: diabetes. One row per person and campaign for every
+      campaign in covid_reported_campaign_ids(). A person qualifies with any ADDIS_COD
+      (Addison disease or pan-hypopituitarism) record, or where their latest DIAB_COD
+      record is later than their latest DMRES_COD (diabetes resolved) record or no
+      resolved record exists. Only records on or before the campaign audit end date count,
+      using the terminology version pinned for the campaign, and the person must be aged 5
+      or over at the campaign reference date. Gestational diabetes is not included. Rows
+      are built for every campaign whether or not it offered this group; the offer is
+      applied in int_covid_under_65_at_risk (currently COVID Autumn 2024 only).
     tests:
       - cluster_ids_exist:
           arguments:
@@ -74,7 +69,7 @@ models:
         data_tests:
           - not_null
       - name: qualifying_event_date
-        description: 'Date of qualifying diagnosis (earliest diabetes diagnosis)'
+        description: 'Latest ADDIS_COD record date if any, otherwise latest DIAB_COD record date'
       - name: reference_date
         description: 'Campaign reference date used for eligibility assessment'
       - name: description
