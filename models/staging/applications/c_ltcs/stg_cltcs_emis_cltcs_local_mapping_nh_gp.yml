@@ -1,13 +1,11 @@
 models:
   - name: stg_cltcs_emis_cltcs_local_mapping_nh_gp
     description: >
-      Operational C-LTCS mapping of GP practices to neighbourhoods for the
-      Haringey test bed, from DATA_LAKE__NCL.CLTCS.CLTCS_LOCAL_MAPPING_NH_GP.
-      One row per practice is expected. Where a practice has several source
-      rows, rows whose local_authority matches the last word of
-      neighbourhood_registered are kept; if none match, all of that practice's
-      rows are kept. No row is chosen arbitrarily: if more than one row remains,
-      the unique test on practice_code fails.
+      C-LTCS mapping of GP practices to neighbourhoods for the Haringey test
+      bed, one row per practice. Practices with several rows keep those whose
+      local_authority matches the last word of neighbourhood_registered, or all
+      rows if none match. If more than one row remains, the practice_code unique
+      test fails.
     config:
       meta:
         owner:

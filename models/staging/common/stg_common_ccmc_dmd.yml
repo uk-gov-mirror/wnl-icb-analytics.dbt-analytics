@@ -1,12 +1,9 @@
 models:
   - name: stg_common_ccmc_dmd
-    description: |
-      CCMS dm+d codelist from DATA_LAKE__NCL.COMMON.CCMC_DMD.
-      Each row maps a CCMS condition to a dm+d product, with the condition name and
-      the product's preferred term. Rows are passed through without filtering or
-      deduplication. Used by the in-house CCMS pipeline under
-      modelling/olids/risk_stratification.
-      Migrated from stg_aic_base_ccms_dmd_codes (AIC_DEV.BASE_CCMS_DMD_CODES).
+    description: >
+      CCMS dm+d codelist, each row mapping a CCMS condition to a dm+d product
+      with its preferred term. Rows are not filtered or deduplicated. Used by
+      the in-house CCMS pipeline under modelling/olids/risk_stratification.
     config:
       meta:
         owner:

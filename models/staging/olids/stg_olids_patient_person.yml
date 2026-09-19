@@ -1,13 +1,10 @@
 models:
   - name: stg_olids_patient_person
     description: >
-      Links OLIDS patient records to person records. One row per patient_id and
-      person_uuid pair; rows with a null patient_id, person_uuid or person_id
-      are excluded. Where a pair has several source rows, the row with the
-      latest lds_transform_datetime is kept, then the highest
-      lds_source_record_id. Rows flagged as deleted are not removed:
-      lds_is_deleted is passed through. The source id column is retained but is
-      not the model key.
+      OLIDS patient-to-person links, one row per patient_id and person_uuid
+      pair, including links flagged as deleted in lds_is_deleted. Rows with a
+      null patient_id, person_uuid or person_id are excluded. The source id
+      column is retained but is not the key.
     config:
       meta:
         owner:

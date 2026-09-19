@@ -3,11 +3,8 @@ version: 2
 models:
   - name: stg_dictionary_ecds_injuryintent
     description: >
-      ECDS injury intent code list from the ECDS Enhanced Technical Output
-      Specification (ETOS) reference data (Dictionary.ECDS_ETOS.InjuryIntent). One row
-      per SNOMED CT code. Where a code has several source versions, the active
-      version is kept first, then an open-ended version (null valid_to), then
-      the latest valid_to and valid_from.
+      ECDS injury intent codes from the ETOS reference data, one row per SNOMED
+      CT code. Codes with several versions keep the active one, else the latest.
     config:
       meta:
         owner:

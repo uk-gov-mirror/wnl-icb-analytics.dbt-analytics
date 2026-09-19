@@ -1,12 +1,9 @@
 models:
   - name: stg_reference_ltc_lcs_original_codes
     description: >
-      LTC LCS value-set codes as they appear in the EMIS XML search
-      definitions, before translation to SNOMED CT, from
-      DATA_LAKE__NCL.TERMINOLOGY.LTC_LCS_ORIGINAL_CODES. One row per
-      original_code_id; where the source repeats an identifier, the row with
-      the first original_code in sort order is kept. Includes the translated
-      SNOMED CT code and term.
+      LTC LCS value-set codes as written in EMIS XML search definitions, one
+      row per original_code_id. Includes the SNOMED CT code and term each
+      translates to.
     config:
       meta:
         owner:

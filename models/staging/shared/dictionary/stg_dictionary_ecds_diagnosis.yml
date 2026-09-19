@@ -1,14 +1,11 @@
 models:
   - name: stg_dictionary_ecds_diagnosis
     description: >
-      ECDS diagnosis code list from the ECDS Enhanced Technical Output
-      Specification (ETOS) reference data (Dictionary.ECDS_ETOS.Diagnosis),
-      with ECDS groupings, clinical flags and ICD-10 and ICD-11 mappings. One
-      row per ecds_unique_id and valid_from version; where the source repeats
-      a version, the row with the latest valid_to is kept, with a null
-      valid_to ranked last. Retired entries are kept: use valid_to and
-      dv_is_active to select current entries. ICD-10 mappings are standardised
-      by the clean_icd10_code macro.
+      ECDS diagnosis codes from the ETOS reference data, one row per
+      ecds_unique_id and valid_from version, including retired entries. Includes
+      ECDS groupings, clinical flags and ICD-10 and ICD-11 mappings. Use
+      valid_to and dv_is_active to select current entries. ICD-10 mappings are
+      cleaned by clean_icd10_code.
     config:
       meta:
         owner:

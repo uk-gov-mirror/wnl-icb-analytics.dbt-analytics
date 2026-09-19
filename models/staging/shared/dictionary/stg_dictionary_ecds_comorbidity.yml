@@ -1,13 +1,10 @@
 models:
   - name: stg_dictionary_ecds_comorbidity
     description: >
-      ECDS comorbidity code list from the ECDS Enhanced Technical Output
-      Specification (ETOS) reference data (Dictionary.ECDS_ETOS.Comorbidity),
-      mapping SNOMED CT codes to ECDS descriptions. One row per ecds_unique_id
-      and valid_from version; where the source repeats a version, the row with
-      the latest valid_to is kept, with a null valid_to ranked last. Retired
-      entries are kept: use valid_to and dv_is_active to select current
-      entries.
+      ECDS comorbidity codes from the ETOS reference data, one row per
+      ecds_unique_id and valid_from version, including retired entries. Maps
+      SNOMED CT codes to ECDS descriptions. Use valid_to and dv_is_active to
+      select current entries.
     config:
       meta:
         owner:

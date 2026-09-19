@@ -1,14 +1,11 @@
 models:
   - name: stg_pds_address
     description: >
-      Personal Demographics Service (PDS) usual address history for
-      pseudonymised patients, from DATA_LAKE.PDS.PDS_Address, with postcode
-      sector, 2021 LSOA of residence, CQC care home code and business-effective
-      dates. For each patient and effective-from date, only rows with the latest
-      effective-to date are kept, treating a null effective-to date as
-      open-ended. Then one row per patient and event_to_date is kept, choosing
-      the highest row_id, so each patient has at most one open-ended (current)
-      address.
+      PDS usual address history for pseudonymised patients, one row per patient
+      and event_to_date, so each patient has at most one current address.
+      Includes postcode sector, 2021 LSOA of residence and CQC care home code. A
+      null event_to_date marks the current address. Superseded rows sharing an
+      effective-from date are dropped.
     config:
       meta:
         owner:

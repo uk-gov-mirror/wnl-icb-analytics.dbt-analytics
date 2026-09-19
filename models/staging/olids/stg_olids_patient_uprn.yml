@@ -1,12 +1,10 @@
 models:
   - name: stg_olids_patient_uprn
     description: >
-      Matches of OLIDS patient addresses to Unique Property Reference Numbers
-      (UPRNs), one row per source row, linked to patient_address through
-      patient_address_id. The 2026 OLIDS source exposes no record metadata or
-      deletion flag, so rows are not deduplicated or filtered for deletion.
-      Includes match status, UPRN, match quality and classification, and the
-      publisher organisation code.
+      OLIDS patient address matches to Unique Property Reference Numbers, one
+      row per source row, linked to patient_address by patient_address_id. The
+      source has no deletion flag or record metadata, so rows are not
+      deduplicated or filtered for deletion.
     config:
       meta:
         owner:

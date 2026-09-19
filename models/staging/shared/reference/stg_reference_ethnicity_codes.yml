@@ -1,11 +1,8 @@
 models:
   - name: stg_reference_ethnicity_codes
     description: >
-      Ethnicity code reference from DATA_LAKE__NCL.TERMINOLOGY.ETHNICITY_CODES,
-      with category, subcategory, granular classification and selection
-      priority. One row per code; where a code has several source rows, the one
-      with the alphabetically first term is kept. Display and sort-order
-      columns are not included.
+      Ethnicity codes with category, subcategory, granular classification and
+      selection priority, one row per code.
     config:
       meta:
         owner:

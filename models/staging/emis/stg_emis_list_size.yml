@@ -1,14 +1,11 @@
 
 models:
   - name: stg_emis_list_size
-    description: |
+    description: >
       EMIS practice list sizes from the emis_list_size seed, one row per
-      practice for the seed's extract. Rows with a null EXTRACT_DATE are
-      excluded, and EXTRACT_DATE is converted from DD/MM/YYYY text to a date.
-      Used as reference data for OLIDS regular registration validation.
-
-      To update: replace the seed with a new EMIS extract and rebuild.
-
+      practice, used to validate OLIDS regular registrations. Rows with no
+      EXTRACT_DATE are excluded. To update, replace the seed with a new EMIS
+      extract and rebuild.
     config:
       meta:
         owner:
