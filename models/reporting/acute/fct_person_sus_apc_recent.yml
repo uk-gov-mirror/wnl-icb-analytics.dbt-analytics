@@ -2,19 +2,19 @@
 models:
   - name: fct_person_sus_apc_recent
     description: >
-      Recent SUS admitted patient care activity per person over rolling windows ending
-      today. One row per patient key (sk_patient_id) in dim_person_demographics_basic, which
-      the SQL describes as all people in PDS whether living, dead, registered or not, plus
-      any other patient key with qualifying activity; people with no activity have zero
-      counts. Spells come from int_sus_apc_imputed_spells, excluding null or '1' patient keys
-      and admission methods 2C, 82 and 31; apc_1mo, apc_3mo, apc_12mo and apc_nel_12mo
-      (admission method starting 2) count spells starting within the last 1, 3 and 12
-      months. apc_los_12mo is non-overlapping length of stay from int_sus_apc_merged_spells,
-      acs_nel_12mo counts ambulatory care sensitive non-elective admissions from
-      int_activity_ambulatory_sensitive_nel starting in the last 12 months, and the dq_
-      columns count spells with a missing source start date, end date or duration among
-      spells starting or ending in the last 12 months. Windows do not allow for SUS
-      reporting delay, and the model needs expert analyst review.
+      SUS admitted patient care spell counts and length of stay over the last 1, 3 and 12
+      months. One row per patient key, zero where there is no activity. Windows end today
+      and do not allow for SUS reporting delay. Needs expert analyst review. Patient keys
+      are all of dim_person_demographics_basic, described in the SQL as everyone in PDS
+      whether living, dead, registered or not, plus any other key with qualifying
+      activity. Spells come from int_sus_apc_imputed_spells, excluding null or '1' patient
+      keys and admission methods 2C, 82 and 31. apc_1mo, apc_3mo and apc_12mo count spells
+      starting in each window; apc_nel_12mo counts those in 12 months with an admission
+      method starting 2. apc_los_12mo is non-overlapping length of stay from
+      int_sus_apc_merged_spells. acs_nel_12mo counts ambulatory care sensitive
+      non-elective admissions starting in the last 12 months. dq_ columns count spells
+      with a missing source start date, end date or duration among spells starting or
+      ending in the last 12 months.
     config:
       meta:
         owner:

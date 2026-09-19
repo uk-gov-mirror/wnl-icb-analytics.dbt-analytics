@@ -1,15 +1,15 @@
 models:
   - name: ptr_dim_person_demographics
     description: >
-      Partner copy of dim_person_demographics: one row per person with registration history
-      and a valid approximate birth date, holding their current demographics. The SQL
-      selects every row without filtering; inactive, deceased and test-patient records are
-      flagged by is_active, is_deceased and is_test_patient rather than removed. Rows a
-      partner role can see are limited at query time by the PARTNER_POLICY row access
-      policy on sk_patient_id, attached through the partner published_data folder config in
-      dbt_project.yml. partner_mapping links a patient to a borough partner role when they
-      are registered with a practice in, or resident in, that borough; the policy body is
-      maintained outside this repository.
+      Partner copy of dim_person_demographics, one row per person. No SQL filter; partner
+      roles see only rows allowed by the PARTNER_POLICY row access policy. partner_mapping
+      links a patient to a borough partner role when they are registered with a practice
+      in, or resident in, that borough. The policy applies on sk_patient_id through the
+      partner published_data folder config in dbt_project.yml; its body is maintained
+      outside this repository. Covers people with registration history and a valid
+      approximate birth date, with their current demographics. Inactive, deceased and
+      test-patient records are kept and flagged by is_active, is_deceased and
+      is_test_patient.
 
     config:
       meta:

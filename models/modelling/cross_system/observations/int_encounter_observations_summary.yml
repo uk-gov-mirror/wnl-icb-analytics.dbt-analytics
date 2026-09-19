@@ -1,12 +1,11 @@
 
 models:
   - name: int_encounter_observations_summary
-    description: |
-      Summary of SUS diagnosis and procedure observations from int_observations per encounter.
-      One row per visit occurrence, observation vocabulary and observation type, with a count
-      of distinct observation concept codes. Includes only observations with a patient key
-      (sk_patient_id) and a concept code, from encounters whose start date falls within the
-      last 12 months up to today.
+    description: >
+      Count of distinct SUS diagnosis and procedure codes per encounter, for encounters
+      starting in the last 12 months up to today. One row per visit occurrence,
+      observation vocabulary and observation type. Source is int_observations. Only
+      observations with a patient key and a concept code are counted.
     config:
       meta:
         owner:
