@@ -1,6 +1,15 @@
 models:
   - name: int_illicit_drug_use_all
-    description: 'DETERMINE ILLICIT DRUG USE using PCD Ref ILLSUB_COD'
+    description: >
+      OLIDS observations coded to the PCD refset clusters ILLSUB_COD and ILLSUBASSDEC_COD,
+      read through get_observations. One row per source observation per matched cluster;
+      the cluster is not output, so an observation in both clusters appears twice.
+      Observations dated after today are excluded; get_observations sets a missing
+      clinical date to 1900-01-01, so those rows are kept. illicit_drug_assessed_last_12m
+      is true when the clinical date is within the last 365 days. ILLICIT_DRUG_PATTERN
+      groups concept codes into patterns such as dependence, misuse, remission and
+      overdose (null for unlisted codes), and ILLICIT_DRUG_CLASS assigns a substance class
+      from the concept display text ('Unknown Substance' where no class matches).
     config:
       meta:
         owner:

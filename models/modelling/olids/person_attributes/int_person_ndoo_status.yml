@@ -1,6 +1,13 @@
 models:
   - name: int_person_ndoo_status
-    description: Latest National Data Opt-Out preference per person. One row per (person_id, preference_type). Resolved from NDOO_HASHED via nhs_number_hash join to PERSON.matched_nhs_no_hash.
+    description: >
+      Latest National Data Opt-out preference per person. One row per person_id and
+      preference_type, covering people with a latest record (is_latest) in
+      stg_olids_national_data_opt_out; people with no opt-out record are absent. Records
+      are linked to person_id through stg_olids_patient on sk_patient_id, and records that
+      do not resolve to a person are dropped. Where more than one latest record remains,
+      the one with the latest effective_from, then effective_to, then lds_record_id is
+      kept. is_opted_in is TRUE only for status OPT_IN; OPT_OUT and UNKNOWN give FALSE.
     config:
       meta:
         owner:
@@ -16,7 +23,7 @@ models:
               - preference_type
     columns:
       - name: person_id
-        description: Resolved person_id from PERSON.id
+        description: Person identifier from stg_olids_patient, matched on sk_patient_id
         tests:
           - not_null
       - name: preference_type

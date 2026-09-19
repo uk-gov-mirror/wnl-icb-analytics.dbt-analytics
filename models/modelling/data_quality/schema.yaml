@@ -8,7 +8,14 @@ version: 2
 
 models:
   - name: provider_daily_apc_activity
-    description: "Created by: J.Linney | dbt test file for APC provider daily activity"
+    description: >
+      Daily count of SUS admitted patient care spells by provider and discharge date, used
+      to monitor data completeness. One row per provider and activity_date (spell discharge
+      date); records is the number of stg_sus_apc_spell rows. Covers ten monitored providers
+      by commissioning service agreement provider code (RRV, RKE, RAL, RP4, RP6, RAN, RYJ,
+      RQM, R1K, RAS) and discharge dates in the last 744 days; spells without a discharge
+      date are excluded. provider is the organisation_nhs_provider name, or the provider
+      code where the lookup has no match.
     columns:
       - name: provider
         description: "Provider name from lookup"
@@ -74,7 +81,13 @@ models:
           - not_null
 
   - name: provider_daily_ecds_activity
-    description: "Created by: J.Linney | dbt test file for ECDS provider daily activity"
+    description: >
+      Daily count of ECDS emergency care attendances by provider and arrival date, used to
+      monitor data completeness. One row per provider and activity_date (attendance arrival
+      date); records is the number of stg_sus_ecds_emergency_care rows. Covers ten monitored
+      providers by system record provider code (RRV, RKE, RAL, RP4, RP6, RAN, RYJ, RQM, R1K,
+      RAS) and arrival dates in the last 744 days. provider is the organisation_nhs_provider
+      name, or the provider code where the lookup has no match.
     columns:
       - name: provider
         description: "Provider name from lookup"

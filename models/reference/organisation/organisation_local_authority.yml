@@ -1,6 +1,10 @@
 models:
   - name: organisation_local_authority
-    description: Organisation reference data for local authorities
+    description: >
+      Local authority organisations: ODS organisations with primary role RO141 from
+      stg_dictionary_dbo_organisation. One row per organisation_code, keeping the record
+      with the latest last_updated date, or first_created where last_updated is missing.
+      Closed organisations are retained and have an end_date.
     config:
       meta:
         owner:
