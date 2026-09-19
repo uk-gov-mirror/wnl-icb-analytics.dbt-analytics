@@ -1,9 +1,13 @@
 models:
   - name: stg_reference_combined_codesets
     description: >-
-      Combined code-set membership used by clinical models. Primary Care
-      Domain rows use the PCD source label and track the current active UKHFD
-      release exposed through REFERENCE.TERMINOLOGY.PCD_REFSET_LATEST.
+      Combined code-set membership used by clinical models, from
+      DATA_LAKE__NCL.TERMINOLOGY.COMBINED_CODESETS. One row per cluster_id,
+      code and source; rows with a null code are excluded, and where the source
+      repeats a combination the alphabetically first cluster and code
+      descriptions are kept. Primary Care Domain rows use the PCD source label;
+      tests check that they match the current active UKHFD release in
+      REFERENCE.TERMINOLOGY.PCD_REFSET_LATEST.
     config:
       meta:
         owner:

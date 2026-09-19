@@ -1,6 +1,13 @@
 models:
   - name: stg_olids_patient_person
-    description: Junction table linking patient records to person records for identity management. The source-side `id` column was removed in the 2026 OLIDS schema realignment; rows are now keyed on the natural pair (patient_id, person_uuid) and deduplicated on that key using lds_start_datetime.
+    description: >
+      Links OLIDS patient records to person records. One row per patient_id and
+      person_uuid pair; rows with a null patient_id, person_uuid or person_id
+      are excluded. Where a pair has several source rows, the row with the
+      latest lds_transform_datetime is kept, then the highest
+      lds_source_record_id. Rows flagged as deleted are not removed:
+      lds_is_deleted is passed through. The source id column is retained but is
+      not the model key.
     config:
       meta:
         owner:

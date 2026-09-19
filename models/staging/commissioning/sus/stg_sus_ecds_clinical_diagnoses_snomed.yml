@@ -1,6 +1,11 @@
 models:
   - name: stg_sus_ecds_clinical_diagnoses_snomed
-    description: SUS A&E clinical diagnoses (SNOMED CT)
+    description: >
+      SUS ECDS (A&E) clinical diagnoses coded in SNOMED CT, from
+      DATA_LAKE.SUS_UNIFIED_ECDS. One row per diagnosis entry within an
+      attendance (primarykey_id and snomed_id); diagnosis_id is a surrogate key
+      on that pair. Where the source repeats the same code for an entry, the row
+      with the lowest rownumber_id is kept. No other filters are applied.
     config:
       meta:
         owner:

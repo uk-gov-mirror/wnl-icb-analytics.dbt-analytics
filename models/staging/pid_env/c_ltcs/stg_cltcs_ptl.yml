@@ -1,6 +1,10 @@
 models:
   - name: stg_cltcs_ptl
-    description: CLTCS EMIS PTL extract (patient tracking list / MDT outcomes). Source raw_cltcs_emis_ptl.
+    description: >
+      C-LTCS EMIS patient tracking list (PTL) extract with MDT outcomes, from
+      DATA_LAKE__NCL.CLTCS.PTL. One row per source row; rows without an
+      sk_patient_id are excluded. sk_patient_id is expected to be unique, but
+      duplicates only raise a warning.
     config:
       meta:
         owner:

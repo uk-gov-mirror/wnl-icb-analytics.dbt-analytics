@@ -1,6 +1,11 @@
 models:
   - name: stg_dictionary_ip_sourceofadmissions
-    description: Dictionary reference for source of inpatient admissions
+    description: >
+      Source of admission code list for inpatient hospital provider spells
+      (NHS Data Dictionary SOURCE OF ADMISSION CODE (HOSPITAL PROVIDER SPELL)),
+      from Dictionary.IP.SourceOfAdmissions. One row per
+      sk_source_of_admission_id; where the source has several rows for a key,
+      the one with the latest date_updated is kept.
     config:
       meta:
         owner:

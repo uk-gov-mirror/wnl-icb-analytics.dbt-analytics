@@ -1,6 +1,12 @@
 models:
   - name: stg_dictionary_ecds_treatment
-    description: ECDS treatment reference data with HRG grouping mappings
+    description: >
+      ECDS treatment code list from the ECDS Enhanced Technical Output
+      Specification (ETOS) reference data (Dictionary.ECDS_ETOS.Treatment),
+      with HRG grouping mappings. One row per ecds_unique_id and valid_from
+      version; where the source repeats a version, the row with the latest
+      valid_to is kept, with a null valid_to ranked last. Retired entries are
+      kept: use valid_to and dv_is_active to select current entries.
     config:
       meta:
         owner:

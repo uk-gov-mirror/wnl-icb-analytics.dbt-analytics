@@ -1,6 +1,10 @@
 models:
   - name: stg_reference_ltc_lcs_expanded_concepts
-    description: Expanded SNOMED codes from valuesets after terminology server processing
+    description: >
+      LTC LCS SNOMED CT codes expanded from value sets by terminology-server
+      processing, from DATA_LAKE__NCL.TERMINOLOGY.LTC_LCS_EXPANDED_CONCEPTS. One
+      row per concept_id and valueset_id; where the source has several rows for
+      a pair, only the one with the first snomed_code in sort order is kept.
     config:
       meta:
         owner:

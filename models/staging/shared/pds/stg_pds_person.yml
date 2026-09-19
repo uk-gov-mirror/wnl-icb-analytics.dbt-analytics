@@ -1,6 +1,12 @@
 models:
   - name: stg_pds_person
-    description: Personal Demographics Service person demographics
+    description: >
+      Personal Demographics Service (PDS) person demographics for pseudonymised
+      patients, from DATA_LAKE.PDS.PDS_Person: month of birth, gender, death,
+      preferred language and interpreter requirement. One row per source row; a
+      patient can have several rows covering different business-effective
+      periods (event_from_date to event_to_date). No filtering or deduplication
+      is applied.
     config:
       meta:
         owner:
@@ -21,18 +27,18 @@ models:
         tests:
           - not_null
       - name: year_month_of_birth
-        description: Year and month of birth
-      - name: gender
-        description: Gender
+        description: Month of birth, stored as the first day of that month
+      - name: gender_code
+        description: Gender code as supplied by PDS
       - name: date_of_death
         description: Date of death
       - name: death_status
         description: Death status indicator
-      - name: preferred_language
-        description: Preferred language
+      - name: preferred_language_code
+        description: Preferred language code as supplied by PDS
       - name: interpreter_required
         description: Interpreter required indicator
-      - name: person_business_effective_from_date
-        description: Business effective from date
-      - name: person_business_effective_to_date
-        description: Business effective to date
+      - name: event_from_date
+        description: Date from which this record version is effective (PDS person business-effective from date)
+      - name: event_to_date
+        description: Date to which this record version is effective (PDS person business-effective to date)

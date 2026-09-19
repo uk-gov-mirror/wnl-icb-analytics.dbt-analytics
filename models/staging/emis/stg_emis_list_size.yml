@@ -2,15 +2,12 @@
 models:
   - name: stg_emis_list_size
     description: |
-      EMIS list size reference data with proper date type conversion.
+      EMIS practice list sizes from the emis_list_size seed, one row per
+      practice for the seed's extract. Rows with a null EXTRACT_DATE are
+      excluded, and EXTRACT_DATE is converted from DD/MM/YYYY text to a date.
+      Used as reference data for OLIDS regular registration validation.
 
-      Source: emis_list_size seed file
-      Extract Date: Dynamic (from seed file)
-
-      Converts EXTRACT_DATE from VARCHAR to DATE and standardises column naming.
-      Used as reference data for OLIDS Regular registration validation.
-
-      To update: Replace seed file with new EMIS extract and re-run models.
+      To update: replace the seed with a new EMIS extract and rebuild.
 
     config:
       meta:
