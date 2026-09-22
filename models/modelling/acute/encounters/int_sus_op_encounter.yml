@@ -181,6 +181,18 @@ models:
         data_type: varchar
         description: "Specialised Commission Code"
 
+      - name: spec_comm_desc
+        data_type: varchar
+        description: "Specialised Commission description"
+
+      - name: pss_service_line_code
+        data_type: varchar
+        description: "Prescribed Specialised Services service line code"
+
+      - name: pss_service_line_desc
+        data_type: varchar
+        description: "Prescribed Specialised Services service line description"
+
       - name: spec_comm_flag
         data_type: varchar
         description: "Specialised Commission Flag"
