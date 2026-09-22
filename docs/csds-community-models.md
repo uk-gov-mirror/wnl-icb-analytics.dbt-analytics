@@ -23,9 +23,10 @@ CSDS is a monthly resubmission feed like MHSDS. Every staging model keeps accept
 
 - [`stg_csds_referral.sql`](../models/staging/commissioning/csds/stg_csds_referral.sql) — one row per referral: age at referral, primary reason, commissioner.
 - [`stg_csds_care_contact.sql`](../models/staging/commissioning/csds/stg_csds_care_contact.sql) — one row per **(referral, contact)**; provider-local contact IDs are reused across referrals, so the pair is the grain.
-- [`stg_csds_servicetype.sql`](../models/staging/commissioning/csds/stg_csds_servicetype.sql) — one team type per referral (latest submitted).
-- [`stg_csds_mpi.sql`](../models/staging/commissioning/csds/stg_csds_mpi.sql) — one row per person: latest residence (LSOA, local authority, sub-ICB), gender, death date, ethnic group.
-- [`stg_csds_gp_registration.sql`](../models/staging/commissioning/csds/stg_csds_gp_registration.sql) — dated GP registrations per person. Practice codes are uppercased here (~19% arrive lowercase, which broke downstream joins) and case variants of the same registration collapse in dedup.
+- [`stg_csds_service_type_history.sql`](../models/staging/commissioning/csds/stg_csds_service_type_history.sql) — every accepted CYP102 service/team row across reporting periods. About one referral in seven has more than one team.
+- [`int_csds_currency_referral_service_type.sql`](../models/modelling/community/currencies/int_csds_currency_referral_service_type.sql) — one team type per referral for the currency grouping: the newest reported CYP102 relationship. All teams stay in `fct_csds_referral_service`.
+- [`stg_csds_mpi.sql`](../models/staging/commissioning/csds/stg_csds_mpi.sql) — latest MPI record per person and provider: residence (LSOA, local authority, sub-ICB), gender, death date, ethnic group. The currency model uses the person's newest record across providers.
+- [`stg_csds_gp_registration.sql`](../models/staging/commissioning/csds/stg_csds_gp_registration.sql) — latest registration per person, provider, practice and start date. Practice codes are uppercased (about a quarter arrive lowercase, which broke downstream joins) so case variants of one registration collapse.
 - [`stg_csds_bridging.sql`](../models/staging/commissioning/csds/stg_csds_bridging.sql) — person → pseudonymised patient id.
 
 ## 2. The mappings as data (seeds)

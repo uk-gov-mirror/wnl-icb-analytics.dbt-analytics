@@ -36,7 +36,9 @@ with activity as (
         )
     qualify row_number() over (
         partition by a.unique_service_request_identifier, a.unique_care_contact_identifier
-        order by gp.start_date_gmp_patient_registration desc nulls last, gp.general_medical_practice_code_patient_registration
+        -- providers can report the same period differently; newest report wins
+        order by gp.start_date_gmp_patient_registration desc nulls last, gp.reporting_period_end_date desc nulls last,
+            gp.effective_from desc nulls last, gp.unique_submission_id desc, gp.cyp002_unique_id desc
     ) = 1
 )
 
@@ -47,7 +49,8 @@ with activity as (
     from {{ ref('stg_csds_gp_registration') }}
     qualify row_number() over (
         partition by person_id
-        order by start_date_gmp_patient_registration desc nulls last, general_medical_practice_code_patient_registration
+        order by start_date_gmp_patient_registration desc nulls last, reporting_period_end_date desc nulls last,
+            effective_from desc nulls last, unique_submission_id desc, cyp002_unique_id desc
     ) = 1
 )
 
