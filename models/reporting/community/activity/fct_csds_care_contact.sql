@@ -33,6 +33,12 @@ select
     end as care_contact_time_precision
     , r.attended_or_did_not_attend_code as attendance_code
     , att.description as attendance_name
+    , nullif(ltrim(trim(coalesce(r.attended_or_did_not_attend_code, r.attendance_status)), '0'), '') in ('5', '6')
+        as is_attended
+    , nullif(ltrim(trim(coalesce(r.attended_or_did_not_attend_code, r.attendance_status)), '0'), '') in ('3', '7')
+        as is_dna
+    , nullif(ltrim(trim(coalesce(r.attended_or_did_not_attend_code, r.attendance_status)), '0'), '') in ('2', '4')
+        as is_cancelled
     , r.attendance_status as source_attendance_status_code
     , source_attendance.description as source_attendance_status_name
     , r.consultation_mechanism_community_care as consultation_mechanism_code

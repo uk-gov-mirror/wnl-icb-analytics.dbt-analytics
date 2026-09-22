@@ -105,6 +105,12 @@ models:
     description: Provider-qualified care professional team identifier.
   - name: local_team_id
     description: Care professional team identifier assigned locally by the provider.
+  - name: is_attended
+    description: Attendance code 5 or 6, from the attended-or-did-not-attend field or else the newer attendance status. Null when both are missing.
+  - name: is_dna
+    description: Attendance code 3 (did not attend) or 7 (arrived late, not seen). Null when both fields are missing.
+  - name: is_cancelled
+    description: Attendance code 2 (patient cancelled) or 4 (provider cancelled or postponed). Null when both fields are missing.
   - name: service_or_team_type_code
     description: Community service or team type of the delivering team, from int_csds_care_contact_context.
       Read with service_or_team_type_basis; unmatched codes remain visible.
