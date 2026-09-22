@@ -21,56 +21,6 @@ with activity as (
         on c.person_id = b.person_id
 )
 
-, practice_at_contact as (
-    select
-        a.unique_service_request_identifier
-        , a.unique_care_contact_identifier
-        , gp.general_medical_practice_code_patient_registration as practice_code
-    from activity as a
-    inner join {{ ref('stg_csds_gp_registration') }} as gp
-        on a.person_id = gp.person_id
-        and a.care_contact_date >= gp.start_date_gmp_patient_registration
-        and (
-            gp.end_date_gmp_patient_registration is null
-            or a.care_contact_date < gp.end_date_gmp_patient_registration
-        )
-    qualify row_number() over (
-        partition by a.unique_service_request_identifier, a.unique_care_contact_identifier
-        -- providers can report the same period differently; newest report wins
-        order by gp.start_date_gmp_patient_registration desc nulls last, gp.reporting_period_end_date desc nulls last,
-            gp.effective_from desc nulls last, gp.unique_submission_id desc, gp.cyp002_unique_id desc
-    ) = 1
-)
-
-, latest_gp_registration as (
-    select
-        person_id
-        , general_medical_practice_code_patient_registration as practice_code
-    from {{ ref('stg_csds_gp_registration') }}
-    qualify row_number() over (
-        partition by person_id
-        order by start_date_gmp_patient_registration desc nulls last, reporting_period_end_date desc nulls last,
-            effective_from desc nulls last, unique_submission_id desc, cyp002_unique_id desc
-    ) = 1
-)
-
-, practice_assignment as (
-    select
-        a.unique_service_request_identifier
-        , a.unique_care_contact_identifier
-        , coalesce(at_contact.practice_code, latest.practice_code) as practice_code
-        , case
-            when at_contact.practice_code is not null then 'at_contact'
-            when latest.practice_code is not null then 'latest_known'
-        end as practice_attribution
-    from activity as a
-    left join practice_at_contact as at_contact
-        on a.unique_service_request_identifier = at_contact.unique_service_request_identifier
-        and a.unique_care_contact_identifier = at_contact.unique_care_contact_identifier
-    left join latest_gp_registration as latest
-        on a.person_id = latest.person_id
-)
-
 , practice_context as (
     select
         practice_code
@@ -145,7 +95,7 @@ with activity as (
         , coalesce(geography.residence_borough, geography_2011.residence_borough) as residence_borough
         , residence.sub_icb_of_residence
     from activity as a
-    left join practice_assignment as practice
+    left join {{ ref('int_csds_care_contact_context') }} as practice
         on a.unique_service_request_identifier = practice.unique_service_request_identifier
         and a.unique_care_contact_identifier = practice.unique_care_contact_identifier
     left join practice_context as context

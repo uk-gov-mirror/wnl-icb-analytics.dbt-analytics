@@ -54,6 +54,9 @@ select
     , site_organisation.name_source as site_organisation_name_source
     , r.unique_care_professional_team_local_identifier as team_id
     , r.care_professional_team_local_identifier as local_team_id
+    , ctx.service_or_team_type_code
+    , team_type.description as service_or_team_type_name
+    , ctx.service_or_team_type_basis
     , r.administrative_category_code
     , r.consultation_type as consultation_type_code
     , r.care_contact_subject as care_contact_subject_code
@@ -103,6 +106,11 @@ left join {{ ref('stg_csds_referral_history') }} as submitted_referral
     on r.unique_submission_id = submitted_referral.unique_submission_id
     and r.unique_service_request_identifier = submitted_referral.unique_service_request_identifier
 left join {{ ref('fct_csds_referral') }} as p on r.unique_service_request_identifier = p.source_record_id
+left join {{ ref('int_csds_care_contact_context') }} as ctx
+    on r.unique_service_request_identifier = ctx.unique_service_request_identifier
+    and r.unique_care_contact_identifier = ctx.unique_care_contact_identifier
+left join {{ ref('csds_service_or_team_type') }} as team_type
+    on trim(ctx.service_or_team_type_code) = team_type.code
 left join {{ ref('attendance_status') }} as att on nullif(ltrim(trim(r.attended_or_did_not_attend_code), '0'), '') = att.code
 left join {{ ref('consultation_mechanism') }} as cm on trim(r.consultation_mechanism_community_care) = cm.code
 left join {{ ref('activity_location_type') }} as loc on trim(r.activity_location_type_code) = loc.code

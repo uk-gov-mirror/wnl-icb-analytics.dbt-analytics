@@ -1,0 +1,60 @@
+version: 2
+models:
+  - name: int_csds_care_contact_context
+    description: >-
+      Delivering team type and GP practice for each CSDS care contact, resolved once for contact
+      reporting, currencies and other consumers. Each row is one latest referral/contact pair.
+      Team type comes from the CYP102 row for the contact's own team in the same submission. When
+      that team is missing or has no CYP102 row, the referral's team type in that submission is
+      used only if all its teams share one type; otherwise the type is unresolved. Some providers
+      record contact teams that never appear on their referrals, so check the basis before
+      comparing teams across providers. Practice is the registration covering the contact date,
+      else the person's latest known registration.
+    config:
+      meta:
+        owner:
+          name: Eddie Davison
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - unique_service_request_identifier
+              - unique_care_contact_identifier
+    columns:
+      - name: care_contact_source_record_id
+        description: Key of the same pair in fct_csds_care_contact (source_record_id).
+        data_tests: [not_null, unique]
+      - name: unique_service_request_identifier
+        description: Provider-qualified referral identifier.
+        data_tests: [not_null]
+      - name: unique_care_contact_identifier
+        description: Provider-qualified contact identifier; unique only together with the referral.
+        data_tests: [not_null]
+      - name: cyp201_unique_id
+        description: Selected CYP201 source row whose submission supplies the context.
+      - name: unique_submission_id
+        description: Submission of the selected contact row.
+      - name: service_or_team_local_id
+        description: Local team identifier supplied on the contact. Kept as supplied whatever the type basis.
+      - name: service_or_team_id
+        description: Provider-qualified team identifier supplied on the contact.
+      - name: service_or_team_type_code
+        description: Community service or team type code. Read with service_or_team_type_basis.
+      - name: service_or_team_type_basis
+        description: >-
+          contact_team when the contact's team has a CYP102 row in the same submission;
+          referral_team_contact_team_missing or referral_team_contact_team_unmatched when the
+          referral's single same-submission team type is used instead; unresolved otherwise.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [contact_team, referral_team_contact_team_missing, referral_team_contact_team_unmatched, unresolved]
+      - name: practice_code
+        description: GP practice code, uppercased. Null when the person has no reported registration.
+      - name: practice_attribution
+        description: at_contact when a registration covers the contact date; latest_known when the person's latest registration is used instead; null without a practice.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [at_contact, latest_known]

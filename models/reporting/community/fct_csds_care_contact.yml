@@ -105,6 +105,17 @@ models:
     description: Provider-qualified care professional team identifier.
   - name: local_team_id
     description: Care professional team identifier assigned locally by the provider.
+  - name: service_or_team_type_code
+    description: Community service or team type of the delivering team, from int_csds_care_contact_context.
+      Read with service_or_team_type_basis; unmatched codes remain visible.
+  - name: service_or_team_type_name
+    description: Newest dictionary description of the service or team type; null when the code is missing
+      or unmatched.
+  - name: service_or_team_type_basis
+    description: contact_team when the contact's own team has a same-submission CYP102 row; referral_team_contact_team_missing
+      or referral_team_contact_team_unmatched when the referral's single team type is used; unresolved otherwise.
+    data_tests:
+    - not_null
   - name: administrative_category_code
     description: Submitted administrative category code. Unmatched values remain visible.
   - name: consultation_type_code
