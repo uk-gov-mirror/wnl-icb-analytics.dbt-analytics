@@ -19,10 +19,10 @@ Assignment rules, exactly as in the NHSE script:
 
 ## 1. Deduplicate the raw feed → clean staging
 
-CSDS is a monthly resubmission feed like MHSDS. Every staging model runs [`deduplicate_csds`](../macros/transformations/deduplicate_csds.sql): latest record per business key within active submissions — never count raw rows.
+CSDS is a monthly resubmission feed like MHSDS. Every staging model keeps accepted submissions only (`stg_csds_activesubmission`). The `_history` models retain each monthly occurrence; the latest models select the newest reported record per ETOS key by reporting period, then receipt time, submission and source row. Never count raw rows.
 
-- [`stg_csds_cyp101referral.sql`](../models/staging/commissioning/csds/stg_csds_cyp101referral.sql) — one row per referral: age at referral, primary reason, commissioner.
-- [`stg_csds_cyp201carecontact.sql`](../models/staging/commissioning/csds/stg_csds_cyp201carecontact.sql) — one row per **(referral, contact)**; provider-local contact IDs are reused across referrals, so the pair is the grain.
+- [`stg_csds_referral.sql`](../models/staging/commissioning/csds/stg_csds_referral.sql) — one row per referral: age at referral, primary reason, commissioner.
+- [`stg_csds_care_contact.sql`](../models/staging/commissioning/csds/stg_csds_care_contact.sql) — one row per **(referral, contact)**; provider-local contact IDs are reused across referrals, so the pair is the grain.
 - [`stg_csds_servicetype.sql`](../models/staging/commissioning/csds/stg_csds_servicetype.sql) — one team type per referral (latest submitted).
 - [`stg_csds_mpi.sql`](../models/staging/commissioning/csds/stg_csds_mpi.sql) — one row per person: latest residence (LSOA, local authority, sub-ICB), gender, death date, ethnic group.
 - [`stg_csds_gp_registration.sql`](../models/staging/commissioning/csds/stg_csds_gp_registration.sql) — dated GP registrations per person. Practice codes are uppercased here (~19% arrive lowercase, which broke downstream joins) and case variants of the same registration collapse in dedup.
