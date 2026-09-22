@@ -1,0 +1,56 @@
+version: 2
+models:
+- name: fct_csds_referral_summary
+  description: >-
+    Care and access measures for each recorded CSDS referral. Each row is one latest referral from
+    fct_csds_referral, with its state at the latest reported period and counts of contacts by
+    attendance, care activities, service teams and referral-to-treatment clocks. Each measure is
+    aggregated before joining, so several contacts and teams do not multiply each other. Referrals
+    without a person bridge remain. Time to first attendance describes recorded evidence, not a
+    national waiting-time measure. Replaces the retiring int_csds_*_summary models.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: source_record_id
+    description: Provider-qualified referral identifier, as in fct_csds_referral.
+    data_tests:
+    - unique
+    - not_null
+  - name: as_of_date
+    description: Latest accepted reporting period in the dataset.
+  - name: is_recorded_open_at_latest_period
+    description: Open state at the referral's latest reported period end; see fct_csds_referral_period.
+  - name: latest_recorded_access_state
+    description: Access state at the referral's latest reported period end.
+  - name: n_contacts
+    description: Latest referral/contact pairs under this referral, all attendance states.
+  - name: n_attended_contacts
+    description: Contacts with attendance code 5 or 6.
+  - name: n_dna_contacts
+    description: Contacts with attendance code 3 (did not attend) or 7 (arrived late, not seen).
+  - name: n_patient_cancelled_contacts
+    description: Contacts cancelled by the patient (code 2).
+  - name: n_provider_cancelled_contacts
+    description: Contacts cancelled or postponed by the provider (code 4).
+  - name: n_contacts_with_missing_attendance
+    description: Contacts with no attendance code in either supplied field.
+  - name: n_contacts_with_different_referral_person
+    description: Contacts whose person differs from the latest referral's person.
+  - name: attended_contact_minutes
+    description: Sum of supplied clinical contact duration on attended contacts; null when none is supplied.
+  - name: first_attended_contact_date
+    description: Earliest attended contact date under this referral.
+  - name: days_to_first_attended_contact
+    description: Days from receipt to first attended contact; null when missing or before receipt.
+  - name: n_care_activities
+    description: CYP202 activities submitted with the referral's latest contact rows.
+  - name: n_service_team_relationships
+    description: Latest service/team relationships under this referral.
+  - name: n_service_team_types
+    description: Distinct team types across those relationships.
+  - name: n_rtt_clock_start_dates
+    description: Distinct submitted clock start dates, a proxy for distinct clocks.
+  - name: n_rtt_records_response_standard_met
+    description: Submitted clock records flagged as meeting the response standard; repeated monthly records are counted each time.

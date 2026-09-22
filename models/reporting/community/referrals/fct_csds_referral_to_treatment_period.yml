@@ -1,0 +1,49 @@
+version: 2
+models:
+- name: fct_csds_referral_to_treatment_period
+  description: >-
+    Referral-to-treatment and response-time clocks reported by CSDS providers. Each row is one
+    accepted CYP104 record in a reporting period, with the clock's dates, times, measurement type,
+    status and the source-derived waiting time and response-standard flag. The same clock repeats
+    each month it is reported and reappears when it gains an end date or status, so counts of rows
+    are counts of submitted evidence, not distinct clocks. A missing end date does not prove the
+    person is still waiting. The response-standard flag underpins the two-hour urgent community
+    response measure; the table does not decide target compliance.
+  config:
+    meta:
+      owner:
+        name: Eddie Davison
+  columns:
+  - name: referral_to_treatment_period_id
+    description: CYP104 source row identifier.
+    data_tests:
+    - unique
+    - not_null
+  - name: referral_source_record_id
+    description: Provider-qualified referral identifier; joins to source_record_id in fct_csds_referral.
+    data_tests:
+    - not_null
+  - name: waiting_time_measurement_type_code
+    description: Submitted community-care waiting time measurement type. Unmatched codes remain visible.
+  - name: waiting_time_measurement_type_name
+    description: Newest UKHFD description of the measurement type; null when unmatched.
+  - name: rtt_start_date
+    description: Supplied clock start date.
+  - name: rtt_end_date
+    description: Supplied clock end date; null when no end was reported in this period.
+  - name: rtt_status_code
+    description: Supplied referral-to-treatment period status.
+  - name: rtt_status_name
+    description: National status description; null when unmatched.
+  - name: source_waiting_time_minutes
+    description: Waiting time in minutes derived by the national pipeline.
+  - name: source_waiting_time_overnight_days
+    description: Waiting time in overnight days derived by the national pipeline.
+  - name: is_response_standard_met
+    description: Source-derived flag that the crisis response or other response standard was met; null when not assessed.
+  - name: recorded_rtt_interval_days
+    description: Days from start to end when both are present and ordered; null otherwise.
+  - name: is_recorded_open_at_period_end
+    description: Started by period end with no end on or before it. Null when the start date is missing.
+  - name: reporting_period_end_date
+    description: Last date of the reporting month carrying this record.
