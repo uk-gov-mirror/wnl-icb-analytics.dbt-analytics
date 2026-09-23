@@ -131,7 +131,11 @@ updated DNA actions. See [e-RS validation](ers-analyst-validation.md).
 Clinical items include OLIDS expanded observations and statement-enriched
 medication orders; MHSDS and CSDS prepared clinical records; SUS diagnoses and
 procedures; and ECDS diagnoses, treatments, investigations, comorbidities, coded
-findings, observations and scored assessments. There are no standalone medication statements. Acute code
+findings, observations, scored assessments, chief complaints, acuity, notifiable
+diseases, injury mechanism, intent and place, and alcohol or drug involvement.
+Single-valued ECDS attendance fields emit one row per recorded code, keyed by the
+attendance. Injury details take the recorded injury date; chief complaint, acuity
+and notifiable disease have no supported clinical date. There are no standalone medication statements. Acute code
 positions are preserved, including repeated codes in distinct supplied positions.
 ECDS observations and scored assessments keep separate source-sequence rows,
 values, reported units and clinical timestamps. Submitted scores populate the
@@ -168,6 +172,7 @@ Existing source key names remain available:
 | ECDS clinical staging | `diagnosis_id` for diagnoses; `source_record_id` for other staged items |
 | `fct_sus_uec_observation` | `observation_id` |
 | `fct_sus_uec_scored_assessment` | `assessment_id` |
+| `int_sus_uec_injury_alcohol_drug` | `involvement_id` |
 
 Recorded parents follow `parent_model_name`. MHSDS/CSDS parents use
 `source_record_id`; e-RS referrals use `ubrn_id`; acute encounters use
