@@ -2,15 +2,12 @@ version: 2
 
 models:
   - name: int_mhsds_contact_currency
-    description: >
-      MHSDS care contact currency classification. Grain: one row per
-      uniq_serv_req_id and uniq_care_cont_id (providers reuse local contact ids
-      across referrals, so the contact id alone is not unique). Population: care
-      contacts outside an inpatient spell for the same service request. Time
-      semantics: diagnosis is the latest recorded on or before the contact date.
-      Inpatient contacts are excluded by contact date between spell admission
-      and derived spell end date, rather than the NHSE notebook's
-      same-submission-month method.
+    description: >-
+      NHS England costing classifications for patient contacts outside inpatient care. Each row is
+      one referral/contact pair. The diagnosis used is the latest recorded on or before the contact
+      date. A contact is excluded when its date falls between admission and the derived end of an
+      inpatient spell for the same referral. This date-based rule differs from the NHS England
+      notebook's submission-month rule. Contact identifiers alone are not unique across referrals.
     config:
       meta:
         owner:
@@ -41,7 +38,14 @@ models:
       - name: age_care_cont_date
         description: MHSDS-derived age at the contact date.
       - name: is_cyp
-        description: Whether age at contact is under 18.
+        description: >-
+          Whether age at contact is under 18. A contact with no recorded age is
+          treated as adult, so read this with has_known_age_at_contact.
+      - name: has_known_age_at_contact
+        description: >-
+          Whether an age at the contact date was recorded. False means is_cyp
+          and the population-group cascade fell back to the adult branch rather
+          than using a known age.
       - name: attend_status
         description: Care contact attendance status.
       - name: cons_mechanism_mh
