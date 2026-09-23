@@ -183,7 +183,7 @@ models:
 
       - name: spec_comm_desc
         data_type: varchar
-        description: "Specialised Commission description"
+        description: "Specialised Commission description from the latest retained UKHFD lookup. Null indicates there is no corresponding code or the code did not match in the lookup."
 
       - name: pss_service_line_code
         data_type: varchar
@@ -191,7 +191,7 @@ models:
 
       - name: pss_service_line_desc
         data_type: varchar
-        description: "Prescribed Specialised Services service line description"
+        description: "Prescribed Specialised Services service line description from the latest retained UKHFD lookup. Null indicates there is no corresponding code or the code did not match in the lookup."
 
       - name: spec_comm_flag
         data_type: varchar
