@@ -39,8 +39,8 @@ models:
     description: Recorded milestone date. Null only for retained undated referral receipts, contacts or onward
       referrals.
   - name: event_at
-    description: Sort timestamp. Recorded date and clock time when event_time_precision is timestamp; otherwise
-      midnight on event_date, which is not an observed time. Null when undated.
+    description: Source clock timestamp only when event_time_precision is timestamp. Null for date-only or
+      undated records; event_date and precision remain. The shared reporting view adds sorting anchors.
   - name: event_time_precision
     description: timestamp when a source time was supplied, date when only a date was supplied, unknown when undated.
   - name: event_time_basis

@@ -378,7 +378,7 @@ models:
       transferred.
   - name: pathway_first_treatment_date
     description: Earliest first_treatment_date across the transfer chain; the referral's own when it never
-      transferred. Use for waits from referral to first treatment.
+      transferred. Used only for separately named local chain-aware waits.
   - name: pathway_second_treatment_date
     description: Second treatment date across the transfer chain, the second earliest of the members' first and
       second treatment dates; the referral's own second_treatment_date when it never transferred.
@@ -404,9 +404,9 @@ models:
     description: Calendar days from referral_received_date to pathway_first_assessment_date, as in NHS England
       measures M024 to M027. Null without a first assessment.
   - name: days_referral_to_first_treatment
-    description: Calendar days from referral_received_date to pathway_first_treatment_date, as in M032 to M037 and
-      M049. A transfer successor counts from the original receipt to the chain's first treatment. Null without a
-      first treatment.
+    description: Calendar days from referral_received_date to this referral's supplied first_treatment_date,
+      including on transfer successors. Used for NHS England M036, M037 and M049 with the first-treatment-period
+      and is_nhse_use_pathway filters. Null without either date.
   - name: is_first_treatment_within_6_weeks
     description: TRUE when days_referral_to_first_treatment is 42 or fewer (M036); FALSE when longer; null without a
       first treatment.
@@ -416,3 +416,10 @@ models:
   - name: days_first_to_second_treatment
     description: Calendar days from pathway_first_treatment_date to pathway_second_treatment_date, as in M046 (over 28
       days) and M047 (over 90 days). Null without a second treatment.
+  - name: pathway_days_referral_to_first_treatment
+    description: Local chain-aware calendar wait from receipt to pathway_first_treatment_date. Null without either
+      date. Repeated on chain members; count only the original referral and attribute to its provider and dimensions.
+  - name: is_pathway_first_treatment_within_6_weeks
+    description: TRUE when the local chain-aware wait is 42 days or fewer; FALSE when longer; null without a wait.
+  - name: is_pathway_first_treatment_within_18_weeks
+    description: TRUE when the local chain-aware wait is 126 days or fewer; FALSE when longer; null without a wait.

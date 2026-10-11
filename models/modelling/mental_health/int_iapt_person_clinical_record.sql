@@ -18,8 +18,7 @@ select
     c.originating_source_record_id::varchar as source_record_id,
     c.clinical_record_type::varchar as clinical_record_type,
     c.clinical_date::date as clinical_record_date,
-    -- Midnight on date-only rows is a sort anchor from the source fact, not an observed time.
-    c.clinical_at::timestamp_ntz as clinical_record_at,
+    iff(c.clinical_time_precision = 'timestamp', c.clinical_at, null)::timestamp_ntz as clinical_record_at,
     iff(c.clinical_date is null, 'unknown', coalesce(c.clinical_time_precision, 'unknown'))::varchar
         as clinical_time_precision,
     coalesce(c.clinical_time_basis, 'not_recorded')::varchar as clinical_time_basis,

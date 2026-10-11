@@ -115,11 +115,14 @@ select
         when caseness_at_start_status = 'not_at_caseness' then null
         else coalesce(is_recovered and reliable_change_status = 'reliable_improvement', false)
     end as is_reliably_recovered
-    -- Waits as in M024 to M037 and M046: calendar days from referral receipt. Chain dates keep a transfer
-    -- successor's wait from the original receipt; members of a chain share the received date.
-    , datediff(day, referral_received_date, pathway_first_assessment_date) as days_referral_to_first_assessment
-    , datediff(day, referral_received_date, pathway_first_treatment_date) as days_referral_to_first_treatment
+    -- NHS England treatment waits use this referral's supplied date, including on transfer successors.
+    , datediff(day, referral_received_date, first_treatment_date) as days_referral_to_first_treatment
     , days_referral_to_first_treatment <= 42 as is_first_treatment_within_6_weeks
     , days_referral_to_first_treatment <= 126 as is_first_treatment_within_18_weeks
+    -- Chain waits are separate local measures. Count only the original referral and attribute to its provider.
+    , datediff(day, referral_received_date, pathway_first_assessment_date) as days_referral_to_first_assessment
+    , datediff(day, referral_received_date, pathway_first_treatment_date) as pathway_days_referral_to_first_treatment
+    , pathway_days_referral_to_first_treatment <= 42 as is_pathway_first_treatment_within_6_weeks
+    , pathway_days_referral_to_first_treatment <= 126 as is_pathway_first_treatment_within_18_weeks
     , datediff(day, pathway_first_treatment_date, pathway_second_treatment_date) as days_first_to_second_treatment
 from pathway

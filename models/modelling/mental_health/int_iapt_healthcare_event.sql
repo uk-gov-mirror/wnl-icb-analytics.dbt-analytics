@@ -134,8 +134,7 @@ select
     r.source_record_id,
     r.source_model_name,
     m.value:date::date as event_date,
-    -- Midnight is a sort anchor for date-only rows, not an observed time.
-    iff(m.value:precision::varchar = 'timestamp', m.value:at::timestamp_ntz, m.value:date::date::timestamp_ntz) as event_at,
+    iff(m.value:precision::varchar = 'timestamp', m.value:at::timestamp_ntz, null::timestamp_ntz) as event_at,
     m.value:precision::varchar as event_time_precision,
     m.value:basis::varchar as event_time_basis,
     m.value:type::varchar as event_type,

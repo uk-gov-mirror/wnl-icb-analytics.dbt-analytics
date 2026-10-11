@@ -184,7 +184,8 @@ referral can transfer twice, and about 260 did.
   earliest date across the chain, and `pathway_second_treatment_date` the second
   earliest treatment. The chain's first treatment is earlier than the
   successor's own for about 40% of successors, and a further 16% have no first
-  treatment of their own. Waits in the summary use these chain dates.
+  treatment of their own. Separately named pathway waits use these chain dates;
+  NHS England first-treatment waits use each referral's own supplied date.
 - `fct_iapt_referral_period` counts care recorded under the earlier code, so a
   moved course is not shown as waiting again.
 
@@ -280,14 +281,20 @@ window to reproduce a published figure.
 | `fct_iapt_referral_period.waiting_state` | M029, M038 | Waiting for assessment or treatment at the period end |
 
 A transfer successor's ended type and outcome flags cover only care after the
-transfer, as NHS England derives them per provider-qualified referral; its
-waits use the chain dates. In `sem_iapt`, first-treatment counts and medians
-count each chain once on its original referral. Provider and other referral
-dimensions therefore describe the original referral, including when treatment
-starts after transfer. These are course waits attributed to the receiving
-provider at referral receipt, not counts of treatments delivered by each provider.
-Filter and group these measures by `referral_first_treatment_month`, the month
-of `pathway_first_treatment_date`, to select the treatment-period population.
+transfer, as NHS England derives them per provider-qualified referral.
+First-treatment waits use each referral's supplied `first_treatment_date` and
+its own receipt-to-treatment interval, including on transfer successors.
+In `sem_iapt`, select and group M036, M037 and M049 by
+`referral_first_treatment_month` and filter `referrals_is_nhse_use_pathway` true.
+The population includes open and discharged referrals first treated in that
+period. The published finished-course waiting-time KPI instead selects
+completed courses by discharge month and is not defined in this view.
+
+The separately named `pathway_` semantic wait measures use the earliest chain
+treatment date and count each original referral once. Provider and other
+referral dimensions describe the original referral, including treatment after
+transfer. These local measures have no NHS England measure identifiers.
+Select and group them by `pathway_first_treatment_month`.
 
 ## Assessments
 
@@ -422,8 +429,9 @@ so the staging schema and its downstream models are rebuilt together.
 ## Time
 
 A time is combined with its own date, never with the placeholder date stored in
-the warehouse time column. Date-only records have `date` precision and a
-midnight sort timestamp that is not an observed time. Undated records are kept
+the warehouse time column. The domain facts retain midnight sorting anchors
+for date-only records and mark their precision as `date`. The prepared adapters
+expose only supplied clock times. Undated records are kept
 with `unknown` precision. Almost every contact has a time; about 28% of onward
 referrals do not. IAPT referrals have no receipt or discharge time, and about
 three quarters of accepted referral versions have no discharge date. Most
@@ -461,7 +469,10 @@ The history models and `stg_iapt_submission_header` are in
 tokens are in the `iapt_code_group` seed.
 
 The two `int_` feeds use the column shape of the other source feeds, are full
-rebuilds and are clustered on patient key and sort timestamp. The event feed
+rebuilds and are clustered on patient key and source clock timestamp. Their
+`event_at` and `clinical_record_at` fields are null unless precision is
+`timestamp`; date-only rows retain the date and precision. The shared reporting
+views add midnight sorting anchors. The event feed
 carries the appointment type as `event_code` and the discharge or onward
 referral reason as `outcome_code`. Fields without a shared column, such as the
 receiving organisation, stay on the source fact: join `source_record_id` to the
@@ -492,8 +503,8 @@ Once `fct_person_healthcare_event` and `fct_person_clinical_record` are on main:
 DEV profiling in September 2026 covered about 7,400 accepted submissions, from
 September 2020 to July 2026. The prepared outputs contain about 5.3 million care
 milestones and 23.2 million clinical items. Their identifiers are unique, and
-every dated item has a sort timestamp. Missing patient keys and undated
-conditions remain in the outputs.
+date-only rows retain their date and precision without a clock timestamp.
+Missing patient keys and undated conditions remain in the outputs.
 
 The published facts contain about 920,000 referrals, 3.5 million contacts, 3.0
 million care activities, 3,600 onward referrals, 19.6 million assessment items
