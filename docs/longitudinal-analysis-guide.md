@@ -15,10 +15,12 @@ IAPT is a prepared feed and is not unioned into these shared outputs.
 `dq_person_activity_coverage` retains one row per output, dataset and source
 record type. Its applicability counters identify which branches supply sites,
 referral direction, status, attendance, outcome, recorded parents, maps and
-results. A zero applicable count means the field is not supplied for that
-source/type. Numeric parse failures can be legitimate enumerated non-score
-responses. Unit checks apply to populated observations, not diagnoses, and
-need a concept-specific assessment before they are called defects.
+results. These rules do not cover every source type listed in the
+reconciliation limits below. For covered types, a zero applicable count means
+the field is not supplied for that source/type. Numeric parse failures can be
+legitimate enumerated non-score responses. Unit checks apply to populated
+observations, not diagnoses, and need a concept-specific assessment before they
+are called defects.
 
 `dq_person_activity_provider_period` has one row per dataset, provider authority,
 provider code and activity month for the last 24 completed calendar months.
@@ -124,10 +126,24 @@ periods, provider recency and submitted section counts. The CSDS diagnostic also
 has section/volume-change flags. Do not compare their contact totals directly
 with event-month totals.
 
-Onward referrals, later MHSDS/CSDS milestones, ECDS observations and scored
-assessments, CSDS growth records and IAPT emissions are not yet included in the
-reconciliation rules. Extend the emission analysis and coverage applicability
-rules when those source types are added to the shared outputs.
+The expected-emission and field-applicability rules have not been extended for:
+
+- ECDS coded observations, scored assessments, attendance-level clinical items
+  and Mental Health Act legal status.
+- MHSDS/CSDS onward referrals and ECDS referrals to services.
+- MHSDS legal-status periods, community treatment orders and recalls, leave of
+  absence, home leave, absence without leave, restrictive interventions and
+  discharge-readiness milestones.
+- CSDS diagnoses, childhood immunisations, social circumstances, newborn
+  screening, breastfeeding and growth records, and MHSDS social circumstances.
+
+Generic source/type counts and grouped MHSDS/CSDS clinical totals can include
+these records, but do not independently validate each added source. An
+actual-only emission group has no expected rule; its difference alone does not
+establish over-emission. A zero applicability count for these types does not
+establish that the field is absent from the source. Extend the rules before
+using these diagnostics to validate a metric that depends on those types.
+IAPT emissions are outside the expected rules and the shared outputs.
 
 ## Worked SQL
 

@@ -9,8 +9,10 @@ models:
       records missing linkage, absent or partial dates and the latest received delivery.
       Source date extremes remain visible, including implausible supplied dates.
       Applicability counts distinguish fields supplied by each source/type from
-      missing evidence. A zero denominator means not applicable; counts do not
-      certify completeness. See docs/longitudinal-analysis-guide.md.
+      missing evidence for covered types. Some source types have no explicit
+      applicability rules; a zero denominator for those types does not establish
+      that the source lacks the field. Counts do not certify completeness.
+      See docs/longitudinal-analysis-guide.md for the types without explicit rules.
     config:
       meta:
         owner:
