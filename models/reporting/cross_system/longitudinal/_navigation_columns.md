@@ -215,7 +215,7 @@ Source field or validated recorded relationship supplying the clinical date. not
 {% enddocs %}
 
 {% docs navigation_source_code %}
-Code supplied for the clinical item, with the source model's documented normalisation. Use source_coding_system to interpret it.
+Code supplied for the clinical item, with the source model's documented normalisation. Use source_coding_system to interpret it. ECDS notifiable disease uses the newer SUS code field first, then a trimmed 6-18 digit legacy code; legacy descriptions are excluded.
 {% enddocs %}
 
 {% docs navigation_source_code_name %}

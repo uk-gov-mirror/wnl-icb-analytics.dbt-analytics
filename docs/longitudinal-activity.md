@@ -136,7 +136,9 @@ findings, observations, scored assessments, chief complaints, acuity, notifiable
 diseases, injury mechanism, intent and place, and alcohol or drug involvement.
 Single-valued ECDS attendance fields emit one row per recorded code, keyed by the
 attendance. Injury details take the recorded injury date; chief complaint, acuity
-and notifiable disease have no supported clinical date. There are no standalone medication statements. Acute code
+and notifiable disease have no supported clinical date. Notifiable disease uses the
+newer SUS code field first, then a trimmed 6-18 digit code from the legacy field.
+Legacy descriptions are excluded. There are no standalone medication statements. Acute code
 positions are preserved, including repeated codes in distinct supplied positions.
 ECDS observations and scored assessments keep separate source-sequence rows,
 values, reported units and clinical timestamps. Submitted scores populate the

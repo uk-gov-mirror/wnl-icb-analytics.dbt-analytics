@@ -6,7 +6,8 @@ models:
     values, units, tool codes and clinical timestamps. Numeric parsing does not validate scores or unit compatibility.
     Single-valued attendance fields (chief complaint, acuity, notifiable disease, injury mechanism, intent and
     place) emit one row per recorded code, keyed by the attendance; alcohol or drug involvements keep one row per
-    source involvement. Injury details take the recorded injury date; the others have no supported clinical date.
+    source involvement. Notifiable disease uses the newer SUS code field, then a trimmed 6-18 digit legacy code;
+    legacy descriptions are excluded. Injury details take the recorded injury date; the others have no supported clinical date.
     Prepared source facts retain domain-specific interpretation and all additional relationships. Incremental
     loads process newly received deliveries and replay the boundary delivery. Withdrawn source keys are removed
     on each run. Monthly full refreshes reconcile earlier corrections and reference changes.
