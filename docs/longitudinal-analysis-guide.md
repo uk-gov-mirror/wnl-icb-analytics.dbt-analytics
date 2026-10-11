@@ -101,10 +101,12 @@ The 210-day acute values are deliberately conservative retained-version guidance
 Use [the validation record](longitudinal-activity-validation.md) for existing
 whole-population fingerprints, incremental replacement/withdrawal checks and
 milestone totals. [The emission analysis](../analyses/navigation/source_emission_reconciliation.sql)
-compares this branch's domain and prepared source counts with emitted rows.
+compares domain and prepared source counts with emitted rows.
 It accounts for primary milestones, optional dates and e-RS action selection.
+APC uses `inpatient_decision_to_admit` for the inpatient spell decision; ECDS
+keeps `decision_to_admit` for the emergency department decision.
 It returns only source/model/type totals and differences. Run it on deployment
-or when a branch changes, rather than adding another daily scan of OLIDS.
+or when an adapter changes, rather than adding another daily scan of OLIDS.
 
 Use [clinical mapping coverage](../analyses/navigation/clinical_mapping_coverage.sql)
 for recognised and historical SNOMED targets. A missing ICD-10/OPCS-4 reverse
@@ -122,9 +124,10 @@ periods, provider recency and submitted section counts. The CSDS diagnostic also
 has section/volume-change flags. Do not compare their contact totals directly
 with event-month totals.
 
-Later MHSDS/CSDS milestones, ECDS observations and IAPT emissions need their own
-reconciliation additions when merged. This analysis does not claim to validate
-models absent from this branch.
+Onward referrals, later MHSDS/CSDS milestones, ECDS observations and scored
+assessments, CSDS growth records and IAPT emissions are not yet included in the
+reconciliation rules. Extend the emission analysis and coverage applicability
+rules when those source types are added to the shared outputs.
 
 ## Worked SQL
 
@@ -134,7 +137,21 @@ Snowflake session.
 
 These are person-level patterns for a human-controlled Snowflake session approved for patient-level data. Every identifier literal below is synthetic. No query outputs or query logs belong in the public repository. Aggregate monitoring/reconciliation belongs in `analyses/navigation/*.sql`; do not add these person-level examples as scheduled dbt models.
 
-The event selection patterns cover only ECDS arrivals and SUS OP explicitly attended appointments. They do not define universal completed-care eligibility. National attendance codes 5/6 mean attended; missing codes are not attended evidence, even where a cost model includes them. For OLIDS, use its source-specific `status_code` definition agreed by the analyst; do not guess that it uses national attendance codes. IAPT is not currently unioned. Booking/slot timestamps alone never prove attendance.
+The event selection patterns cover only ECDS arrivals and SUS OP explicitly
+attended appointments. They do not define universal completed-care eligibility.
+National attendance codes 5/6 mean attended; missing codes are not attended
+evidence, even where a cost model includes them. IAPT is not currently unioned.
+Booking/slot timestamps alone never prove attendance.
+
+OLIDS slots carry mapped national `attendance_status_code` alongside the original
+`status_code`; bookings have no status. A mapped OLIDS DNA can include unanswered
+calls or incomplete written work and does not prove literal non-attendance.
+See [the OLIDS attendance definitions](longitudinal-activity.md).
+
+Interpret `priority_code` within `source_dataset`. e-RS uses its own priority
+codes; CSDS referral milestones and SUS OP slots use NHS DD Priority Type.
+Codes are not mapped across lists. Read `priority_name` for the source or
+reference label. MHSDS clinical response priority uses a separate list.
 
 ### First attended event after an index
 
@@ -359,7 +376,7 @@ where c.sk_patient_id = 'SYNTHETIC_PERSON_001'
     and c.source_model_name = 'stg_sus_ecds_clinical_coded_findings';
 ```
 
-Join a static, named detail relation using its documented native key. Do not execute `source_model_name` as SQL. APC episode parents use `source_record_id`; acute attendances use `visit_occurrence_id`; e-RS referrals use `ubrn_id`; OLIDS encounter parents use `id`; MHSDS/CSDS referral parents use `source_record_id`. Later legal-status additions are outside this branch. OLIDS clinical detail also needs `source_record_type` alongside `source_record_id`. Retain undated clinical rows, with parent dates as context rather than invented clinical dates.
+Join a static, named detail relation using its documented native key. Do not execute `source_model_name` as SQL. APC episode parents use `source_record_id`; acute attendances use `visit_occurrence_id`; e-RS referrals use `ubrn_id`; OLIDS encounter parents use `id`; MHSDS/CSDS referral parents use `source_record_id`. This example selects coded findings, not legal-status records. OLIDS clinical detail also needs `source_record_type` alongside `source_record_id`. Retain undated clinical rows, with parent dates as context rather than invented clinical dates.
 
 For an OLIDS appointment's directly recorded clinical items, use the existing bridge rather than a same-day join:
 
@@ -387,7 +404,7 @@ Unlinked clinical items remain available for a separately labelled person/time s
 
 ### No observed event versus DNA
 
-Retain three separate outcomes: observed qualifying event; no observed qualifying event within an assessed window; unassessable window. DNA is evidence on a supplied attendance record. For national attendance-coded contacts/OP, codes 3/7 are recorded non-attendance; use source definitions for other feeds. e-RS `appointment_dna_recorded`, `appointment_dna_updated` and `appointment_dna_resolved` are distinct actions, not three new DNAs or a universal final outcome. OLIDS status is extract-current and lacks reconstructable cancellation history.
+Retain three separate outcomes: observed qualifying event; no observed qualifying event within an assessed window; unassessable window. DNA is evidence on a supplied attendance record. For national attendance-coded contacts/OP, codes 3/7 are recorded non-attendance; use source definitions for other feeds. e-RS `appointment_dna_recorded`, `appointment_dna_updated` and `appointment_dna_resolved` are distinct actions, not three new DNAs or a universal final outcome. OLIDS slots carry mapped national `attendance_status_code` alongside original `status_code`; bookings have no status. A mapped OLIDS DNA can mean an unanswered call or incomplete written work, so it does not prove literal non-attendance. OLIDS status is extract-current and lacks reconstructable cancellation history. See [the OLIDS attendance definitions](longitudinal-activity.md).
 
 An absent record with complete feed evidence still means no event observed in the included feeds, not proof that care did not occur anywhere. Never derive an attendance flag from a left join failing to match.
 
@@ -415,34 +432,19 @@ Copy this table into each metric protocol and record:
 | Sensitivity | Longer lags/windows, same-day inclusion/exclusion, source restrictions, linkage classes and alternative deduplication. |
 | Reproducibility | SQL/version, extract dates, denominator and output grain; aggregate validation and disclosure policy. |
 
-## Acceptance checklist mapping
-
-| #1015 criterion | Deliverable |
-|---|---|
-| Temporal proximity is association, not causation | Guide and metric template; inferred labels in sequence/query outputs. |
-| Direct links, recorded referrals/bookings and time-only candidates distinguishable | Static clinical-parent joins, OLIDS bridge and e-RS booking-reference example with patient agreement. |
-| No observed event is not DNA; complete window required | First-event outcome logic, separate DNA guidance, expected-provider coverage rule and lag table. |
-| Same-day ambiguity and date-only records | Separate candidate query, day-state sequences, display-tie flags and boundary sensitivity. |
-| Codes/values linked to source and recorded parents | Clinical drill-down, exact shared column names and native-key table. |
-| Approved population/equity joins and access purpose | OLIDS-specific opt-out join, current/historical demographic distinction and template. |
-| Synthetic identifiers; no outputs/logs committed | All worked examples use `SYNTHETIC_*`; person-level examples live only as guide SQL. |
-| Reproducible aggregate quality checks | Existing coverage/mapping evidence, source/type and provider-period diagnostics, measured lag evidence and emission reconciliation analysis. |
-
 ## Reproducing the lag evidence
 
 [The activity lag analysis](../analyses/navigation/activity_delivery_lag.sql)
-reproduces the source-level retained receipt/extraction ages using this branch's
-adapters. The cohort dates are fixed so a later run uses the same activity window;
+reproduces source-level retained receipt/extraction ages from the prepared
+activity adapters. The cohort dates are fixed so a later run uses the same activity window;
 replacements can still change the result. Its minimum group size is 100 records.
 
 The following metadata-only Snowflake query reproduces MHSDS/CSDS header-history
-summaries for the fixed review cohort. It reads existing raw header views because
-this branch has no staging interface retaining every header version. It creates
-no warehouse object and is not a dbt model bypassing staging. It returns only
-source-level rounded distributions, with each provider/reporting period weighted
-equally. It does not return provider codes or source identifiers.
-The IAPT evidence came from its prepared header in the combined review; IAPT is
-excluded from this branch's executable examples and shared coverage.
+summaries for October 2024 to July 2026. It reads raw header views that retain
+submission history and returns source-level rounded distributions, with each
+provider/reporting period weighted equally. It does not return provider codes
+or source identifiers. IAPT is excluded from these examples and the shared
+coverage diagnostics.
 
 ```sql
 with headers as (
@@ -451,12 +453,12 @@ with headers as (
         reporting_period_end_date::date as period_end,
         effective_from::timestamp_ntz as received_at,
         dmic_date_added::timestamp_ntz as loaded_at
-    from DEV__STAGING.DBT_RAW.RAW_MHSDS_MHS000HEADER
+    from STAGING.DBT_RAW.RAW_MHSDS_MHS000HEADER
     union all
     select 'CSDS', organisation_code_code_of_provider::varchar,
         unique_submission_id::varchar, reporting_period_end_date::date,
         effective_from::timestamp_ntz, upload_date_time::timestamp_ntz
-    from DEV__STAGING.DBT_RAW.RAW_CSDS_CYP000HEADER
+    from STAGING.DBT_RAW.RAW_CSDS_CYP000HEADER
 ), submissions as (
     select dataset, provider, submission, period_end,
         min(received_at) as received_at, min(loaded_at) as loaded_at

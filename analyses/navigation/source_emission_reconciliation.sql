@@ -1,5 +1,5 @@
 -- One aggregate per output/dataset/detail model/emitted type. Run on deployment
--- or a branch change, not daily. Primary events retain undated rows; optional
+-- or an adapter change, not daily. Primary events retain undated rows; optional
 -- milestones need their supplied date. OLIDS reconciles the prepared snapshot.
 with expected as (
     select 'healthcare_event' as output_type, 'MHSDS' as source_dataset,
@@ -55,7 +55,7 @@ with expected as (
     from {{ ref('obt_encounter_apc') }} where end_date is not null
     union all
     select 'healthcare_event' as output_type, 'SUS_APC' as source_dataset,
-        'obt_encounter_apc' as source_model_name, 'decision_to_admit' as emitted_type, count(*) as expected_record_count
+        'obt_encounter_apc' as source_model_name, 'inpatient_decision_to_admit' as emitted_type, count(*) as expected_record_count
     from {{ ref('obt_encounter_apc') }} where decided_to_admit_date is not null
     union all
     select 'healthcare_event' as output_type, 'SUS_APC' as source_dataset,

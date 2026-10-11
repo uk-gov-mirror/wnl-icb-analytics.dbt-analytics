@@ -88,7 +88,7 @@ Retained source or reference label for status_code.
 {% enddocs %}
 
 {% docs navigation_attendance_code %}
-Recorded attendance status. A null value means no attendance status is supplied in this branch.
+Recorded attendance status. A null value means no attendance status is supplied for this source milestone.
 OLIDS uses its national mapping. A mapped DNA category can include incomplete written work or an unanswered call and does not prove literal non-attendance.
 {% enddocs %}
 

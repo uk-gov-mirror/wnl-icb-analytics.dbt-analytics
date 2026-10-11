@@ -102,7 +102,7 @@ models:
           Clinical items with a mapped code and no mapped label.
       - name: result_applicable_record_count
         description: >-
-          MHSDS/CSDS observations and referral/activity/clustering assessments, plus OLIDS observations. Other clinical types and this branch's ECDS items do not supply result values.
+          MHSDS/CSDS observations and referral/activity/clustering assessments, plus OLIDS observations. ECDS observations and scored assessments are not yet included in this diagnostic.
       - name: result_value_record_count
         description: >-
           Applicable clinical items with a result value. Presence does not establish a usable score.
