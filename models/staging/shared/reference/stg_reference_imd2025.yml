@@ -1,20 +1,132 @@
 models:
   - name: stg_reference_imd2025
-    description: Index of Multiple Deprivation 2025 by LSOA 2021
+    description: >-
+      English Indices of Deprivation 2025 File 7 from the analyst-managed source.
+      One row per English LSOA on 2021 boundaries. Contains the published scores,
+      ranks, deciles and population denominators without selecting a local population.
+      Includes MHCLG's November 2025 correction of the local authority assignment for
+      LSOA E01027305 to West Northamptonshire.
+      Source: https://www.gov.uk/government/statistics/english-indices-of-deprivation-2025
     config:
       meta:
         owner:
           name: KateHomer55
     columns:
       - name: lsoa_code_2021
-        description: Primary key - LSOA 2021 code
+        description: "ONS lower-layer super output area code on 2021 boundaries. Unique within this release."
         data_tests:
           - unique
           - not_null
       - name: index_of_multiple_deprivation_decile
-        description: IMD decile (1 = most deprived, 10 = least deprived)
+        description: "Index of Multiple Deprivation national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
         data_tests:
           - not_null
       - name: index_of_multiple_deprivation_score
-        description: IMD score
+        description: "Index of Multiple Deprivation score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: lsoa_name_2021
+        description: "ONS lower-layer super output area name on 2021 boundaries."
+      - name: local_authority_district_code_2024
+        description: "ONS local authority district code on 2024 boundaries, as supplied with this release."
+      - name: local_authority_district_name_2024
+        description: "Local authority district name on 2024 boundaries, as supplied with this release."
+      - name: index_of_multiple_deprivation_rank
+        description: "Index of Multiple Deprivation rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: income_score
+        description: "Proportion of the population experiencing income deprivation, on a 0 to 1 scale."
+      - name: income_rank
+        description: "Income Deprivation Domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: income_decile
+        description: "Income Deprivation Domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: employment_score
+        description: "Proportion of the working-age population involuntarily excluded from the labour market, on a 0 to 1 scale."
+      - name: employment_rank
+        description: "Employment Deprivation Domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: employment_decile
+        description: "Employment Deprivation Domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: education_skills_and_training_score
+        description: "Education, Skills and Training Deprivation Domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: education_skills_and_training_rank
+        description: "Education, Skills and Training Deprivation Domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: education_skills_and_training_decile
+        description: "Education, Skills and Training Deprivation Domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: health_deprivation_and_disability_score
+        description: "Health Deprivation and Disability Domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: health_deprivation_and_disability_rank
+        description: "Health Deprivation and Disability Domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: health_deprivation_and_disability_decile
+        description: "Health Deprivation and Disability Domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: crime_score
+        description: "Crime Domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: crime_rank
+        description: "Crime Domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: crime_decile
+        description: "Crime Domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: barriers_to_housing_and_services_score
+        description: "Barriers to Housing and Services Domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: barriers_to_housing_and_services_rank
+        description: "Barriers to Housing and Services Domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: barriers_to_housing_and_services_decile
+        description: "Barriers to Housing and Services Domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: living_environment_score
+        description: "Living Environment Deprivation Domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: living_environment_rank
+        description: "Living Environment Deprivation Domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: living_environment_decile
+        description: "Living Environment Deprivation Domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: idaci_score
+        description: "Proportion of children aged 0 to 15 living in income-deprived families, on a 0 to 1 scale."
+      - name: idaci_rank
+        description: "Income Deprivation Affecting Children Index (IDACI) rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: idaci_decile
+        description: "Income Deprivation Affecting Children Index (IDACI) national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: idaopi_score
+        description: "Proportion of people aged 60 and over experiencing income deprivation, on a 0 to 1 scale."
+      - name: idaopi_rank
+        description: "Income Deprivation Affecting Older People Index (IDAOPI) rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: idaopi_decile
+        description: "Income Deprivation Affecting Older People Index (IDAOPI) national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: children_and_young_people_score
+        description: "Children and Young People Sub-domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: children_and_young_people_rank
+        description: "Children and Young People Sub-domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: children_and_young_people_decile
+        description: "Children and Young People Sub-domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: adult_skills_score
+        description: "Published proportion of people aged 25 to 66 with no or low qualifications and/or limited English proficiency, on a 0 to 1 scale. The age range and Census basis differ between releases."
+      - name: adult_skills_rank
+        description: "Adult Skills Sub-domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: adult_skills_decile
+        description: "Adult Skills Sub-domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: geographical_barriers_score
+        description: "Geographical Barriers Sub-domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: geographical_barriers_rank
+        description: "Geographical Barriers Sub-domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: geographical_barriers_decile
+        description: "Geographical Barriers Sub-domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: wider_barriers_score
+        description: "Wider Barriers Sub-domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: wider_barriers_rank
+        description: "Wider Barriers Sub-domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: wider_barriers_decile
+        description: "Wider Barriers Sub-domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: indoors_score
+        description: "Indoors Sub-domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: indoors_rank
+        description: "Indoors Sub-domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: indoors_decile
+        description: "Indoors Sub-domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: outdoors_score
+        description: "Outdoors Sub-domain score as published. Higher values indicate greater deprivation; this is an index score, not a percentage."
+      - name: outdoors_rank
+        description: "Outdoors Sub-domain rank among all English LSOAs in this release. Rank 1 is the most deprived."
+      - name: outdoors_decile
+        description: "Outdoors Sub-domain national decile. 1 is the most deprived 10% of English LSOAs and 10 the least deprived 10%."
+      - name: total_population_mid_2022
+        description: "Published total population denominator for mid-2022, including prisoners. Count of people."
+      - name: dependent_children_aged_0_to_15_mid_2022
+        description: "Published population denominator aged 0 to 15 for mid-2022, including prisoners. Count of people, used for IDACI."
+      - name: older_population_aged_60_and_over_mid_2022
+        description: "Published population denominator aged 60 and over for mid-2022, including prisoners. Count of people, used for IDAOPI."
+      - name: working_age_population_18_to_66_for_use_with_employment_deprivation_domain_mid_2022
+        description: "Published Employment Deprivation Domain denominator for mid-2022: people aged 18 to 66, including prisoners. Count of people."
 
