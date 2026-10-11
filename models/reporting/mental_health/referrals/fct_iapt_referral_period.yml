@@ -9,7 +9,8 @@ models:
     assessment and first treatment dates supplied with that month's version. For a confirmed transfer successor
     (int_iapt_referral_transfer), care recorded under the earlier provider code counts, so a course moved by a
     provider code change is not shown as waiting again. Later accepted corrections can revise historical rows.
-    Select one reporting period for a snapshot; apply is_nhse_use_pathway when reconciling to NHS England.
+    Select one reporting period for a snapshot. These local chain-aware waiting-list measures do not reproduce
+    NHS England monthly waiting-list measures. is_nhse_use_pathway retains the supplied monthly eligibility flag.
   config:
     meta:
       owner:
@@ -68,9 +69,9 @@ models:
   - name: waiting_state
     description: State at period end. ended when discharged by then; in_treatment when a first treatment is recorded;
       awaiting_treatment when assessed but not yet treated; awaiting_assessment with neither; not_started when
-      received after the period end; referral_date_missing without a received date. NHS England's waiting for
-      treatment count (M038) is awaiting_assessment plus awaiting_treatment; waiting for assessment (M029) is
-      awaiting_assessment. Recorded evidence, not national waiting-list eligibility.
+      received after the period end; referral_date_missing without a received date. Includes care under earlier
+      provider codes of a confirmed transfer chain. This local waiting-list state does not reproduce NHS England
+      monthly waiting-list measures or national eligibility rules.
     data_tests:
     - not_null
     - accepted_values:
@@ -78,10 +79,10 @@ models:
           values: [ended, in_treatment, awaiting_treatment, awaiting_assessment, not_started, referral_date_missing]
   - name: days_waiting_at_period_end
     description: Calendar days from referral receipt to the period end for awaiting_assessment and awaiting_treatment
-      rows, as in NHS England measures M030 and M039 to M045. Null for other states.
+      rows. Local chain-aware population, including care before confirmed transfers. Null for other states.
   - name: days_since_last_treatment
-    description: Calendar days from last_treatment_date to the period end for referrals open at period end, as in
-      M019 to M022. Null when closed or never treated.
+    description: Local chain-aware calendar days from last_treatment_date to the period end for referrals open at
+      period end, including care before confirmed transfers. Null when closed or never treated.
   - name: is_nhse_use_pathway
     description: NHS England UsePathway_Flag on this period's version. NHS England's monthly measures filter it to
       TRUE.

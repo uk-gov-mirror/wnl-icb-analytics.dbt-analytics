@@ -108,13 +108,13 @@ select
     , s.pathway_last_treatment_date as last_treatment_date
     , s.is_recorded_open_at_period_end
     , s.waiting_state
-    -- Waits at period end as in NHS England measures M030 and M039 to M045.
+    -- Local waiting-list population retains predecessor care across confirmed transfers.
     , iff(
         s.waiting_state in ('awaiting_assessment', 'awaiting_treatment')
         , datediff(day, s.referral_request_received_date, s.reporting_period_end_date)
         , null
     ) as days_waiting_at_period_end
-    -- Time since the last treatment for open referrals, as in M019 to M022.
+    -- Local interval since the latest treatment, including care before a confirmed transfer.
     , iff(
         s.is_recorded_open_at_period_end
         , datediff(day, s.pathway_last_treatment_date, s.reporting_period_end_date)

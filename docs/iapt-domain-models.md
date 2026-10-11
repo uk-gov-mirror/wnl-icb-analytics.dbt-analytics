@@ -185,7 +185,9 @@ referral can transfer twice, and about 260 did.
   earliest treatment. The chain's first treatment is earlier than the
   successor's own for about 40% of successors, and a further 16% have no first
   treatment of their own. Separately named pathway waits use these chain dates;
-  NHS England first-treatment waits use each referral's own supplied date.
+  unprefixed assessment, first-treatment and first-to-second treatment waits use
+  each referral's own supplied dates. A predecessor without its own date does
+  not gain an unprefixed wait from a successor.
 - `fct_iapt_referral_period` counts care recorded under the earlier code, so a
   moved course is not shown as waiting again.
 
@@ -273,17 +275,25 @@ window to reproduce a published figure.
 |---|---|---|
 | `ended_referral_type` | M073 to M076 | For a recorded discharge: `finished_course_treatment` when completed treatment is flagged, `treated_once` with one treatment contact, `seen_not_treated` with contacts but no treatment contact, `not_seen` with no contact |
 | `is_reliably_recovered` | M193 over the M195 denominator | Recovered and reliably improved; FALSE for other finished courses not below caseness at the start; null outside that denominator |
-| `days_referral_to_first_assessment` | M024 to M027 | Receipt to first assessment |
+| `days_referral_to_first_assessment` | M024 to M027 date basis | Own receipt to supplied first assessment, selected by assessment month and grouped into fewer than 29, 29 to 56, 57 to 90 or over 90 days |
 | `days_referral_to_first_treatment` | M032 to M035, M049 | Receipt to first treatment |
 | `is_first_treatment_within_6_weeks`, `_18_weeks` | M036, M037 | 42 and 126 days or fewer |
-| `days_first_to_second_treatment` | M046, M047 | First to second treatment |
+| `days_first_to_second_treatment` | Monthly M046, M047 date basis | Own supplied first to second treatment, selected by second-treatment month and counted when over 28 or over 90 days |
 | `consultation_mechanism_group` | M1001 to M1020 | Delivery group of attended or unplanned contacts |
-| `fct_iapt_referral_period.waiting_state` | M029, M038 | Waiting for assessment or treatment at the period end |
 
 A transfer successor's ended type and outcome flags cover only care after the
-transfer, as NHS England derives them per provider-qualified referral.
-First-treatment waits use each referral's supplied `first_treatment_date` and
-its own receipt-to-treatment interval, including on transfer successors.
+transfer, as NHS England derives them per provider-qualified referral. The
+summary uses each referral's own counts, completed-treatment and recovery flags,
+caseness and reliable-change statuses. It does not inherit them across a chain.
+All unprefixed waits use each referral's supplied dates, including on transfer
+successors. Missing supplied dates leave their waits null even when a chain date
+is available.
+In `sem_iapt`, select and group monthly M024 to M027 by
+`referral_first_assessment_month`, and monthly M046/M047 by
+`referral_second_treatment_month`. Filter `referrals_is_nhse_use_pathway` true.
+The assessment bands are fewer than 29, 29 to 56, 57 to 90 and over 90 days.
+First-to-second treatment counts use strictly over 28 or over 90 days.
+Their denominators and local medians have no NHS England measure identifiers.
 In `sem_iapt`, select and group M036, M037 and M049 by
 `referral_first_treatment_month` and filter `referrals_is_nhse_use_pathway` true.
 The population includes open and discharged referrals first treated in that
@@ -291,10 +301,18 @@ period. The published finished-course waiting-time KPI instead selects
 completed courses by discharge month and is not defined in this view.
 
 The separately named `pathway_` semantic wait measures use the earliest chain
-treatment date and count each original referral once. Provider and other
+assessment or treatment date, or its first-to-second treatment interval, and
+count each original referral once. Provider and other
 referral dimensions describe the original referral, including treatment after
 transfer. These local measures have no NHS England measure identifiers.
-Select and group them by `pathway_first_treatment_month`.
+Select and group them by `pathway_first_assessment_month`,
+`pathway_first_treatment_month` or `pathway_second_treatment_month` for the
+corresponding wait. Summary pathway dates and waits remain repeated on chain
+members for inspection; the semantic measures exclude successors.
+
+`fct_iapt_referral_period` intentionally retains care under predecessor codes
+when deriving waiting state and elapsed waits. Its waiting-list measures are
+local chain-aware snapshots, not reproductions of NHS England monthly measures.
 
 The referral fact also carries all 19 supplied per-therapy course totals
 (I101D34-I101D52), named `nhse_<therapy>_count`. These NHS England derivations
