@@ -36,7 +36,7 @@ hdp_codes AS (
 
     SELECT
         person_id,
-        clinical_effective_date AS hdp_code_date
+        TO_DATE(clinical_effective_date) AS hdp_code_date
     FROM {{ ref('int_hypertensive_disorders_of_pregnancy_all') }}
 
 ),

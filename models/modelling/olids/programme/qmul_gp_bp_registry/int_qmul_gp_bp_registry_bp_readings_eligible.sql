@@ -28,10 +28,10 @@ INNER JOIN {{ ref('int_qmul_gp_bp_registry_base_population') }} pop
     ON bp.person_id = pop.person_id
 LEFT JOIN {{ ref('int_hdp_exclusion_windows_all') }} w
     ON bp.person_id = w.person_id
-    AND bp.effective_date BETWEEN w.window_start AND w.window_end
+    AND TO_DATE(bp.effective_date) BETWEEN w.window_start AND w.window_end
 
 WHERE w.window_id IS NULL
-  AND bp.effective_date BETWEEN {{ qmul_gp_bp_registry_extraction_start_date() }}
-                            AND {{ qmul_gp_bp_registry_extraction_end_date() }}
+  AND TO_DATE(bp.effective_date) BETWEEN {{ qmul_gp_bp_registry_extraction_start_date() }}
+                                     AND {{ qmul_gp_bp_registry_extraction_end_date() }}
 
 ORDER BY bp.person_id, bp.effective_date

@@ -2,7 +2,8 @@ models:
   - name: int_pregnancy_episodes_all
     description: 'One row per pregnancy episode per person, for all people with pregnancy or outcome observations.
 
-      Same-day codes are ordered pregnancy, delivery, then pregnancy loss. A pregnancy code starts a new episode when there is no prior code, the prior code is an outcome, or the prior code is more than pregnancy_episode_max_weeks earlier.
+      Observation dates ignore time of day. Same-day codes are ordered pregnancy, delivery, then pregnancy loss. A pregnancy code starts a new episode when there is no prior code, the prior code is an outcome, or the episode''s first pregnancy code is more than pregnancy_episode_max_weeks earlier.
+      A pregnancy code exactly at the maximum duration stays in the episode; a later code starts a new episode on its own date.
       An outcome starts an orphan episode only when no pregnancy code was recorded within the preceding pregnancy_episode_max_weeks (default 42). Its start is back-dated by that duration.
       Repeated outcomes within that duration of the latest pregnancy code join the episode; its outcome stays the earliest delivery or loss.
       The episode ends at the earliest outcome or at start plus the maximum duration when no outcome is recorded. The end is capped at that maximum duration.'

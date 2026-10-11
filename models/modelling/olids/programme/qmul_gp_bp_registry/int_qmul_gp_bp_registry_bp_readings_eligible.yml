@@ -3,6 +3,7 @@ models:
     description: 'BP readings eligible for inclusion in the QMUL GP BP Registry cohort.
 
       Paired systolic + diastolic BP events (from int_blood_pressure_all) for persons in the registry base population, with readings dropped if the event date falls inside any pregnancy or HDP exclusion window or outside the study extraction period (qmul_gp_bp_registry_extraction_start_date / _end_date, default 2010-01-01 to 2025-12-31).
+      Exclusion and extraction boundaries use inclusive calendar dates, ignoring time of day.
       One row per person and retained reading date, using the upstream lowest-systolic reading for each date.'
     config:
       meta:

@@ -8,10 +8,11 @@
 Pregnancy episodes constructed from int_pregnancy_observations_all.
 
 Episode logic:
-  - Same-day events are ordered pregnancy, delivery, then pregnancy loss.
+  - Observation dates ignore time of day. Same-day events are ordered pregnancy,
+    delivery, then pregnancy loss.
   - A pregnancy code starts a new episode if not preceded by an open episode (no
-    prior code, prior code was an outcome, or prior code more than
-    pregnancy_episode_max_weeks ago).
+    prior code, prior code was an outcome, or the episode's first pregnancy code
+    was more than pregnancy_episode_max_weeks ago). The maximum date is inclusive.
   - A delivery / pregnancy_loss code starts an orphan episode only when no
     pregnancy code is recorded in the preceding pregnancy_episode_max_weeks.
     Repeated outcomes within that period join the episode; its outcome stays
@@ -27,11 +28,11 @@ Episode logic:
 One row per pregnancy episode per person. Used by exclusion-window and cohort models.
 */
 
-WITH preg_obs AS (
+WITH RECURSIVE preg_obs AS (
 
     SELECT
         person_id,
-        clinical_effective_date,
+        TO_DATE(clinical_effective_date) AS clinical_effective_date,
         CASE
             WHEN is_pregnancy_code THEN 'pregnancy'
             WHEN is_delivery_outcome_code AND code_type = 'delivery' THEN 'delivery'
@@ -61,9 +62,9 @@ with_context AS (
         clinical_effective_date,
         event_type,
         event_priority,
-        LAG(clinical_effective_date) OVER (
+        ROW_NUMBER() OVER (
             PARTITION BY person_id ORDER BY clinical_effective_date, event_priority
-        ) AS prev_date,
+        ) AS event_number,
         LAG(event_type) OVER (
             PARTITION BY person_id ORDER BY clinical_effective_date, event_priority
         ) AS prev_event_type,
@@ -81,15 +82,12 @@ episode_flags AS (
         person_id,
         clinical_effective_date,
         event_type,
-        event_priority,
+        event_number,
         CASE
-            -- A pregnancy code starts a new episode if not inside an open one
+            -- The duration limit is applied during assignment from the episode's first code.
             WHEN event_type = 'pregnancy' AND (
-                prev_date IS NULL
+                prev_event_type IS NULL
                 OR prev_event_type IN ('delivery', 'pregnancy_loss')
-                OR DATEDIFF(
-                    'day', prev_date, clinical_effective_date
-                ) > {{ pregnancy_episode_max_weeks() }} * 7
             ) THEN 1
             -- An outcome code starts an "orphan" episode when no recent pregnancy
             -- code precedes it (otherwise it just closes an existing episode)
@@ -105,19 +103,51 @@ episode_flags AS (
 
 ),
 
-episode_assignment AS (
+-- Carry the episode's first date: a chain of short gaps must not outlive its window.
+episode_assignment (
+    person_id, clinical_effective_date, event_type, event_number,
+    episode_number, episode_first_event_date
+) AS (
 
     SELECT
         person_id,
         clinical_effective_date,
         event_type,
-        event_priority,
-        SUM(is_new_episode) OVER (
-            PARTITION BY person_id
-            ORDER BY clinical_effective_date, event_priority
-            ROWS UNBOUNDED PRECEDING
-        ) AS episode_number
+        event_number,
+        1 AS episode_number,
+        clinical_effective_date AS episode_first_event_date
     FROM episode_flags
+    WHERE event_number = 1
+
+    UNION ALL
+
+    SELECT
+        e.person_id,
+        e.clinical_effective_date,
+        e.event_type,
+        e.event_number,
+        CASE
+            WHEN e.is_new_episode = 1 OR (
+                e.event_type = 'pregnancy'
+                AND e.clinical_effective_date > DATEADD(
+                    'week', {{ pregnancy_episode_max_weeks() }}, a.episode_first_event_date
+                )
+            ) THEN a.episode_number + 1
+            ELSE a.episode_number
+        END AS episode_number,
+        CASE
+            WHEN e.is_new_episode = 1 OR (
+                e.event_type = 'pregnancy'
+                AND e.clinical_effective_date > DATEADD(
+                    'week', {{ pregnancy_episode_max_weeks() }}, a.episode_first_event_date
+                )
+            ) THEN e.clinical_effective_date
+            ELSE a.episode_first_event_date
+        END AS episode_first_event_date
+    FROM episode_assignment a
+    INNER JOIN episode_flags e
+        ON e.person_id = a.person_id
+        AND e.event_number = a.event_number + 1
 
 ),
 
