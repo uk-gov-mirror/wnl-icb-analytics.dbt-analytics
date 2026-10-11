@@ -15,9 +15,6 @@ with versions as (
         , care_activity_id
         , pathway_id
         , nullif(trim(code_proc_and_proc_status), '') as procedure_expression
-        , nullif(upper(trim(find_scheme_in_use)), '') as finding_scheme_code
-        , nullif(trim(code_find), '') as finding_code
-        , nullif(upper(trim(validated_finding_code)), '') as nhsd_validated_finding_code
         , nullif(trim(code_obs), '') as observation_code
         , nullif(trim(obs_value), '') as observation_value
         , nullif(trim(unit_measure), '') as unit_of_measurement_code
@@ -45,16 +42,6 @@ with versions as (
         , {{ iapt_procedure_focus_code('v.procedure_expression') }} as procedure_concept_code
         , {{ iapt_procedure_context_code('v.procedure_expression') }} as procedure_context_code
         , {{ iapt_asserted_procedure_code('v.procedure_expression') }} as asserted_procedure_code
-        , case v.finding_scheme_code when '01' then 'ICD-10' when '04' then 'SNOMED CT' end
-            as finding_coding_system
-        , iff(finding_coding_system = 'ICD-10', {{ iapt_icd10_lookup_code('v.finding_code') }}, null)
-            as finding_code_normalised
-        -- NHSD pads three-character codes with X or 9 and marks unmatched codes -3.
-        , iff(
-            finding_coding_system = 'ICD-10' and coalesce(v.nhsd_validated_finding_code, '') <> '-3'
-            , {{ iapt_icd10_lookup_code('coalesce(v.nhsd_validated_finding_code, v.finding_code)') }}, null
-        ) as finding_icd10_lookup_code
-        , iff(finding_coding_system = 'SNOMED CT', v.finding_code, null) as finding_snomed_code
         , try_to_decimal(v.observation_value, 38, 9) as observation_value_numeric
     from versions as v
 )
@@ -116,42 +103,6 @@ with versions as (
         , therapy.legacy_therapy_type_code
         , therapy.legacy_therapy_type_description as legacy_therapy_type_name
 
-        , p.finding_code is not null as has_finding
-        , p.finding_scheme_code
-        , finding_scheme.description as finding_scheme_name
-        , p.finding_coding_system
-        , p.finding_code
-        , p.nhsd_validated_finding_code
-        , p.finding_snomed_code
-        , {{ iapt_icd10_precision('p.finding_code_normalised') }} as finding_icd10_precision
-        , iff(
-            p.finding_coding_system = 'ICD-10'
-            , coalesce(length(p.finding_code_normalised) = 3 and length(p.finding_icd10_lookup_code) = 4
-                and startswith(p.finding_icd10_lookup_code, p.finding_code_normalised), false)
-            , null
-        ) as is_finding_code_extended_by_nhsd
-        , left(p.finding_icd10_lookup_code, 3) as finding_icd10_category_code
-        , finding_icd10_category.description as finding_icd10_category_name
-        -- Three-character submissions keep the category label, not NHSD's padded "unspecified" code.
-        , case p.finding_coding_system
-            when 'ICD-10' then iff(
-                is_finding_code_extended_by_nhsd
-                    or finding_icd10_precision in ('three_character', 'three_character_filler')
-                , coalesce(finding_icd10_category.description, finding_icd10.description)
-                , finding_icd10.description
-            )
-            when 'SNOMED CT' then finding_snomed.preferred_term
-        end as finding_name
-        , case
-            when p.finding_code is null then 'code_missing'
-            when p.finding_scheme_code is null then 'coding_scheme_missing'
-            when p.finding_coding_system is null then 'coding_scheme_unrecognised'
-            when p.finding_coding_system = 'ICD-10' and p.nhsd_validated_finding_code = '-3'
-                then 'invalid_code_supplied'
-            when finding_name is not null then 'labelled'
-            else 'code_unmatched'
-        end as finding_label_status
-
         , p.observation_code is not null or p.observation_value is not null as has_observation
         , p.observation_code
         , observation_concept.preferred_term as observation_name
@@ -203,15 +154,6 @@ with versions as (
         on p.procedure_context_code = procedure_context.snomed_code
     left join {{ ref('iapt_therapy_type_definitions') }} as therapy
         on p.asserted_procedure_code = therapy.snomed_code
-    left join {{ ref('mhsds_care_activity_code_lookup') }} as finding_scheme
-        on finding_scheme.code_set_name = 'finding_scheme'
-        and p.finding_scheme_code = finding_scheme.code
-    left join {{ ref('icd10_code') }} as finding_icd10
-        on p.finding_icd10_lookup_code = finding_icd10.code
-    left join {{ ref('icd10_code') }} as finding_icd10_category
-        on left(p.finding_icd10_lookup_code, 3) = finding_icd10_category.code
-    left join {{ ref('snomed_concept') }} as finding_snomed
-        on p.finding_snomed_code = finding_snomed.snomed_code
     left join {{ ref('snomed_concept') }} as observation_concept
         on p.observation_code = observation_concept.snomed_code
     left join {{ ref('iapt_assessment_scale') }} as observation_scale

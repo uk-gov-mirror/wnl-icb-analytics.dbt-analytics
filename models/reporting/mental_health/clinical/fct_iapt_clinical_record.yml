@@ -4,7 +4,7 @@ models:
     description: >-
       NHS Talking Therapies (IAPT data set) clinical items in one list: one row
       per scored assessment item, recorded condition, and care activity
-      procedure, finding or observation. The only inclusion union for IAPT
+      procedure or observation. The only inclusion union for IAPT
       clinical items, used by analysts and the person clinical-record adapter.
       A view that selects from fct_iapt_assessment_score,
       fct_iapt_health_condition and fct_iapt_care_activity; use those facts for
@@ -19,8 +19,7 @@ models:
       ceases to be valid (ETOS v2.1.22 IDS603 row 24) and is excluded here;
       fct_iapt_health_condition keeps it with is_superseded_by_dated_record.
       IDS202 Coded Finding was not populated in the source when profiled in
-      September 2026, so finding items do not currently appear; the branch is
-      kept so they flow when supplied.
+      September 2026. Those fields remain in raw until populated.
     config:
       meta:
         owner:
@@ -30,13 +29,13 @@ models:
         description: Hash of source model, originating record id and clinical record type.
         data_tests: [not_null, unique]
       - name: originating_source_record_id
-        description: source_record_id in source_model_name. One activity yields up to three items.
+        description: source_record_id in source_model_name. One activity yields up to two items.
       - name: source_model_name
         description: Typed fact supplying the item.
       - name: source_table
         description: IAPT table supplying the item (IDS202, IDS601, IDS602, IDS603, IDS606 or IDS607).
       - name: clinical_record_type
-        description: assessment_score, previous_diagnosis, long_term_condition, presenting_complaint, procedure, finding or observation. Finding items are not currently populated in the source.
+        description: assessment_score, previous_diagnosis, long_term_condition, presenting_complaint, procedure or observation.
       - name: person_id
         description: IAPT Person_ID. IAPT-scoped; use sk_patient_id across datasets.
       - name: parent_record_id
@@ -68,7 +67,7 @@ models:
       - name: clinical_qualifier_description
         description: Label of the procedure context.
       - name: snomed_code
-        description: Atomic SNOMED CT code the item supports - assessment observable, SNOMED-coded condition or finding, observation, or an asserted procedure. Null for ICD-10 items and for procedures that are offered, planned or otherwise refined.
+        description: Atomic SNOMED CT code the item supports - assessment observable, SNOMED-coded condition, observation, or an asserted procedure. Null for ICD-10 items and for procedures that are offered, planned or otherwise refined.
       - name: clinical_value
         description: Assessment score or observation value as submitted.
       - name: clinical_value_description

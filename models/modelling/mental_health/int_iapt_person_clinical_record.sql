@@ -5,7 +5,7 @@
 
 -- One row per IAPT clinical item, selected from fct_iapt_clinical_record, the only inclusion union.
 -- source_record_id drills down to the typed fact named in source_model_name; one care activity
--- can supply a procedure, finding and observation, told apart by source_record_type.
+-- can supply a procedure and observation, told apart by source_record_type.
 select
     {{ dbt_utils.generate_surrogate_key(["'IAPT'", 'c.source_record_id']) }} as clinical_record_id,
     c.sk_patient_id::varchar as sk_patient_id,

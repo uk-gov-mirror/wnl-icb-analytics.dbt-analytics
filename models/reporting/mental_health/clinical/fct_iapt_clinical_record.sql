@@ -1,7 +1,7 @@
 {{ config(materialized='view') }}
 
 -- The single inclusion union for IAPT clinical items. Every value is selected from a typed
--- fact, not derived here; a care activity yields up to three items.
+-- fact, not derived here; a care activity yields up to two items.
 with items as (
     select
         source_record_id as originating_source_record_id
@@ -145,54 +145,6 @@ with items as (
         , source_loaded_at
     from {{ ref('fct_iapt_care_activity') }}
     where has_procedure
-
-    union all
-
-    select
-        source_record_id
-        , 'fct_iapt_care_activity'
-        , source_table
-        , 'finding'
-        , person_id
-        , sk_patient_id
-        , referral_id
-        , care_contact_id
-        , care_activity_id
-        , parent_record_id
-        , parent_record_type
-        , parent_model_name
-        , clinical_date
-        , clinical_time
-        , clinical_at
-        , clinical_time_precision
-        , clinical_time_basis
-        , clinical_date_status
-        , is_source_date_inconsistent
-        , finding_coding_system
-        , finding_code
-        , finding_name
-        , finding_label_status
-        , null::varchar
-        , null::varchar
-        , finding_snomed_code
-        , null::varchar
-        , null::varchar
-        , null::number(38, 9)
-        , null::varchar
-        , null::varchar
-        , null::varchar
-        , null::varchar
-        , null::varchar
-        , null::number(38, 9)
-        , null::varchar
-        , null::boolean
-        , provider_organisation_code
-        , provider_organisation_name
-        , reporting_period_end_date
-        , source_file_received_at
-        , source_loaded_at
-    from {{ ref('fct_iapt_care_activity') }}
-    where has_finding
 
     union all
 

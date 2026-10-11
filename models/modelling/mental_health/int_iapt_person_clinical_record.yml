@@ -2,7 +2,7 @@ version: 2
 models:
 - name: int_iapt_person_clinical_record
   description: NHS Talking Therapies (IAPT data set) clinical items, one row per scored assessment item, recorded
-    condition, and care activity procedure, finding or observation. Selects fct_iapt_clinical_record in the column
+    condition, and care activity procedure or observation. Selects fct_iapt_clinical_record in the column
     shape of the other source clinical-record feeds, for the later cross-system longitudinal stream. Undated and
     unlinked items are kept. Superseded undated complaints remain in the condition fact but are excluded here.
     Condition categories include explicit absence and generic history codes, so they are not positive disease flags.
@@ -23,13 +23,13 @@ models:
   - name: source_person_id
     description: IAPT Person_ID. Only comparable within the IAPT data set.
   - name: source_record_type
-    description: assessment_score, health_condition, care_activity_procedure, care_activity_finding or
+    description: assessment_score, health_condition, care_activity_procedure or
       care_activity_observation. Together with source_record_id it identifies one item.
   - name: source_record_id
-    description: source_record_id in source_model_name. One care activity can supply a procedure, finding and
+    description: source_record_id in source_model_name. One care activity can supply a procedure and
       observation item under the same ID.
   - name: clinical_record_type
-    description: assessment_score, previous_diagnosis, long_term_condition, presenting_complaint, procedure, finding
+    description: assessment_score, previous_diagnosis, long_term_condition, presenting_complaint, procedure
       or observation.
   - name: clinical_record_date
     description: Recorded clinical date. Care activities and activity-level assessments take the date of their

@@ -5,8 +5,14 @@ models:
     Aggregate analysis of NHS Talking Therapies (IAPT data set) referrals, contacts, care activities, assessment
     items, recorded conditions, monthly referral state and provider submission quality. The semantic view connects
     the reporting tables at their defined row meanings and supplies named measures, including NHS England finished
-    courses, reliable recovery and waits. Child facts relate to referrals by referral_id; contacts and referral
-    periods relate to provider submissions by provider and month. Assessment rows are items, not questionnaires.
+    courses, reliable recovery and waits. First-treatment measures count each confirmed transfer chain once on
+    its original referral, using the chain first-treatment date and the original referral provider and dimensions.
+    Filter and group those measures by referral_first_treatment_month to select the treatment-period population.
+    Procedure breakdowns retain offered, planned and done context; the asserted procedure code is populated
+    only for bare concepts or expressions refined only by Done.
+    Child facts and referral periods relate to the latest referral only when referral_id and non-null person_id
+    agree. Unmatched children remain in counts with null referral dimensions. Contacts and referral periods
+    relate to provider submissions by provider and month. Assessment rows are items, not questionnaires.
   config:
     materialized: semantic_view
     schema: SEMANTIC
@@ -15,3 +21,4 @@ models:
         name: Eddie Davison
   data_tests:
   - iapt_semantic_counts
+  - iapt_semantic_waits

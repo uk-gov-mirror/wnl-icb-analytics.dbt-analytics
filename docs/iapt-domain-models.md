@@ -229,6 +229,8 @@ about 400 of them map to more than one patient key, and none map all their
 Person_IDs to one key. A changed Person_ID is therefore not treated as the same
 person. Each record keeps the Person_ID of its own latest version, and a parent
 is published only when it exists and agrees on referral, contact and person.
+Semantic relationships to the latest referral also require the same non-null
+Person_ID. Unmatched children remain in counts with null referral dimensions.
 
 Within one accepted submission every care activity joins its contact, and
 every activity assessment joins its activity, with no person or referral
@@ -279,7 +281,13 @@ window to reproduce a published figure.
 
 A transfer successor's ended type and outcome flags cover only care after the
 transfer, as NHS England derives them per provider-qualified referral; its
-waits use the chain dates.
+waits use the chain dates. In `sem_iapt`, first-treatment counts and medians
+count each chain once on its original referral. Provider and other referral
+dimensions therefore describe the original referral, including when treatment
+starts after transfer. These are course waits attributed to the receiving
+provider at referral receipt, not counts of treatments delivered by each provider.
+Filter and group these measures by `referral_first_treatment_month`, the month
+of `pathway_first_treatment_date`, to select the treatment-period population.
 
 ## Assessments
 
@@ -386,7 +394,10 @@ their `site_name` is null.
 A procedure maps to an atomic SNOMED CT concept only when it is a bare concept
 or a concept whose only refinement is procedure context "done". Offered,
 planned or otherwise refined expressions keep the expression and a label that
-names the context. ICD-10 codes keep their ICD-10 label, using the category
+names the context. The semantic view uses this description for
+`activity_procedure` and exposes the procedure context, expression type and
+asserted code so offered or planned care can be distinguished from performed
+procedures. ICD-10 codes keep their ICD-10 label, using the category
 label for three-character codes; no ICD-10 to SNOMED CT map is applied.
 
 Therapy categories use the terminology mapping guide, supplemented by the
@@ -402,8 +413,11 @@ does not establish clinical resolution. Multiple dated records of the same
 complaint are distinct source items, not necessarily distinct conditions.
 
 The current care activity supply contains procedures and observations, but no
-populated clinical finding codes. The clinical union supports findings when
-they are supplied.
+populated clinical finding codes. Finding fields stay in raw until populated;
+staging and reporting expose procedures and observations only. When deploying
+this column removal to an existing incremental table, run
+`dbt build --target dev --full-refresh -s stg_iapt_care_activity_history+`
+so the staging schema and its downstream models are rebuilt together.
 
 ## Time
 
@@ -431,7 +445,7 @@ means a time was supplied, not that its clinical accuracy has been established.
 | [`sem_iapt`](../models/semantic/sem_iapt.sql) | Semantic view over the referral, contact, activity, assessment, condition, referral period and submission tables |
 | [`fct_iapt_care_contact`](../models/reporting/mental_health/activity/fct_iapt_care_contact.sql) | One care contact within its referral and reporting month |
 | [`fct_iapt_onward_referral`](../models/reporting/mental_health/referrals/fct_iapt_onward_referral.sql) | One onward referral milestone |
-| [`fct_iapt_care_activity`](../models/reporting/mental_health/activity/fct_iapt_care_activity.sql) | One care activity within its referral, contact and reporting month, with its procedure, finding and observation |
+| [`fct_iapt_care_activity`](../models/reporting/mental_health/activity/fct_iapt_care_activity.sql) | One care activity within its referral, contact and reporting month, with its procedure and observation |
 | [`fct_iapt_assessment_score`](../models/reporting/mental_health/clinical/fct_iapt_assessment_score.sql) | One scored assessment question, dimension or total |
 | [`fct_iapt_health_condition`](../models/reporting/mental_health/clinical/fct_iapt_health_condition.sql) | One previous diagnosis, long-term condition or presenting complaint |
 | [`fct_iapt_clinical_record`](../models/reporting/mental_health/clinical/fct_iapt_clinical_record.sql) | One clinical item from the three clinical facts, in one list |

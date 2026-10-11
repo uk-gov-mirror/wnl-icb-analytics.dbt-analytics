@@ -7,7 +7,7 @@ models:
       that month, including orphans. A contact is accepted only in the file for its
       own month (ETOS v2.1.22 IDS201 row 6), so a contact or activity identifier
       reused in another month is a separate record; a Refresh replacing the Primary
-      file keeps the same key. An activity carries at most one procedure, finding and
+      file keeps the same key. An activity carries at most one procedure and
       observation; several procedures in one contact arrive as several
       activities. Time comes only from the contact recorded in the same
       submission when it names the same referral and person. SNOMED CT procedure
@@ -100,24 +100,6 @@ models:
       - name: legacy_therapy_type_name
         description: IAPT v1.5 national therapy type definition from iapt_therapy_type_definitions, such as Guided
           Self Help (Book). For concepts without a v1.5 code it is the mapping guidance name.
-      - name: finding_scheme_code
-        description: Submitted finding scheme. 01 ICD-10, 04 SNOMED CT.
-      - name: finding_coding_system
-        description: ICD-10 or SNOMED CT; null when the scheme is missing or not valid for IAPT.
-      - name: nhsd_validated_finding_code
-        description: NHSD validated finding code. '-3' means NHSD rejected the code or scheme; three-character ICD-10 codes may be padded with X or 9.
-      - name: finding_snomed_code
-        description: Finding code when the scheme is SNOMED CT.
-      - name: finding_icd10_precision
-        description: Precision of the submitted ICD-10 code - three_character, three_character_filler, four_character, five_character or invalid_format.
-      - name: is_finding_code_extended_by_nhsd
-        description: True when NHSD turned a three-character submission into a four-character code, such as F41 to F41.9 (unspecified). Null for SNOMED CT.
-      - name: finding_icd10_category_code
-        description: Three-character ICD-10 category of the code.
-      - name: finding_name
-        description: Label of the finding. Three-character ICD-10 submissions take the category label, so the label never claims the precision NHSD padding added.
-      - name: finding_label_status
-        description: labelled, code_missing, coding_scheme_missing, coding_scheme_unrecognised, invalid_code_supplied or code_unmatched.
       - name: is_assessment_observable_in_observation
         description: True when the observation code is an IAPT outcome measure observable. Guidance p41 says these must flow in IDS606/607.
       - name: observation_value

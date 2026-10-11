@@ -21,9 +21,6 @@ select
     , a.clin_contact_dur_of_care_act
     -- SNOMED expressions keep their case and syntax.
     , nullif(trim(a.code_proc_and_proc_status), '') as code_proc_and_proc_status
-    , nullif(trim(a.find_scheme_in_use), '') as find_scheme_in_use
-    , nullif(trim(a.code_find), '') as code_find
-    , nullif(trim(a.validated_finding_code), '') as validated_finding_code
     , nullif(trim(a.code_obs), '') as code_obs
     , nullif(trim(a.obs_value), '') as obs_value
     , nullif(trim(a.unit_measure), '') as unit_measure

@@ -2,7 +2,8 @@
 
 TABLES(
     referrals AS {{ ref('fct_iapt_referral_summary') }}
-        PRIMARY KEY (referral_id) COMMENT = 'NHS Talking Therapies referrals, one row per provider-qualified referral with its status at the latest accepted month, NHS England course outcomes, waits and referral source and discharge reason groups. A provider code change resubmits a referral under a new identifier; exclude transfer successors to count referrals received once.',
+        PRIMARY KEY (referral_id)
+        UNIQUE (referral_id, person_id) COMMENT = 'NHS Talking Therapies referrals, one row per provider-qualified referral with its status at the latest accepted month, NHS England course outcomes, waits and referral source and discharge reason groups. A provider code change resubmits a referral under a new identifier; exclude transfer successors to count referrals received once.',
     contacts AS {{ ref('fct_iapt_care_contact') }}
         PRIMARY KEY (source_record_id) COMMENT = 'Care contacts in all attendance states, one row per referral, contact and reporting month. Use the NHS England attended-or-unplanned and treatment contact flags for national counting rules.',
     activities AS {{ ref('fct_iapt_care_activity') }}
@@ -18,11 +19,11 @@ TABLES(
 )
 
 RELATIONSHIPS(
-    contacts (referral_id) REFERENCES referrals,
-    activities (referral_id) REFERENCES referrals,
-    assessments (referral_id) REFERENCES referrals,
-    conditions (referral_id) REFERENCES referrals,
-    referral_periods (referral_id) REFERENCES referrals,
+    contacts (referral_id, person_id) REFERENCES referrals (referral_id, person_id),
+    activities (referral_id, person_id) REFERENCES referrals (referral_id, person_id),
+    assessments (referral_id, person_id) REFERENCES referrals (referral_id, person_id),
+    conditions (referral_id, person_id) REFERENCES referrals (referral_id, person_id),
+    referral_periods (referral_id, person_id) REFERENCES referrals (referral_id, person_id),
     contacts (provider_organisation_code, reporting_period_end_date) REFERENCES submissions,
     referral_periods (provider_organisation_code, reporting_period_end_date) REFERENCES submissions
 )
@@ -32,6 +33,7 @@ DIMENSIONS(
     referrals.referrals_provider_name AS provider_organisation_name COMMENT = 'Name of the provider reporting the referral.',
     referrals.referrals_is_wnl_commissioner AS is_wnl_commissioner COMMENT = 'The referral is commissioned by West and North London. Filter true for WNL population figures.',
     referrals.referral_received_month AS DATE_TRUNC('month', referral_received_date) COMMENT = 'Month the referral was received.',
+    referrals.referral_first_treatment_month AS DATE_TRUNC('month', pathway_first_treatment_date) COMMENT = 'Month of first treatment across the transfer chain. Use this month to select and group the first-treatment waiting-time measures.',
     referrals.referral_discharge_month AS DATE_TRUNC('month', service_discharge_date) COMMENT = 'Month of the recorded discharge; null when none is recorded.',
     referrals.referral_status AS as_of_referral_status COMMENT = 'Status at the latest accepted month: open, discharged, transferred or no_longer_submitted.',
     referrals.referral_source_group AS source_of_referral_group_name COMMENT = 'UKHFD referral source category, such as Self-Referral or Primary Health Care. Null when no source is recorded, which is common for some providers, or the code has no category.',
@@ -50,7 +52,11 @@ DIMENSIONS(
     contacts.contact_appointment_type AS appointment_type_name COMMENT = 'Appointment type, such as assessment or treatment.',
     contacts.contact_attendance AS attendance_name COMMENT = 'Attendance description.',
     activities.activity_therapy_category AS therapy_type_category COMMENT = 'Low Intensity, High Intensity or Employment Support for a national therapy concept; null otherwise.',
-    activities.activity_procedure AS procedure_name COMMENT = 'Procedure preferred term.',
+    activities.activity_procedure AS procedure_description COMMENT = 'Procedure label including recorded context, such as offered or planned; use for procedure breakdowns.',
+    activities.activity_procedure_context_code AS procedure_context_code COMMENT = 'SNOMED CT procedure context code; interpret with activity_procedure_context.',
+    activities.activity_procedure_context AS procedure_context_name COMMENT = 'Recorded procedure context, such as Offered or Done; null for a bare concept or an unparsed expression.',
+    activities.activity_asserted_procedure_code AS asserted_procedure_code COMMENT = 'SNOMED CT concept asserted as performed: a bare concept or a concept refined only by Done. Null for offered, planned or other refinements. Interpret with activity_procedure.',
+    activities.activity_procedure_expression_type AS procedure_expression_type COMMENT = 'bare_concept, procedure_context, unrecognised_refinement or unparsed; distinguishes absent context from expressions that cannot be interpreted.',
     activities.activity_month AS DATE_TRUNC('month', clinical_date) COMMENT = 'Month of the contact the activity belongs to.',
     assessments.assessment_tool AS assessment_tool_name COMMENT = 'Assessment tool, such as Patient Health Questionnaire-9 (PHQ-9).',
     assessments.assessment_source AS assessment_source COMMENT = 'referral or care_activity: the IDS606 or IDS607 table that recorded the item.',
@@ -82,10 +88,10 @@ METRICS(
     referrals.reliable_recovery_count AS COUNT_IF(referrals.is_reliably_recovered) COMMENT = 'Referrals finishing a course of treatment that reliably recovered (M193).',
     referrals.reliable_recovery_denominator AS COUNT(referrals.is_reliably_recovered) COMMENT = 'Referrals finishing a course of treatment, excluding those below caseness at the start (M195 denominator).',
     referrals.reliable_recovery_rate AS COUNT_IF(referrals.is_reliably_recovered) / NULLIF(COUNT(referrals.is_reliably_recovered), 0) COMMENT = 'Reliable recovery count divided by its denominator.',
-    referrals.first_treatment_count AS COUNT(referrals.days_referral_to_first_treatment) COMMENT = 'Referrals with a first treatment, the denominator for treatment waits.',
-    referrals.first_treatment_within_6_weeks_count AS COUNT_IF(referrals.is_first_treatment_within_6_weeks) COMMENT = 'Referrals first treated within 42 days of receipt (M036).',
-    referrals.first_treatment_within_18_weeks_count AS COUNT_IF(referrals.is_first_treatment_within_18_weeks) COMMENT = 'Referrals first treated within 126 days of receipt (M037).',
-    referrals.median_days_to_first_treatment AS MEDIAN(referrals.days_referral_to_first_treatment) COMMENT = 'Median days from receipt to first treatment among referrals with one (M049).',
+    referrals.first_treatment_count AS COUNT(IFF(NOT referrals.is_transfer_successor, referrals.days_referral_to_first_treatment, NULL)) COMMENT = 'Courses with a first treatment, counted once on the original referral and attributed to its provider and other referral dimensions. Denominator for treatment waits.',
+    referrals.first_treatment_within_6_weeks_count AS COUNT_IF(NOT referrals.is_transfer_successor AND referrals.is_first_treatment_within_6_weeks) COMMENT = 'Courses first treated within 42 days of receipt (M036), counted once on the original referral and attributed to its provider.',
+    referrals.first_treatment_within_18_weeks_count AS COUNT_IF(NOT referrals.is_transfer_successor AND referrals.is_first_treatment_within_18_weeks) COMMENT = 'Courses first treated within 126 days of receipt (M037), counted once on the original referral and attributed to its provider.',
+    referrals.median_days_to_first_treatment AS MEDIAN(IFF(NOT referrals.is_transfer_successor, referrals.days_referral_to_first_treatment, NULL)) COMMENT = 'Median days from receipt to first treatment (M049), counting each course once on the original referral and attributing it to that provider.',
     contacts.contact_count AS COUNT(contacts.source_record_id) COMMENT = 'Contacts in all attendance states.',
     contacts.attended_contact_count AS COUNT_IF(contacts.is_attended) COMMENT = 'Contacts with attendance code 5 or 6.',
     contacts.nhse_attended_or_unplanned_count AS COUNT_IF(contacts.is_nhse_attended_or_unplanned) COMMENT = 'Contacts attended or unplanned, the NHS England contact counting rule.',
@@ -103,5 +109,5 @@ METRICS(
 )
 
 COMMENT = 'NHS Talking Therapies (IAPT data set) referrals, contacts, care activities, assessment items, recorded conditions, monthly referral state and provider submission quality. Choose the entity matching the question; each has its own row meaning and date basis.'
-AI_SQL_GENERATION 'Return non-identifying aggregates only; never select person or patient identifiers. For West and North London population figures filter is_wnl_commissioner on referrals, contacts or referral_periods. Count referrals received with referrals_received_count, which counts a referral moved by a provider code change once. For outcomes use finished_course_count, reliable_recovery_count and reliable_recovery_denominator grouped by referral_discharge_month; for waits use first_treatment_within_6_weeks_count and first_treatment_within_18_weeks_count over first_treatment_count. For open referrals and waiting lists use referral_periods filtered to one reporting period. Before comparing providers or months, check submissions: a true has_refresh_section_shortfall means that month is understated, and the mostly_missing flags mean referral source, discharge reason or consultation mechanism comparisons exclude most of that provider''s records. Group by month dimensions rather than daily dates. Assessment rows are items, not questionnaires; filter assessment_tool.'
+AI_SQL_GENERATION 'Return non-identifying aggregates only; never select person or patient identifiers. For West and North London population figures filter is_wnl_commissioner on referrals, contacts or referral_periods. Count referrals received with referrals_received_count, which counts a referral moved by a provider code change once. For outcomes use finished_course_count, reliable_recovery_count and reliable_recovery_denominator grouped by referral_discharge_month; for waits use first_treatment_within_6_weeks_count and first_treatment_within_18_weeks_count over first_treatment_count, filtered and grouped by referral_first_treatment_month. Waits count each transfer chain once, attributed to the original referral provider and other original-referral dimensions even when treatment starts after transfer. For open referrals and waiting lists use referral_periods filtered to one reporting period. Before comparing providers or months, check submissions: a true has_refresh_section_shortfall means that month is understated, and the mostly_missing flags mean referral source, discharge reason or consultation mechanism comparisons exclude most of that provider''s records. Group by month dimensions rather than daily dates. Assessment rows are items, not questionnaires; filter assessment_tool.'
 AI_QUESTION_CATEGORIZATION 'Use this view for aggregate questions about NHS Talking Therapies (IAPT) referrals, referral sources, discharge reasons, waits to first treatment, finished courses and reliable recovery, contacts by delivery mechanism, therapy types, assessment items, recorded conditions, monthly open referrals and provider data quality. It cannot identify individuals or describe care outside the IAPT data set.'

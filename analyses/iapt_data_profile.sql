@@ -206,8 +206,6 @@ with active as (
         coalesce(clinical_date_status, 'null') || ':' || coalesce(procedure_expression_type, 'no_procedure') as entity
         , count(*) as fact_rows
         , count_if(asserted_procedure_code is not null) as asserted_procedures
-        , count_if(finding_label_status = 'invalid_code_supplied') as invalid_findings
-        , count_if(is_finding_code_extended_by_nhsd) as nhsd_extended_findings
         , count_if(is_assessment_observable_in_observation) as assessment_in_observation
         , count_if(is_source_date_inconsistent) as source_date_inconsistent
     from {{ ref('fct_iapt_care_activity') }}
@@ -300,11 +298,9 @@ with active as (
         'latest_care_activity' as entity
         , count(*) as latest_activities
         , count_if(code_proc_and_proc_status is not null) as with_procedure
-        , count_if(code_find is not null) as with_finding
-        , count_if(validated_finding_code = '-3') as nhsd_invalid_finding
         , count_if(code_obs is not null or obs_value is not null) as with_observation
     from (
-        select code_proc_and_proc_status, code_find, validated_finding_code, code_obs, obs_value
+        select code_proc_and_proc_status, code_obs, obs_value
         from {{ ref('stg_iapt_care_activity_history') }}
         qualify row_number() over (
             partition by referral_id, care_contact_id, unique_month_id, care_activity_id
