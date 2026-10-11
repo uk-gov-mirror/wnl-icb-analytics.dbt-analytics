@@ -20,7 +20,7 @@ models:
       - name: local_authority_boundary_year
         description: "Boundary year of the local authority district codes and names supplied with this release."
       - name: population_year
-        description: "Mid-year reference year of the published population denominators. This is not the reference year of every indicator."
+        description: "Mid-year of the total, children and older population denominators. The working-age denominator can combine years; see working_age_population."
       - name: is_population_excluding_prisoners
         description: "Whether the population denominators in this table exclude prisoners. This does not describe every indicator-specific denominator."
       - name: lsoa_code
@@ -137,4 +137,4 @@ models:
       - name: older_population
         description: "Published population denominator aged 60 and over for mid-2015, excluding prisoners. Count of people, used for IDAOPI."
       - name: working_age_population
-        description: "Published Employment Deprivation Domain denominator for mid-2015: women aged 18 to 59 and men aged 18 to 64, excluding prisoners. Count of people."
+        description: "Published Employment Deprivation Domain denominator: women aged 18 to 59 and men aged 18 to 64, excluding prisoners. Weighted population estimate using 75% of mid-2015 and 25% of mid-2016, expressed as a count of people."

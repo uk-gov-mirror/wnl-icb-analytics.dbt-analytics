@@ -126,4 +126,4 @@ models:
       - name: older_population_aged_60_and_over_mid_2015_excluding_prisoners
         description: "Published population denominator aged 60 and over for mid-2015, excluding prisoners. Count of people, used for IDAOPI."
       - name: working_age_population_18_to_59_64_for_use_with_employment_deprivation_domain_excluding_prisoners
-        description: "Published Employment Deprivation Domain denominator for mid-2015: women aged 18 to 59 and men aged 18 to 64, excluding prisoners. Count of people."
+        description: "Published Employment Deprivation Domain denominator: women aged 18 to 59 and men aged 18 to 64, excluding prisoners. Weighted population estimate using 75% of mid-2015 and 25% of mid-2016, expressed as a count of people."

@@ -21,7 +21,7 @@ models:
       - name: local_authority_boundary_year
         description: "Boundary year of the local authority district codes and names supplied with this release."
       - name: population_year
-        description: "Mid-year reference year of the published population denominators. This is not the reference year of every indicator."
+        description: "Mid-year of the total, children and older population denominators. The working-age denominator can combine years; see working_age_population."
       - name: is_population_excluding_prisoners
         description: "Whether the population denominators in this table exclude prisoners. This does not describe every indicator-specific denominator."
       - name: lsoa_code
