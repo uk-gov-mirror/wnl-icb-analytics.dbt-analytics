@@ -8,9 +8,15 @@ models:
       and LTC status. One row per breakdown dimension and category. Patient
       shares and cost shares are both provided. Resource indices compare each
       cohort-category cost per Core need-weighted head with the WNL mean.
-      LTC rows use NCL OLIDS-covered patients only. Each cohort's cost is also
+      LTC rows use NCL OLIDS-covered patients only and reflect current register
+      memberships from fct_person_ltc_summary via int_resource_index_olids_profile,
+      not status at the cost-window end. Diagnoses or resolutions after that
+      window can change the LTC comparison. Each cohort's cost is also
       split by service grouping, in GBP and as a share of that cohort's own
-      cost, so the two service mixes compare directly.
+      cost, so the two service mixes compare directly. If a category has no
+      patients in one cohort, its patient count, costs and shares of that
+      cohort's patients and cost are zero. Mean age, costs per head, resource
+      indices and service-mix shares remain null for that absent cohort.
     config:
       meta:
         owner:

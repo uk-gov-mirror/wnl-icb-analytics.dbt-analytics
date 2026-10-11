@@ -21,7 +21,13 @@ sum(total_cost_12m) / sum(weighted_person_years). Do not average person rates.
     config(
         materialized='table',
         meta={
-            'custom_message': 'LTC columns are derived from OLIDS - for secondary use, INNER JOIN to REPORTING.OLIDS_PERSON_STATUS.DIM_PERSON_SECONDARY_USE_ALLOWED ON person_id to apply National Data Opt-Out and Type 1 opt-out filtering.'
+            'custom_message': (
+                'LTC columns are derived from OLIDS. For secondary use, join dim_person_pseudo '
+                ~ 'to dim_person_secondary_use_allowed on person_id to apply National Data Opt-Out '
+                ~ 'and Type 1 opt-out filtering. Reduce the eligible keys to one row per sk_patient_id, '
+                ~ 'then INNER JOIN this model to those keys on sk_patient_id. Several OLIDS person IDs '
+                ~ 'can share that key; joining the bridge directly can multiply costs.'
+            )
         }
     )
 }}

@@ -10,9 +10,17 @@ models:
       Aggregate rates must divide summed
       cost by summed person-years or weighted person-years; do not average the
       person-level rate columns. LTC fields are populated for NCL patients
-      linked to OLIDS and remain null otherwise. Cost is split two ways, each
+      linked to OLIDS and remain null otherwise. They describe current register
+      memberships from fct_person_ltc_summary via int_resource_index_olids_profile,
+      not status at the cost-window end. Diagnoses or resolutions after that
+      window can change the LTC comparison. Cost is split two ways, each
       summing back to total_cost_12m: by feed (SLAM, EPD, MHSDS, CSDS) and by
       service grouping (Crisis, Planned, Community, Mental Health, Unmapped).
+      For secondary use, join dim_person_pseudo to dim_person_secondary_use_allowed
+      on person_id to apply National Data Opt-Out and Type 1 opt-out filtering.
+      Reduce the eligible keys to one row per sk_patient_id before joining this
+      model on sk_patient_id. Several OLIDS person IDs can share that key;
+      joining the bridge directly can multiply costs.
     config:
       meta:
         owner:
@@ -52,9 +60,16 @@ models:
         data_tests:
           - not_null
       - name: ltc_count
-        description: Distinct LTC register count for OLIDS-covered patients; null otherwise.
+        description: >
+          Count of distinct current LTC condition codes from fct_person_ltc_summary,
+          combined across OLIDS person IDs by int_resource_index_olids_profile.
+          Zero when no current membership is recorded for an OLIDS-covered patient;
+          null outside coverage. Not assessed at the cost-window end.
       - name: has_one_or_more_ltcs
-        description: TRUE for at least one LTC, FALSE for none, and null outside OLIDS coverage.
+        description: >
+          TRUE for at least one current register membership in fct_person_ltc_summary
+          via int_resource_index_olids_profile, FALSE for none recorded, and null
+          outside OLIDS coverage. Not assessed at the cost-window end.
       - name: total_cost_12m
         description: >
           SLAM and EPD actual plus MHSDS and CSDS proxy cost in the analysis
