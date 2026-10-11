@@ -32,7 +32,7 @@ The table counts all milestones, including bookings and slots. Those scheduled
 counts remain separate even where a current status records attendance. They
 are not encounter counts. The table is rebuilt monthly with `monthly-full` and
 `person_activity_coverage` tags. Check `profiled_at`; rebuild it before a study
-that needs newer evidence. It inherits the existing reporting table configuration.
+that needs newer evidence.
 
 For MHSDS/CSDS, accepted submissions and submitted contact rows use the calendar
 month of the reporting-period end. Activity uses the event month. These are
@@ -53,11 +53,9 @@ follow-up period have usable evidence.
 
 ## Observation lag
 
-Header queries used XS; event and retained-version aggregates used the existing `WH_WNL_ENGINEERING_M`. No patient keys, source-record identifiers or provider-level small cells were returned.
-
 ### Evidence measured on 11 October 2026
 
-The review used non-identifying aggregate queries. Header sample: October 2024 to July 2026 reporting periods, grouped into provider/period after reducing repeated header rows to submission grain. Each provider/period has equal weight. Receipt means `effective_from`; MHSDS/IAPT load means `dmic_date_added`. CSDS's second timestamp is upload, not independently measured warehouse loading.
+Header sample: October 2024 to July 2026 reporting periods, grouped into provider/period after reducing repeated header rows to submission grain. Each provider/period has equal weight. Receipt means `effective_from`; MHSDS/IAPT load means `dmic_date_added`. CSDS's second timestamp is upload, not independently measured warehouse loading.
 
 | Source | First receipt p50 / p90 | Latest receipt p95 | First-to-latest receipt span p95 | Period end to load/upload p95 | Multiple submissions |
 |---|---:|---:|---:|---:|---:|
@@ -132,8 +130,7 @@ models absent from this branch.
 
 These examples use dbt `ref()` names. Compile them in a dbt analysis, or replace
 references with their documented reporting/staging relations in an approved
-Snowflake session. DEV uses the existing `DEV__` database layers. Do not create
-task-specific schemas or run person-level previews through an agent.
+Snowflake session.
 
 These are person-level patterns for a human-controlled Snowflake session approved for patient-level data. Every identifier literal below is synthetic. No query outputs or query logs belong in the public repository. Aggregate monitoring/reconciliation belongs in `analyses/navigation/*.sql`; do not add these person-level examples as scheduled dbt models.
 
@@ -337,7 +334,7 @@ The temporal filter defines this metric's candidates. Recorded links outside it 
 
 ### Clinical source and recorded-parent drill-down
 
-Subject and grain: one selected ECDS coded finding. The exact shared names are `source_code_name`, `mapped_code_name`, `result_value`, `result_value_numeric`, `result_unit_code` and `relationship_type`, not the epic's original proposed names.
+Subject and grain: one selected ECDS coded finding. The shared fields are `source_code_name`, `mapped_code_name`, `result_value`, `result_value_numeric`, `result_unit_code` and `relationship_type`.
 
 ```sql
 select c.clinical_record_id, c.source_record_id, c.source_model_name,

@@ -258,3 +258,13 @@ outstanding source date-quality and recovery decisions are tracked in #1176.
 `analyses/navigation/ers_appointment_date_recovery_profile.sql` reproduces the
 strong-candidate aggregate checks without returning person-level records.
 These counts do not establish a general maximum future booking date.
+
+## Coverage and lag validation setup
+
+The provider-period diagnostic inherits the existing reporting table configuration.
+The 11 October 2026 lag checks used XS for headers and `WH_WNL_ENGINEERING_M`
+for event and retained-version aggregates. Queries returned no patient keys,
+source-record identifiers or provider-level small cells.
+Development checks use the existing `DEV__` database layers. Person-level worked
+examples require an approved human-controlled Snowflake session; they must not
+be previewed through an agent.
