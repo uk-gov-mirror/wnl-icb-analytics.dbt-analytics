@@ -206,7 +206,7 @@ left join {{ ref('stg_iapt_referral_history') }} as sr
     and c.referral_id = sr.referral_id
 left join {{ ref('fct_iapt_referral') }} as r
     on c.referral_id = r.referral_id
-left join {{ ref('attendance_status') }} as attendance
+left join {{ ref('nhs_dd_attendance_status') }} as attendance
     on c.attendance_code_normalised = attendance.code
 left join {{ ref('iapt_code_lookup') }} as appointment_type
     on appointment_type.code_set_name = 'appointment_type'
@@ -232,11 +232,11 @@ left join {{ ref('mhsds_care_contact_code_lookup') }} as therapy_mode
 left join {{ ref('mhsds_care_contact_code_lookup') }} as interpreter
     on interpreter.code_set_name = 'interpreter_present_indicator'
     and upper(c.interpreter_present_ind) = interpreter.code
-left join {{ ref('consultation_mechanism') }} as mechanism
+left join {{ ref('nhs_dd_consultation_mechanism') }} as mechanism
     on upper(c.consultation_code) = mechanism.code
-left join {{ ref('activity_location_type') }} as location
+left join {{ ref('nhs_dd_activity_location_type') }} as location
     on upper(c.act_loc_type_code) = location.code
-left join {{ ref('language') }} as treatment_language
+left join {{ ref('nhs_dd_language') }} as treatment_language
     on upper(c.language_code_treat) = treatment_language.code
 left join {{ ref('organisation') }} as site
     on c.site_id_of_treat = site.organisation_code

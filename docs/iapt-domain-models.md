@@ -368,7 +368,7 @@ significance and statutory sick pay. It keeps retired codes;
 the newest revision that supplies one: UKHFD's 2022 revision of the discharge
 reason list dropped every code's category and changed nothing else. Shared code
 sets come from their existing lookups, such as `mhsds_source_of_referral` for
-v2.0 referral sources and `consultation_mechanism`. A code absent from UKHFD
+v2.0 referral sources and `nhs_dd_consultation_mechanism`. A code absent from UKHFD
 keeps a null label.
 
 Two historical lists label codes that the current lists lack, and a code-set

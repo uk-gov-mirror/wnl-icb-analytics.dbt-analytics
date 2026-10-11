@@ -227,7 +227,7 @@ left join dated_complaints as dated
     and v.parent_key = dated.parent_key
     and v.coding_scheme_code is not distinct from dated.coding_scheme_code
     and v.submitted_code = dated.submitted_code
-left join {{ ref('diagnosis_scheme') }} as diagnosis_scheme
+left join {{ ref('nhs_dd_diagnosis_scheme') }} as diagnosis_scheme
     on v.source_table = 'IDS601'
     and v.coding_scheme_code = diagnosis_scheme.code
 left join {{ ref('mhsds_care_activity_code_lookup') }} as finding_scheme
