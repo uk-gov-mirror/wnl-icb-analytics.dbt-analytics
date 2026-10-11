@@ -44,7 +44,8 @@ WITH RECURSIVE eligible AS (
             PARTITION BY person_id ORDER BY effective_date
         ) AS reading_rank
     FROM (
-        SELECT DISTINCT person_id, effective_date
+        -- Source times are midnight/01:00; the spacing rule uses calendar dates.
+        SELECT DISTINCT person_id, TO_DATE(effective_date) AS effective_date
         FROM {{ ref('int_qmul_gp_bp_registry_bp_readings_eligible') }}
     )
 

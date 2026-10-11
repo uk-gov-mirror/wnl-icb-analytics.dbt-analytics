@@ -3,6 +3,7 @@ models:
     description: 'Per-person BP spacing assessment for the QMUL GP BP Registry cohort inclusion rule.
 
       Greedy chain walk over each person''s distinct eligible BP reading dates: takes the earliest date, then the next date at least min_reading_gap_weeks later, and so on.
+      Uses calendar dates, ignoring source times of day for both spacing and span checks. Multiple readings on the same calendar date count as one date.
       A person meets the criterion when they have min_qualifying_readings (default 4) dates at least min_reading_gap_weeks apart, the last at least min_span_months (default 36) calendar months after the first.
       The chain supplies the earliest possible dates for all but the last reading; the last can be any eligible date after both limits, so it need not be on the chain.
       One row per person in the base population with at least one eligible reading.'
