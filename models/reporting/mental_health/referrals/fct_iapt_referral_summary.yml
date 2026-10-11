@@ -11,7 +11,11 @@ models:
     transferred, and both copies are rows here; exclude is_transfer_successor to count each referral received once.
     Unconfirmed transfer candidates are treated as separate referrals. The analyst entry point for referrals. It adds
     NHS England ended-referral types, reliable recovery, waits to first assessment and treatment, and the referral
-    source and discharge reason groups. Unprefixed waits use this referral's own supplied dates. Separately named
+    source and discharge reason groups. Supplied NHS England course fields are derived by PathwayID. A successor
+    retaining its predecessor's PathwayID carries cumulative fields and pre-transfer dates, while a new PathwayID
+    covers care after transfer only. Do not sum predecessor and retained-PathwayID successor course totals.
+    Unprefixed waits use this referral's own supplied dates, excluding a successor's event before its first reported
+    month so pre-transfer events count only on the predecessor. Separately named
     pathway waits use confirmed transfer-chain dates and are local measures, counted once under the original
     referral's provider. A referral without its own date keeps a null unprefixed wait even if its chain has one.
   config:
@@ -112,6 +116,7 @@ models:
     description: First day of symptom_onset_month. Month precision only; null when the value is not YYYY-MM.
   - name: first_assessment_date
     description: This referral's supplied NHS England derived date of the first attended assessment contact.
+      A successor retaining PathwayID can carry a pre-transfer date; a new PathwayID covers post-transfer care.
       Null when none was supplied; never replaced with a transfer-chain date.
   - name: last_assessment_date
     description: NHS England derived date of the last attended assessment contact. Null when first_assessment_date is null.
@@ -120,13 +125,16 @@ models:
       internet therapy start. Null when none was supplied; never replaced with a transfer-chain date.
   - name: second_treatment_date
     description: This referral's supplied NHS England derived date of the second attended treatment contact.
+      A successor retaining PathwayID can carry a pre-transfer date; a new PathwayID covers post-transfer care.
       Null when none was supplied; never replaced with a transfer-chain date.
   - name: last_treatment_date
     description: NHS England derived date of the last attended treatment contact.
   - name: nhse_care_contact_count
     description: NHS England CareContact_Count (I101D28). Contacts of any appointment type that were attended (codes
       5 or 6) or unplanned, dated from referral receipt to discharge (or the reporting period end while open), plus
-      completed internet-enabled therapy weekly logs. Counts within this provider-qualified referral only. Zero
+      completed internet-enabled therapy weekly logs. Derived by PathwayID. retained-PathwayID successors carry
+      cumulative pre-transfer and post-transfer totals; a new PathwayID covers post-transfer care only. Do not add
+      a retained-PathwayID successor total to its predecessor total. Zero
       means the referral was not seen.
   - name: nhse_treatment_contact_count
     description: NHS England TreatmentCareContact_Count (I101D29). As nhse_care_contact_count, restricted to treatment
@@ -174,7 +182,7 @@ models:
   - name: first_therapy_type_code
     description: NHS England first therapy type (I101D32), as supplied. A SNOMED CT procedure concept from an attended
       treatment contact, or IET followed by the programme when an internet-enabled therapy log came first. Covers this
-      provider-qualified referral only.
+      supplied PathwayID, including pre-transfer care when retained after a provider code change.
   - name: first_therapy_type_name
     description: SNOMED CT preferred term for first_therapy_type_code; null for IET values and unmatched codes.
   - name: first_therapy_type_category
@@ -345,6 +353,11 @@ models:
     description: TRUE when the referral continues an earlier one under a new provider code, as a confirmed transfer.
       It was received once, on the first referral of the chain; exclude successors when counting referrals
       received.
+  - name: is_pathway_id_retained
+    description: TRUE for a confirmed successor with the same supplied PathwayID as its immediate predecessor.
+      Its supplied NHS England course dates and cumulative fields can include pre-transfer care. FALSE for other
+      referrals, including successors with a new PathwayID whose supplied fields cover care after transfer only.
+      Null for a confirmed successor when either PathwayID is missing.
   - name: is_transfer_predecessor
     description: TRUE when the referral was resubmitted under another provider code, as a confirmed transfer.
   - name: original_referral_id
@@ -375,9 +388,10 @@ models:
         arguments:
           values: [discharged, open, last_submission]
   - name: has_partial_nhse_course_fields
-    description: TRUE for a transfer successor. NHS England derives first and last treatment dates, contact counts,
-      first scores, completed treatment, recovery and reliable change per provider-qualified referral, so these
-      fields cover only the part after the transfer. The predecessor's cover the part before it.
+    description: TRUE for a confirmed transfer successor with a new PathwayID. Its supplied dates, contact counts,
+      scores and outcome fields cover care after transfer only. FALSE for other referrals, including successors
+      retaining PathwayID, whose supplied fields are cumulative and can include pre-transfer care. Null for a
+      confirmed successor when either PathwayID is missing. Never add cumulative successor totals to predecessor totals.
   - name: pathway_first_assessment_date
     description: Earliest first_assessment_date across the transfer chain; the referral's own when it never
       transferred. Used only for separately named local chain-aware waits.
@@ -386,7 +400,8 @@ models:
       transferred. Used only for separately named local chain-aware waits.
   - name: pathway_second_treatment_date
     description: Second treatment date across the transfer chain, the second earliest of the members' first and
-      second treatment dates; the referral's own second_treatment_date when it never transferred. Used only for
+      second treatment dates after excluding successor dates before their first reported month. Two treatments on
+      the same day remain separate. The referral's own second_treatment_date when it never transferred. Used only for
       separately named local chain-aware waits.
   - name: ended_referral_type
     description: NHS England ended-referral group (M073 to M076) for a referral with a recorded discharge date, from
@@ -394,7 +409,8 @@ models:
       with one treatment contact (M075); seen_not_treated with contacts but no treatment contact (M074); not_seen
       with no attended or unplanned contact (M073). Null while undischarged, or when the counts are missing or
       the completed-treatment flag is absent despite two or more treatment contacts. A transfer successor's type
-      covers only care after the transfer (has_partial_nhse_course_fields). not_seen and seen_not_treated together
+      includes pre-transfer care when PathwayID is retained; it covers only post-transfer care with a new PathwayID
+      (has_partial_nhse_course_fields). not_seen and seen_not_treated together
       approximate M153, ended before treatment.
     data_tests:
     - accepted_values:
@@ -408,23 +424,24 @@ models:
       among non-null rows is the reliable recovery rate.
   - name: days_referral_to_first_assessment
     description: Calendar days from referral_received_date to this referral's supplied first_assessment_date,
-      including on transfer successors. The date basis for NHS England M024 to M027, with the first-assessment-period
-      and is_nhse_use_pathway filters and each measure's wait band. Null without either date, even if the chain
+      excluding a successor's assessment before its first reported month. The date basis for NHS England M024 to M027,
+      with the first-assessment-period and is_nhse_use_pathway filters and each measure's wait band. Null without either date, even if the chain
       has an assessment date.
   - name: days_referral_to_first_treatment
     description: Calendar days from referral_received_date to this referral's supplied first_treatment_date,
-      including on transfer successors. Used for NHS England M036, M037 and M049 with the first-treatment-period
-      and is_nhse_use_pathway filters. Null without either date.
+      excluding a successor's first treatment before its first reported month. Used for NHS England M036, M037 and M049
+      with the first-treatment-period and is_nhse_use_pathway filters. Null without either date.
   - name: is_first_treatment_within_6_weeks
-    description: TRUE when days_referral_to_first_treatment is 42 or fewer (M036); FALSE when longer; null without a
-      first treatment.
+    description: TRUE when days_referral_to_first_treatment is 42 or fewer (M036); FALSE when longer; null when
+      the wait is missing or excluded because the successor first treatment predates its first reported month.
   - name: is_first_treatment_within_18_weeks
-    description: TRUE when days_referral_to_first_treatment is 126 or fewer (M037); FALSE when longer; null without a
-      first treatment.
+    description: TRUE when days_referral_to_first_treatment is 126 or fewer (M037); FALSE when longer; null when
+      the wait is missing or excluded because the successor first treatment predates its first reported month.
   - name: days_first_to_second_treatment
     description: Calendar days between this referral's supplied first_treatment_date and second_treatment_date,
-      including on transfer successors. The date basis for monthly M046 (over 28 days) and M047 (over 90 days),
-      with the second-treatment-period and is_nhse_use_pathway filters. Null without either supplied date,
+      excluding a successor's second treatment before its first reported month. A retained-PathwayID first treatment
+      before transfer can still start an interval whose second treatment is after transfer. The date basis for monthly
+      M046 (over 28 days) and M047 (over 90 days), with the second-treatment-period and is_nhse_use_pathway filters. Null without either supplied date,
       even if the chain has both dates.
   - name: pathway_days_referral_to_first_assessment
     description: Local chain-aware calendar wait from receipt to pathway_first_assessment_date. Null without either

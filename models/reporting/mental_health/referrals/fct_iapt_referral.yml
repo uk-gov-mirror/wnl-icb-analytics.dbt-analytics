@@ -6,7 +6,9 @@ models:
     referral with no discharge date may no longer be submitted; fct_iapt_referral_summary gives the status as of the
     latest accepted month. No population filter is applied beyond the commissioner filter of the data feed. NHS
     England pathway derivations come from the selected version and can change until the refresh window for that
-    month closes.
+    month closes. Course fields and dates are derived by PathwayID. After a provider code change, a retained
+    PathwayID carries cumulative fields including pre-transfer care; a new PathwayID covers post-transfer care only.
+    Do not add retained-PathwayID successor totals to predecessor totals.
   config:
     meta:
       owner:
@@ -117,19 +119,25 @@ models:
   - name: symptom_onset_month_start_date
     description: First day of symptom_onset_month. Month precision only; null when the value is not YYYY-MM.
   - name: first_assessment_date
-    description: NHS England derived date of the first attended assessment contact.
+    description: Supplied NHS England date of the first attended assessment contact by PathwayID. A successor
+      retaining PathwayID can carry a pre-transfer date; a new PathwayID covers post-transfer care. Null when absent.
   - name: last_assessment_date
     description: NHS England derived date of the last attended assessment contact. Null when first_assessment_date is null.
   - name: first_treatment_date
-    description: NHS England derived date of the first attended treatment contact or internet therapy start.
+    description: Supplied NHS England date of the first attended treatment contact or internet therapy start by
+      PathwayID. A successor retaining PathwayID can carry a pre-transfer date; a new PathwayID covers post-transfer care.
+      Null when absent.
   - name: second_treatment_date
-    description: NHS England derived date of the second attended treatment contact.
+    description: Supplied NHS England date of the second attended treatment contact by PathwayID. A successor
+      retaining PathwayID can carry a pre-transfer date; a new PathwayID covers post-transfer care. Null when absent.
   - name: last_treatment_date
     description: NHS England derived date of the last attended treatment contact.
   - name: nhse_care_contact_count
     description: NHS England CareContact_Count (I101D28). Contacts of any appointment type that were attended (codes
       5 or 6) or unplanned, dated from referral receipt to discharge (or the reporting period end while open), plus
-      completed internet-enabled therapy weekly logs. Counts within this provider-qualified referral only. Zero
+      completed internet-enabled therapy weekly logs. Derived by PathwayID. A successor retaining PathwayID carries
+      cumulative pre-transfer and post-transfer totals; a new PathwayID covers post-transfer care only. Do not add
+      a retained-PathwayID successor total to its predecessor total. Zero
       means the referral was not seen.
   - name: nhse_treatment_contact_count
     description: NHS England TreatmentCareContact_Count (I101D29). As nhse_care_contact_count, restricted to treatment
@@ -185,7 +193,7 @@ models:
   - name: first_therapy_type_code
     description: NHS England first therapy type (I101D32), as supplied. A SNOMED CT procedure concept from an attended
       treatment contact, or IET followed by the programme when an internet-enabled therapy log came first. Covers this
-      provider-qualified referral only.
+      supplied PathwayID, including pre-transfer care when retained after a provider code change.
   - name: first_therapy_type_name
     description: SNOMED CT preferred term for first_therapy_type_code; null for IET values and unmatched codes.
   - name: first_therapy_type_category

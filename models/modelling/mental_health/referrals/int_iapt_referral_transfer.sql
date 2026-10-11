@@ -1,8 +1,10 @@
 -- Referral keys are provider-qualified. When a provider's ODS code changes, its open referrals are resubmitted
--- under the new code with new local and pathway identifiers and none of their earlier contacts.
+-- under the new code without their earlier contacts. Local identifiers and PathwayID may be retained;
+-- a retained PathwayID carries cumulative NHS England course fields, while a new one covers post-transfer care.
 with referrals as (
     select
         referral_id
+        , pathway_id
         , person_id
         , referral_received_date
         , provider_organisation_code
@@ -20,6 +22,7 @@ with referrals as (
     select
         successor.referral_id as successor_referral_id
         , predecessor.referral_id as predecessor_referral_id
+        , successor.pathway_id = predecessor.pathway_id as is_pathway_id_retained
         , successor.provider_organisation_code as successor_provider_organisation_code
         , predecessor.provider_organisation_code as predecessor_provider_organisation_code
         , successor.first_reported_period_end_date as successor_first_reported_period_end_date
@@ -92,6 +95,7 @@ with referrals as (
 select
     e.successor_referral_id
     , e.predecessor_referral_id
+    , e.is_pathway_id_retained
     , e.is_confirmed_transfer
     , e.provider_transition_pair_count
     , c.original_referral_id

@@ -6,8 +6,9 @@ models:
     items, recorded conditions, monthly referral state and provider submission quality. The semantic view connects
     the reporting tables at their defined row meanings and supplies named measures, including NHS England finished
     courses, reliable recovery and waits. Unprefixed waits use each referral's own supplied dates, including
-    transfer successors. For monthly M024 to M027, select referral_first_assessment_month; for M036, M037 and M049,
-    select referral_first_treatment_month; for monthly M046 and M047, select referral_second_treatment_month.
+    transfer successors only when the event is on or after the start of their first reported month. Repeated
+    pre-transfer course dates stay supplied but cannot contribute a successor wait. For monthly M024 to M027,
+    select referral_first_assessment_month; for M036, M037 and M049, select referral_first_treatment_month; for monthly M046 and M047, select referral_second_treatment_month.
     Group by the selected month and filter referrals_is_nhse_use_pathway true. The first-treatment population
     includes open and discharged referrals first treated in the period; it is not the finished-course waiting-time KPI.
     Separately named pathway measures count each confirmed transfer chain once on its original referral,

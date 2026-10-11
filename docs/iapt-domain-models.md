@@ -145,12 +145,18 @@ status.
 ## Provider code changes
 
 Referral identifiers are provider-qualified. When a provider's ODS code
-changes, its open referrals are resubmitted under the new code with new local
-and pathway identifiers and none of their earlier contacts. The old copy stops
+changes, its open referrals are resubmitted under the new code without their
+earlier contacts. The provider-qualified referral identifier changes even when
+the local referral identifier and PathwayID stay the same. The old copy stops
 being reported without a discharge. Left alone, the referral is counted as
-received twice, the old copy looks abandoned, and NHS England's course fields
-on the new copy (first treatment date, contact counts, first scores, completed
-treatment, recovery) describe only the care after the change.
+received twice and the old copy looks abandoned.
+
+NHS England derives course fields by PathwayID. RWK4C to RQY58 in December 2022
+and TAF87/TAF88 in June and July 2024 retained PathwayID and local identifiers.
+Their successors carry pre-transfer dates and cumulative supplied course fields,
+including contact totals, scores and outcomes. Do not add these totals to the
+predecessor's totals. Transfers to G6V2S in November 2024 used new PathwayIDs;
+those successors' supplied course fields cover care after transfer only.
 
 `int_iapt_referral_transfer` lists candidate pairs: the same Person_ID and
 referral received date under different provider codes, the predecessor
@@ -178,16 +184,24 @@ referral can transfer twice, and about 260 did.
   referral of the chain and has one value per course of care.
 - The predecessor's `as_of_referral_status` is `transferred`, ending at its
   last reported month.
-- `has_partial_nhse_course_fields` is true on a successor. The supplied NHS
-  England values are unchanged on `fct_iapt_referral`.
+- `is_pathway_id_retained` is true on a successor retaining its immediate
+  predecessor's PathwayID. `has_partial_nhse_course_fields` is true only on a
+  successor with a new PathwayID. Both are null on a successor when either
+  PathwayID is missing. The supplied NHS England values stay unchanged.
 - `pathway_first_assessment_date` and `pathway_first_treatment_date` take the
   earliest date across the chain, and `pathway_second_treatment_date` the second
-  earliest treatment. The chain's first treatment is earlier than the
-  successor's own for about 40% of successors, and a further 16% have no first
+  earliest treatment after excluding successor dates before their first
+  reported month. Two treatments on one day remain separate. The chain's first
+  treatment is earlier than the successor's own for about 40% of successors, and a further 16% have no first
   treatment of their own. Separately named pathway waits use these chain dates;
   unprefixed assessment, first-treatment and first-to-second treatment waits use
-  each referral's own supplied dates. A predecessor without its own date does
-  not gain an unprefixed wait from a successor.
+  each referral's own supplied dates. A successor contributes an own-date wait
+  only when its assessment, first treatment or second treatment respectively
+  falls on or after the start of its first reported month. This counts retained
+  pre-transfer dates only on the predecessor, as the successor was absent from
+  those monthly submissions. A first-to-second interval may still start before
+  transfer when the second treatment is after transfer. A predecessor without
+  its own date does not gain an unprefixed wait from a successor.
 - `fct_iapt_referral_period` counts care recorded under the earlier code, so a
   moved course is not shown as waiting again.
 
@@ -281,13 +295,15 @@ window to reproduce a published figure.
 | `days_first_to_second_treatment` | Monthly M046, M047 date basis | Own supplied first to second treatment, selected by second-treatment month and counted when over 28 or over 90 days |
 | `consultation_mechanism_group` | M1001 to M1020 | Delivery group of attended or unplanned contacts |
 
-A transfer successor's ended type and outcome flags cover only care after the
-transfer, as NHS England derives them per provider-qualified referral. The
-summary uses each referral's own counts, completed-treatment and recovery flags,
-caseness and reliable-change statuses. It does not inherit them across a chain.
-All unprefixed waits use each referral's supplied dates, including on transfer
-successors. Missing supplied dates leave their waits null even when a chain date
-is available.
+A transfer successor's ended type and outcome flags include pre-transfer care
+when PathwayID is retained. They cover only care after transfer with a new
+PathwayID. The summary uses each referral's own counts, completed-treatment and
+recovery flags, caseness and reliable-change statuses. It does not inherit them across a chain.
+All unprefixed waits use each referral's supplied dates. A successor's wait is
+null when the event precedes its first reported month. For first-to-second
+treatment this rule applies to the second date, so an interval can start before
+transfer if the second treatment is after it. Missing supplied dates leave their
+waits null even when a chain date is available.
 In `sem_iapt`, select and group monthly M024 to M027 by
 `referral_first_assessment_month`, and monthly M046/M047 by
 `referral_second_treatment_month`. Filter `referrals_is_nhse_use_pathway` true.
@@ -316,9 +332,10 @@ local chain-aware snapshots, not reproductions of NHS England monthly measures.
 
 The referral fact also carries all 19 supplied per-therapy course totals
 (I101D34-I101D52), named `nhse_<therapy>_count`. These NHS England derivations
-remain available when a refresh drops historical contacts. They cover each
-provider-qualified referral, so a successor's totals cover only care after
-transfer. Do not reconstruct them solely from the retained contact facts.
+remain available when a refresh drops historical contacts. A retained-PathwayID
+successor carries cumulative totals including pre-transfer care; a new PathwayID
+covers only care after transfer. Do not add retained-PathwayID successor totals
+to predecessor totals or reconstruct them solely from retained contact facts.
 The contact fact retains `internet_enabled_therapy_programme` as supplied
 programme-name text. UKHFD has no matching programme code list.
 

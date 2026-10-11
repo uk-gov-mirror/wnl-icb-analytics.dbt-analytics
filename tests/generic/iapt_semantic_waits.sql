@@ -37,6 +37,10 @@ from (
         , median(datediff(day, {{ start_field }}, {{ end_field }})) as median_days
     from {{ ref('fct_iapt_referral_summary') }}
     where {{ 'referral_id = original_referral_id' if chain else 'is_nhse_use_pathway' }}
+    {% if not chain %}
+        and (not is_transfer_successor
+            or {{ end_field }} >= date_trunc('month', first_reported_period_end_date))
+    {% endif %}
     group by provider_organisation_code, date_trunc('month', {{ end_field }})
 ) as e
 full outer join (

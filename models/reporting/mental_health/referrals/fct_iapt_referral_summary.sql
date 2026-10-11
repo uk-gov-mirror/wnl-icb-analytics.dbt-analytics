@@ -26,6 +26,8 @@ with reporting_date as (
         , ts.predecessor_referral_id
         , tp.successor_referral_id
         , ts.successor_referral_id is not null as is_transfer_successor
+        , case when ts.successor_referral_id is null then false else ts.is_pathway_id_retained end
+            as is_pathway_id_retained
         , tp.predecessor_referral_id is not null as is_transfer_predecessor
         , coalesce(ts.original_referral_id, r.referral_id) as original_referral_id
         -- Open referrals must be resubmitted every month (user guidance v1.6.1 pp15 and 32). Without a discharge
@@ -52,16 +54,20 @@ with reporting_date as (
         and tp.is_confirmed_transfer
 )
 
--- Course dates across a confirmed transfer chain. The predecessor's contacts precede the successor's, so the
--- chain's second treatment is the second earliest of its members' first and second treatment dates.
+-- Retained PathwayIDs repeat pre-transfer course dates. Keep successor treatments from its first reported
+-- month onwards before taking the chain's second earliest treatment; two treatments on one day remain valid.
 , chain_treatment_dates as (
     select original_referral_id, first_treatment_date as treatment_date
     from referrals
     where first_treatment_date is not null
+        and (not is_transfer_successor
+            or first_treatment_date >= date_trunc('month', first_reported_period_end_date))
     union all
     select original_referral_id, second_treatment_date
     from referrals
     where second_treatment_date is not null
+        and (not is_transfer_successor
+            or second_treatment_date >= date_trunc('month', first_reported_period_end_date))
 )
 
 , chain_second_treatment as (
@@ -87,9 +93,8 @@ with reporting_date as (
             when 'open' then 'open'
             else 'last_submission'
         end as referral_end_date_source
-        -- NHS England derives course fields per provider-qualified referral, so a successor's cover only the
-        -- part after the transfer.
-        , r.is_transfer_successor as has_partial_nhse_course_fields
+        -- NHS England derives course fields by PathwayID. Only a new PathwayID restarts the supplied course.
+        , r.is_transfer_successor and not r.is_pathway_id_retained as has_partial_nhse_course_fields
         , min(r.first_assessment_date) over (partition by r.original_referral_id) as pathway_first_assessment_date
         , min(r.first_treatment_date) over (partition by r.original_referral_id) as pathway_first_treatment_date
         , c.pathway_second_treatment_date
@@ -115,12 +120,22 @@ select
         when caseness_at_start_status = 'not_at_caseness' then null
         else coalesce(is_recovered and reliable_change_status = 'reliable_improvement', false)
     end as is_reliably_recovered
-    -- NHS England waits use this referral's supplied dates, including on transfer successors.
-    , datediff(day, referral_received_date, first_assessment_date) as days_referral_to_first_assessment
-    , datediff(day, referral_received_date, first_treatment_date) as days_referral_to_first_treatment
+    -- A successor was absent from pre-transfer monthly submissions. Exclude its repeated course dates from
+    -- own-date waits so the predecessor alone contributes in those months; keep the supplied dates unchanged.
+    , case when not is_transfer_successor
+        or first_assessment_date >= date_trunc('month', first_reported_period_end_date)
+        then datediff(day, referral_received_date, first_assessment_date)
+    end as days_referral_to_first_assessment
+    , case when not is_transfer_successor
+        or first_treatment_date >= date_trunc('month', first_reported_period_end_date)
+        then datediff(day, referral_received_date, first_treatment_date)
+    end as days_referral_to_first_treatment
     , days_referral_to_first_treatment <= 42 as is_first_treatment_within_6_weeks
     , days_referral_to_first_treatment <= 126 as is_first_treatment_within_18_weeks
-    , datediff(day, first_treatment_date, second_treatment_date) as days_first_to_second_treatment
+    , case when not is_transfer_successor
+        or second_treatment_date >= date_trunc('month', first_reported_period_end_date)
+        then datediff(day, first_treatment_date, second_treatment_date)
+    end as days_first_to_second_treatment
     -- Chain waits are separate local measures. Count only the original referral and attribute to its provider.
     , datediff(day, referral_received_date, pathway_first_assessment_date) as pathway_days_referral_to_first_assessment
     , datediff(day, referral_received_date, pathway_first_treatment_date) as pathway_days_referral_to_first_treatment
