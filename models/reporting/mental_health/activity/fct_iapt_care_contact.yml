@@ -208,3 +208,6 @@ models:
     description: Primary or Refresh.
   - name: dataset_version
     description: IAPT data set version of the selected file.
+  - name: internet_enabled_therapy_programme
+    description: Submitted Internet Enabled Therapy Programme name (I201270), with surrounding whitespace removed.
+      Free text, not a category code; UKHFD has no matching programme code list. Null when blank or not recorded.

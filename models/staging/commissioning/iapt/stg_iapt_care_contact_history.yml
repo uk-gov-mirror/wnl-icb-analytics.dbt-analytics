@@ -34,3 +34,6 @@ models:
   - name: cons_medium_used
     description: Warehouse consultation medium used field. v2.0 submits consultation medium used codes; v2.1
       consultation mechanism codes are copied into this field too. Read with dataset_version.
+  - name: internet_enabled_therapy_programme
+    description: Submitted Internet Enabled Therapy Programme name (I201270), with surrounding whitespace removed.
+      Free text, not a category code; UKHFD has no matching programme code list. Null when blank or not recorded.

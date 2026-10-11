@@ -82,6 +82,8 @@ models:
         description: SNOMED CT observable for the scored item.
       - name: pers_score
         description: Submitted score as text (max 5 characters), including Y, N and NA responses.
+      - name: age_assessment_completion_date
+        description: "{{ doc('iapt_age_at_assessment') }}"
       - name: ass_tool_comp_date
         description: Completion date as supplied.
       - name: ass_tool_comp_time
@@ -103,5 +105,7 @@ models:
         description: Provider-qualified care activity id (Unique_CareActivityID).
       - name: pers_score
         description: Submitted score as text (max 5 characters), including Y, N and NA responses.
+      - name: age_assessment_completion_date
+        description: "{{ doc('iapt_age_at_assessment') }}"
       - name: dmic_completion_date
         description: Completion date added by the data services processing office. Undocumented derivation; compared with the contact date, never used in its place.

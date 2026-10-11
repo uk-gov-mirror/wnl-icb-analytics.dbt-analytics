@@ -23,6 +23,7 @@ select
     , c.clin_cont_dur_of_care_cont
     , nullif(trim(c.iaptltc_service_ind), '') as iaptltc_service_ind
     , nullif(trim(c.app_type), '') as app_type
+    , nullif(trim(c.int_enabled_ther_prog), '') as internet_enabled_therapy_programme
     -- v2.1 submits consultation mechanism; v2.0 submitted consultation medium used.
     , nullif(trim(c.cons_mechanism), '') as cons_mechanism
     , nullif(trim(c.cons_medium_used), '') as cons_medium_used

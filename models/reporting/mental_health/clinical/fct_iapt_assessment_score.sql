@@ -16,6 +16,7 @@ with referral_assessments as (
         , pathway_id
         , coded_ass_tool_type as assessment_tool_code
         , pers_score as score_text
+        , age_assessment_completion_date as age_at_assessment
         , null::boolean as is_care_activity_linked
         , null::boolean as is_care_activity_referral_consistent
         , null::boolean as is_care_activity_contact_consistent
@@ -91,6 +92,7 @@ with referral_assessments as (
         , pathway_id
         , coded_ass_tool_type as assessment_tool_code
         , pers_score as score_text
+        , age_assessment_completion_date as age_at_assessment
         , is_care_activity_linked
         , is_care_activity_referral_consistent
         , is_care_activity_contact_consistent
@@ -225,6 +227,7 @@ with referral_assessments as (
                 > coalesce(scale.decimal_places, 0)
             , null) as has_excess_score_precision
 
+        , v.age_at_assessment
         , v.clinical_date
         , v.clinical_time
         , case

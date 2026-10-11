@@ -15,6 +15,7 @@ select
     , nullif(trim(r.pathway_id), '') as pathway_id
     , nullif(trim(r.coded_ass_tool_type), '') as coded_ass_tool_type
     , nullif(trim(r.pers_score), '') as pers_score
+    , r.age_assessment_completion_date
     , r.dmic_completion_date::date as dmic_completion_date
     , s.reporting_period_start_date
     , s.reporting_period_end_date

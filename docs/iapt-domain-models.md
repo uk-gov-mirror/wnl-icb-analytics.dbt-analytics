@@ -296,7 +296,19 @@ referral dimensions describe the original referral, including treatment after
 transfer. These local measures have no NHS England measure identifiers.
 Select and group them by `pathway_first_treatment_month`.
 
+The referral fact also carries all 19 supplied per-therapy course totals
+(I101D34-I101D52), named `nhse_<therapy>_count`. These NHS England derivations
+remain available when a refresh drops historical contacts. They cover each
+provider-qualified referral, so a successor's totals cover only care after
+transfer. Do not reconstruct them solely from the retained contact facts.
+The contact fact retains `internet_enabled_therapy_programme` as supplied
+programme-name text. UKHFD has no matching programme code list.
+
 ## Assessments
+
+`fct_iapt_assessment_score.age_at_assessment` carries the supplied age in years.
+IDS606 uses the completion date; IDS607 uses the related contact date. It stays
+available even when the fact cannot validate the clinical date or parent link.
 
 Scores are read against the latest published definition of each observable in
 the IAPT routine outcome measure mapping. The specification version records

@@ -32,6 +32,25 @@ select
     , r.therapy_session_last_date::date as therapy_session_last_date
     , r.care_contact_count
     , r.treatment_care_contact_count
+    , r.applied_relaxation_count
+    , r.brief_psychodynamic_psychotherapy_count
+    , r.cognitive_behaviour_therapy_count
+    , r.collaborative_care_count
+    , r.counselling_depression_count
+    , r.couples_therapy_depression_count
+    , r.employment_support_count
+    , r.eye_movement_desensitisation_reprocessing_count
+    , r.guided_self_help_book_count
+    , r.guided_self_help_computer_count
+    , r.interpersonal_psychotherapy_count
+    , r.mindfulness_count
+    , r.non_guided_self_help_book_count
+    , r.non_guided_self_help_computer_count
+    , r.other_high_intensity_count
+    , r.other_low_intensity_count
+    , r.psychoeducational_peer_support_count
+    , r.structured_physical_activity_count
+    , r.community_sign_posting_count
     , r.internet_enabled_therapy_count
     , r.high_intensity_therapy_first_date::date as high_intensity_therapy_first_date
     , r.low_intensity_therapy_first_date::date as low_intensity_therapy_first_date

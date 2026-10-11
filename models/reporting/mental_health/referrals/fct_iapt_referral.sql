@@ -161,6 +161,25 @@ select
     , o.therapy_session_last_date as last_treatment_date
     , o.care_contact_count as nhse_care_contact_count
     , o.treatment_care_contact_count as nhse_treatment_contact_count
+    , o.applied_relaxation_count as nhse_applied_relaxation_count
+    , o.brief_psychodynamic_psychotherapy_count as nhse_brief_psychodynamic_psychotherapy_count
+    , o.cognitive_behaviour_therapy_count as nhse_cognitive_behaviour_therapy_count
+    , o.collaborative_care_count as nhse_collaborative_care_count
+    , o.counselling_depression_count as nhse_counselling_depression_count
+    , o.couples_therapy_depression_count as nhse_couples_therapy_depression_count
+    , o.employment_support_count as nhse_employment_support_count
+    , o.eye_movement_desensitisation_reprocessing_count as nhse_eye_movement_desensitisation_reprocessing_count
+    , o.guided_self_help_book_count as nhse_guided_self_help_book_count
+    , o.guided_self_help_computer_count as nhse_guided_self_help_computer_count
+    , o.interpersonal_psychotherapy_count as nhse_interpersonal_psychotherapy_count
+    , o.mindfulness_count as nhse_mindfulness_count
+    , o.non_guided_self_help_book_count as nhse_non_guided_self_help_book_count
+    , o.non_guided_self_help_computer_count as nhse_non_guided_self_help_computer_count
+    , o.other_high_intensity_count as nhse_other_high_intensity_count
+    , o.other_low_intensity_count as nhse_other_low_intensity_count
+    , o.psychoeducational_peer_support_count as nhse_psychoeducational_peer_support_count
+    , o.structured_physical_activity_count as nhse_structured_physical_activity_count
+    , o.community_sign_posting_count as nhse_community_sign_posting_count
     , o.is_completed_treatment
     , o.adsm as anxiety_disorder_specific_measure
     , adsm_scale.assessment_tool_name as anxiety_disorder_specific_measure_name

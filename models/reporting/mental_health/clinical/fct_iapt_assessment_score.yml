@@ -69,6 +69,8 @@ models:
         description: Comparable numeric score on the latest definition's scale - an enumerated numeric response or a value within the latest range. Null for non-score, text, historical-format and out-of-range values. Does not derive questionnaire totals.
       - name: has_excess_score_precision
         description: True when a within-range score has more significant decimals than the latest definition publishes. A warning, not a comparability rule; such scores are kept.
+      - name: age_at_assessment
+        description: "{{ doc('iapt_age_at_assessment') }}"
       - name: clinical_date
         description: IDS606 completion date; IDS607 date of the contact in the same submission. Null unless clinical_date_status is recorded.
       - name: clinical_time

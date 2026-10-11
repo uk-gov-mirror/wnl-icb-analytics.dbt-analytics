@@ -136,6 +136,7 @@ select
     end as consultation_mechanism_label_status
     , coalesce(consultation_group.group_code, 'unknown') as consultation_mechanism_group
     , coalesce(consultation_group.group_name, 'Unknown') as consultation_mechanism_group_name
+    , c.internet_enabled_therapy_programme
     , c.care_cont_patient_ther_mode as patient_therapy_mode_code
     , therapy_mode.description as patient_therapy_mode_name
     , try_to_number(c.num_group_ther_participants) as group_therapy_participant_count

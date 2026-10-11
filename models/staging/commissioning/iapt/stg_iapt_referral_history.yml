@@ -45,3 +45,41 @@ models:
     description: Earlier name of the NHS England presenting complaint higher-category derivation, not a code.
   - name: secondary_presenting_complaint
     description: Earlier name of the NHS England presenting complaint lower-category derivation, not a code.
+  - name: applied_relaxation_count
+    description: "Applied relaxation session total (I101D34). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: brief_psychodynamic_psychotherapy_count
+    description: "Brief psychodynamic psychotherapy session total (I101D35). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: cognitive_behaviour_therapy_count
+    description: "Cognitive behaviour therapy session total (I101D36). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: collaborative_care_count
+    description: "Collaborative care session total (I101D37). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: counselling_depression_count
+    description: "Counselling depression session total (I101D38). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: couples_therapy_depression_count
+    description: "Couples therapy depression session total (I101D39). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: employment_support_count
+    description: "Employment support session total (I101D40). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: eye_movement_desensitisation_reprocessing_count
+    description: "Eye movement desensitisation reprocessing session total (I101D41). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: guided_self_help_book_count
+    description: "Guided self help book session total (I101D42). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: guided_self_help_computer_count
+    description: "Guided self help computer session total (I101D43). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: interpersonal_psychotherapy_count
+    description: "Interpersonal psychotherapy session total (I101D44). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: mindfulness_count
+    description: "Mindfulness session total (I101D45). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: non_guided_self_help_book_count
+    description: "Non guided self help book session total (I101D46). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: non_guided_self_help_computer_count
+    description: "Non guided self help computer session total (I101D47). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: other_high_intensity_count
+    description: "Other high intensity session total (I101D48). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: other_low_intensity_count
+    description: "Other low intensity session total (I101D49). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: psychoeducational_peer_support_count
+    description: "Psychoeducational peer support session total (I101D50). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: structured_physical_activity_count
+    description: "Structured physical activity session total (I101D51). {{ doc('iapt_nhse_therapy_course_count') }}"
+  - name: community_sign_posting_count
+    description: "Community sign posting session total (I101D52). {{ doc('iapt_nhse_therapy_course_count') }}"
