@@ -1,5 +1,3 @@
-{{ config(materialized='ephemeral') }}
-
 select
     code_set_name,
     source_code_set_name,

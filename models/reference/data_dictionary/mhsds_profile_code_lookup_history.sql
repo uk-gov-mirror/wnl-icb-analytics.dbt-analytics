@@ -1,5 +1,3 @@
-{{ config(materialized='ephemeral') }}
-
 select
     'child_protection_plan_status' as code_set_name,
     definitions.*
