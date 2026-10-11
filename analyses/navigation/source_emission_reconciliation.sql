@@ -54,6 +54,14 @@ with expected as (
         'obt_encounter_apc' as source_model_name, 'discharge' as emitted_type, count(*) as expected_record_count
     from {{ ref('obt_encounter_apc') }} where end_date is not null
     union all
+    select 'healthcare_event' as output_type, 'SUS_APC' as source_dataset,
+        'obt_encounter_apc' as source_model_name, 'decision_to_admit' as emitted_type, count(*) as expected_record_count
+    from {{ ref('obt_encounter_apc') }} where decided_to_admit_date is not null
+    union all
+    select 'healthcare_event' as output_type, 'SUS_APC' as source_dataset,
+        'obt_encounter_apc' as source_model_name, 'discharge_ready' as emitted_type, count(*) as expected_record_count
+    from {{ ref('obt_encounter_apc') }} where discharge_ready_date is not null
+    union all
     select 'healthcare_event' as output_type, 'SUS_OP' as source_dataset,
         'int_sus_op_appointment' as source_model_name, 'appointment_slot' as emitted_type, count(*) as expected_record_count
     from {{ ref('int_sus_op_appointment') }}
