@@ -46,12 +46,14 @@ select
     , uec_site_label
     , start_date
     , start_time
+    , timestamp_ntz_from_parts(start_date, start_time) as arrival_at
     , financial_year
     , financial_month
     , financial_month_name
     , week_end_date
     , end_date
     , end_time
+    , timestamp_ntz_from_parts(end_date, end_time) as departure_at
     , duration
     , initial_assessment_date
     , initial_assessment_time

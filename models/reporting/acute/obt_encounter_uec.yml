@@ -70,6 +70,10 @@ models:
       - name: start_time
         data_type: time
         description: "Time of arrival at urgent care department"
+
+      - name: arrival_at
+        data_type: timestamp_ntz
+        description: "Date and time of arrival at urgent care department, from start_date and start_time. Local clock time; null when either part is missing."
       
       - name: end_date
         data_type: date
@@ -78,6 +82,10 @@ models:
       - name: end_time
         data_type: time
         description: "Time of departure at urgent care department"
+
+      - name: departure_at
+        data_type: timestamp_ntz
+        description: "Date and time of departure from urgent care department, from end_date and end_time. Local clock time; null when either part is missing."
       
       - name: duration
         data_type: number
