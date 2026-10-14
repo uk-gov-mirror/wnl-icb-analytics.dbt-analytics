@@ -23,9 +23,7 @@ models:
       UEC rows include uec_is_four_hour_breach. It is true when
       arrival-to-departure time is over 240 minutes, false at 240 minutes or
       less, and null when duration is missing. uec_four_hour_breach_count
-      counts the true flags. The view has no breach rate. Filter the report
-      population, then divide the breach count by uec_attendance_count. The
-      flag does not select that population.
+      counts the true flags.
 
       Tables: obt_encounter_apc, obt_encounter_uec, and obt_encounter_op.
     config:
