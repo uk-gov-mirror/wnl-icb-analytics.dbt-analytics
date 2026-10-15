@@ -155,9 +155,10 @@ dbt build --target dev --full-refresh -s int_sus_person_clinical_record
 dbt build --target dev -s int_sus_person_clinical_record+
 ```
 
-Use `code`, `code_name` and `coding_system` together for routine clinical analysis.
-They select the mapped triplet when available, otherwise the source triplet.
-Both original triplets remain available. Use `assessment_score_numeric` for
+Use `original_code`, `original_code_name` and `original_coding_system` for the
+recorded terminology, and `snomed_code` and `snomed_code_name` for SNOMED analysis.
+Check `snomed_mapping_method` and `is_snomed_mapping_assured` when selecting
+mapped records. Use `assessment_score_numeric` for
 assessment scoring; `result_value_numeric` also contains numeric non-score responses.
 
 SUS procedures use their supplied procedure dates. Undated diagnoses remain
@@ -222,8 +223,8 @@ deliveries behind the watermark otherwise retain the former type and ID.
 e-RS assessment actions 1426 and 1428 retain assessment outcome in the shared
 outcome fields. Other action milestones and slots retain the action reason.
 
-APC admission and discharge carry their recorded methods in `event_code` and
-`event_code_name`. Their `event_coding_system` values are `Admission method` and
+APC admission and discharge carry their recorded methods in `original_code` and
+`original_code_name`. Their `original_coding_system` values are `Admission method` and
 `Discharge method`, the NHS DD list names. Decision-to-admit and discharge-ready
 milestones have null event codes.
 
@@ -241,8 +242,8 @@ Start and end milestones of the same period share a source record. Each start is
 primary; each end is optional. MHSDS legal-status periods have no recorded
 parent; community treatment orders and recalls link to their legal-status
 period; leave links to its ward stay; restrictive interventions and discharge
-readiness link to their hospital spell. `event_code` carries the record's legal
-status or reason, with `event_coding_system` naming the NHS Data Dictionary item.
+readiness link to their hospital spell. `original_code` carries the record's legal
+status or reason, with `original_coding_system` naming the NHS Data Dictionary item.
 Order and leave end milestones carry their end reason instead.
 The legal-status fact retains the supplied classification separately from the
 NHSD-derived classification used by the milestones and detention rules.
@@ -293,7 +294,7 @@ remain in `int_sus_uec_mental_health_legal_status` for drill-down. There are no 
 positions are preserved, including repeated codes in distinct supplied positions.
 ECDS observations and scored assessments keep separate source-sequence rows,
 values, reported units and clinical timestamps. Submitted scores populate the
-result fields but remain `not_validated` for assessment interpretation, with
+result fields but remain `not validated` for assessment interpretation, with
 `assessment_score_numeric` null. Unit labels do not establish measurement-unit
 compatibility. See the [ECDS measurement review](ecds-measurement-review.md).
 
@@ -344,11 +345,11 @@ codes retain the latest supported definition. No query calls a terminology
 server. Null labels mean no supported label was found; they do not invalidate
 the source code. Provider authorities distinguish ODS from local identifiers.
 
-`mapped_code` retains a recognised source SNOMED code, including an inactive
+`snomed_code` retains a recognised source SNOMED code, including an inactive
 historical concept. MHSDS, CSDS and ECDS validate codes against
 `snomed_concept`, which exposes the NHS Digital reporting model with its latest
-retained preferred terms. Supported Read mappings can supply a SNOMED target.
-The checks run when adapters load; monthly full refreshes apply reference
+retained preferred terms. National preferred-term Read maps take precedence over the legacy Read dictionary. MHSDS first retains an eligible recognised source-pipeline target. National candidates must be present in snomed_concept; inactive concepts and unassured maps are eligible under the agreed rule. CTV3 synonym-only and term-ID matches are excluded.
+CSDS and MHSDS resolve targets in their domain facts; ECDS resolves recorded concepts when its adapter loads; monthly full refreshes apply reference
 changes to older deliveries. OLIDS retains its upstream EMIS mappings, some of
 which are not recognised in this reference.
 
@@ -380,3 +381,63 @@ source counts without the shared facts' display fields.
 Define the index event, source populations, completed-care criteria and period
 before calculating a time-to-care measure. Treat undated or partially dated
 records separately. No observed attendance is not evidence of non-attendance.
+
+## Column changes for longitudinal cleanup
+
+Both views now put person and time first, followed by the item or event type,
+source dataset, original terminology and SNOMED terminology. Result and care
+context follow; source identifiers, date provenance and delivery metadata come last.
+
+| Previous clinical column | Current column or treatment |
+|---|---|
+| `source_code`, `source_code_name`, `source_coding_system` | `original_code`, `original_code_name`, `original_coding_system` |
+| `mapped_code`, `mapped_code_name` | `snomed_code`, `snomed_code_name` |
+| `code`, `code_name`, `coding_system` | Removed. Select the original or SNOMED fields explicitly. |
+| `mapped_coding_system` | Removed. The SNOMED field names fix the target system. |
+| `medication_authorisation_type_code`, `medication_authorisation_type_name` | `medication_authorisation_type`, using the existing identical label |
+| `relationship_type` | Removed from the clinical view. Parent keys remain source-recorded links. |
+
+The event view renames `event_code`, `event_code_name` and `event_coding_system`
+to `original_code`, `original_code_name` and `original_coding_system`. It adds
+`snomed_code`, `snomed_code_name` and `snomed_mapping_method`. ECDS referred-service
+milestones copy their recorded SNOMED into both code blocks. OLIDS referral
+events retain their existing SNOMED code under `OLIDS concept map`; their original
+code block stays null until dbt-olids supplies it in the event interface.
+Other administrative codes receive no inferred SNOMED equivalent. Attendance
+labels replace non-breaking spaces and trim outer spaces; their wording and
+codes retain the same meaning.
+
+The clinical view adds `snomed_mapping_method` and
+`is_snomed_mapping_assured`. Assurance comes only from the selected national map.
+False means explicitly unassured; null means unavailable or inapplicable. CSDS
+original terminology still uses the evidence-corrected Read scheme; its domain
+fact retains the submitted scheme and correction flag. MHSDS original Read
+labels now come from the Read dictionary or remain null.
+
+Numeric and assessment statuses use readable values such as `no value`,
+`unknown value`, `numeric (rounded)`, `numeric (format not checked)`,
+`not numeric or out of range`, `non-score response`, `listed response`,
+`within published range`, `reference unavailable`, `unmatched response` and
+`not validated`. Parsing, scoring and non-score exclusions retain their existing rules.
+
+### Deploying the cleanup
+
+Merge with `[skip deploy]`. The changed stored adapter schemas use
+`on_schema_change='fail'`, and their historical mappings and statuses need
+recomputing. Follow the owner-approved production backfill procedure in
+[longitudinal activity validation](longitudinal-activity-validation.md).
+Build `read_code_snomed_map`, both clinical domain facts and their partner copies,
+then full-refresh only the CSDS, MHSDS and ECDS clinical adapters. Recreate the
+OLIDS clinical adapter view and both longitudinal views, then run their tests.
+Dispatch a normal deployment afterwards to publish the production state artefacts.
+Reordering or renaming reporting columns alone does not require adapter refreshes.
+SUS clinical and all event adapter schemas retain their existing columns.
+
+Other models that store the revised status values or consume them, including
+ECDS observation/assessment facts and MHSDS assessment summaries, need the normal
+deployment selection after the backfill. They are outside the restricted DEV
+rehearsal selection for this cleanup.
+
+Coordinate #1371's view-based counters, examples and analyst guide with these
+renames. Adapter `source_*` and `mapped_*` names remain unchanged, so its
+adapter-based coverage SQL retains its existing input names.

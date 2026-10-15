@@ -287,7 +287,7 @@ select
     s.observation_value::varchar as result_value,
     s.categorical_value_name::varchar as result_value_name,
     s.observation_value_numeric::number(38,9) as result_value_numeric,
-    s.value_parse_status::varchar as result_value_parse_status,
+    {{ numeric_parse_status("nullif(trim(s.observation_value), '')") }}::varchar as result_value_parse_status,
     s.ucum_unit_code::varchar as result_unit_code,
     s.unit_name::varchar as result_unit_name,
     s.resolved_unit_symbol::varchar as result_unit_symbol,
@@ -330,12 +330,12 @@ select
     s.person_score::varchar as result_value,
     null::varchar as result_value_name,
     s.person_score_numeric::number(38,9) as result_value_numeric,
-    s.value_parse_status::varchar as result_value_parse_status,
+    {{ numeric_parse_status("nullif(trim(s.person_score), '')") }}::varchar as result_value_parse_status,
     null::varchar as result_unit_code,
     null::varchar as result_unit_name,
     null::varchar as result_unit_symbol,
     s.assessment_tool_name::varchar as assessment_tool_name,
-    iff(s.value_parse_status = 'value_missing', 'value_missing', 'not_validated')::varchar as assessment_response_status
+    iff(nullif(trim(s.person_score), '') is null, 'no value', 'not validated')::varchar as assessment_response_status
 from {{ ref('fct_sus_uec_scored_assessment') }} as s
 left join {{ ref('obt_encounter_uec') }} as p on s.visit_occurrence_id = p.visit_occurrence_id
 left join {{ ref('stg_sus_ecds_emergency_care') }} as delivery on s.visit_occurrence_id = delivery.primarykey_id
@@ -472,7 +472,8 @@ select
     is_primary_diagnosis,
     coding_position,
     parent_start_date,
-    parent_end_date
+    parent_end_date,
+    iff(source_snomed.snomed_code is not null, 'Recorded as SNOMED CT', null)::varchar as snomed_mapping_method
 from clinical_records
 left join {{ ref('snomed_concept') }} as source_snomed
     on trim(clinical_records.source_code) = source_snomed.snomed_code
