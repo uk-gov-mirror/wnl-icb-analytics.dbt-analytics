@@ -1,9 +1,9 @@
 {% docs navigation_event_id %}
-Stable namespaced identifier for one source milestone. OLIDS retains its upstream UUID without a text prefix. A date correction keeps the same event ID; this is not an audit version ID.
+Stable namespaced identifier for one source milestone. OLIDS retains its upstream UUID without a text prefix. SUS and ECDS IDs are stable while the supplier keeps PRIMARYKEY_ID and change if a resubmission reissues it. A date correction keeps the same event ID; this is not an audit version ID.
 {% enddocs %}
 
 {% docs navigation_clinical_record_id %}
-Stable namespaced identifier for one clinical source record. OLIDS retains its upstream UUID without a text prefix in both outputs. On the event output, this is an explicitly linked clinical record, not a temporal match.
+Stable namespaced identifier for one clinical source record. OLIDS retains its upstream UUID without a text prefix in both outputs. SUS and ECDS IDs are stable while the supplier keeps PRIMARYKEY_ID and change if a resubmission reissues it. On the event output, this is an explicitly linked clinical record, not a temporal match.
 {% enddocs %}
 
 {% docs navigation_sk_patient_id %}
@@ -59,7 +59,7 @@ Readable milestone label. e-RS preserves the recorded action label, including au
 {% enddocs %}
 
 {% docs navigation_event_code %}
-Recorded code associated with the milestone. For an e-RS slot this is its latest recorded appointment-state action, not evidence of attendance.
+Recorded code associated with the milestone. For an e-RS slot this is its latest recorded appointment-state action, not evidence of attendance. MHSDS legal-status, restrictive-intervention, discharge-readiness and onward-referral milestones carry the record's status or reason; end milestones of community treatment orders and leave carry their end reason. ECDS onward referrals carry the referred-to service. SUS APC admission and discharge carry their recorded admission and discharge methods; decision-to-admit and discharge-ready milestones have null event codes.
 {% enddocs %}
 
 {% docs navigation_event_code_name %}
@@ -67,7 +67,7 @@ Authoritative or retained source label for event_code.
 {% enddocs %}
 
 {% docs navigation_event_coding_system %}
-Namespace defining event_code, such as the e-RS action dictionary or the supplied OLIDS clinical coding system.
+Namespace defining event_code, such as the e-RS action dictionary, an NHS Data Dictionary code list named after its data item, SNOMED CT or the supplied OLIDS clinical coding system.
 {% enddocs %}
 
 {% docs navigation_care_setting %}
@@ -97,8 +97,7 @@ Authoritative reference label for attendance_code.
 {% enddocs %}
 
 {% docs navigation_outcome_code %}
-Recorded source outcome or action-reason code. APC discharge and ECDS departure use recorded discharge destination; admission and arrival do not carry that outcome. Interpret within the source dataset, record type and milestone.
-e-RS actions 1426 and 1428 use the recorded assessment outcome; other e-RS milestones use the action reason.
+Recorded source outcome or action-reason code. APC discharge and ECDS departure use recorded discharge destination; admission and arrival do not carry that outcome. MHSDS legal-status start and end milestones use their respective assignment-period start and end reasons. e-RS actions 1426 and 1428 use the recorded assessment outcome; other e-RS milestones use the action reason. Interpret within the source dataset, record type and milestone.
 {% enddocs %}
 
 {% docs navigation_outcome_name %}
@@ -174,16 +173,24 @@ Recorded referring organisation, where available. ECDS arrival uses the recorded
 Retained source or reference name for the referring organisation. ECDS arrival retains the attendance source site or provider name.
 {% enddocs %}
 
+{% docs navigation_receiving_organisation_code %}
+Recorded organisation an onward referral was sent to, where supplied. A referral to it does not establish acceptance or later care.
+{% enddocs %}
+
+{% docs navigation_receiving_organisation_name %}
+Latest reference name for the receiving organisation. Null when the code is not recognised.
+{% enddocs %}
+
 {% docs navigation_parent_record_type %}
 Entity type of the explicit recorded parent. Other submitted links and consistency flags remain on the detailed source fact.
 {% enddocs %}
 
 {% docs navigation_parent_record_id %}
-Recorded parent key in parent_model_name. A recorded link does not establish causality, attendance or a journey. Clinical activity links with conflicting person identifiers are not promoted.
+Recorded parent key in parent_model_name. A recorded link does not establish causality, attendance or a journey. Activity and referral links naming a different person are not promoted.
 {% enddocs %}
 
 {% docs navigation_parent_model_name %}
-dbt model containing the recorded parent. Consult the source-key mapping for keys named appointment_id, visit_occurrence_id, ubrn_id or id.
+dbt model containing the recorded parent. Consult the source-key mapping for keys named appointment_id, visit_occurrence_id, ubrn_id, mental_health_act_period_id or id.
 {% enddocs %}
 
 {% docs navigation_relationship_type %}
@@ -199,7 +206,7 @@ Recorded receipt, import or extraction timestamp used for incremental loading. I
 {% enddocs %}
 
 {% docs navigation_clinical_record_type %}
-Source clinical item type. An OLIDS observation can contain diagnoses, allergies or referral content; its code defines the meaning. Medication rows are orders enriched by statements, with no standalone statements.
+Source clinical item type. An OLIDS observation can contain diagnoses, allergies or referral content; its code defines the meaning. Medication rows are orders enriched by statements, with no standalone statements. CSDS and MHSDS include recorded social circumstances, with the source fact defining restatement keys and missing-date rules. A missing date is part of the CSDS CYP006 key; rows missing person, provider or SNOMED code keep each source occurrence.
 {% enddocs %}
 
 {% docs navigation_clinical_record_type_name %}
@@ -235,7 +242,7 @@ Latest supported reference or source description of the clinical code. Historica
 {% enddocs %}
 
 {% docs navigation_source_coding_system %}
-Source clinical coding system or its source-supplied label. Keep source and mapped codes separate.
+Coding system of the source code, or its source-supplied label. Keep source and mapped codes separate. CSDS gives the Read scheme the code belongs to: a code submitted as Read v2 or CTV3 that is absent from that scheme but an exact concept code in the other takes the other scheme. fct_csds_clinical_record keeps the submitted scheme. Any Dictionary membership, including ambiguous alternatives, or UKHFD code or term evidence prevents correction.
 {% enddocs %}
 
 {% docs navigation_mapped_code %}
@@ -255,7 +262,7 @@ Recorded clinical result as text, including numeric results and enumerated respo
 {% enddocs %}
 
 {% docs navigation_result_value_name %}
-Published response label where a clinical assessment has an enumerated response. Null does not imply an invalid numeric value.
+Published response label for an enumerated assessment response or categorical observation. Null does not imply an invalid numeric value.
 {% enddocs %}
 
 {% docs navigation_result_value_numeric %}
@@ -263,11 +270,11 @@ Numeric representation at precision 38 and scale 9. Check result_value_parse_sta
 {% enddocs %}
 
 {% docs navigation_result_value_parse_status %}
-Source numeric parsing assessment. Rounded or out-of-range values remain identifiable, and the original result_value is retained.
+Source numeric parsing assessment. Rounded or out-of-range values remain identifiable, and the original result_value is retained. value_unknown marks a submitted placeholder meaning unknown, such as the CSDS 99.9 length; its numeric value is null.
 {% enddocs %}
 
 {% docs navigation_result_date %}
-Date-valued OLIDS result. This is the result content, not a replacement clinical event date.
+Date-valued OLIDS result. This is the result content, not a replacement clinical event date. The CYP604 blood spot result receipt date stays in fct_csds_clinical_record.blood_spot_result_received_date and is not mapped here.
 {% enddocs %}
 
 {% docs navigation_result_unit_code %}
@@ -275,7 +282,7 @@ Recorded measurement-unit code or source unit token. Interpret with its label an
 {% enddocs %}
 
 {% docs navigation_result_unit_name %}
-Supported unit label. CSDS historical aliases apply only to their documented matching measurement codes; the source fact retains definition provenance.
+Supported unit label. CSDS historical aliases apply only to their documented matching measurement codes; the source fact retains definition provenance. ECDS unit labels resolve the reported token without checking its compatibility with the observation. No unit or conversion is inferred.
 {% enddocs %}
 
 {% docs navigation_result_unit_symbol %}
