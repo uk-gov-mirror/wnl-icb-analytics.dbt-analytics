@@ -103,7 +103,8 @@ with submitted as (
         , read_code.snomed_ct_code::varchar as dictionary_snomed_code
         , mapped_snomed.preferred_term as dictionary_snomed_description
         , coalesce(snomed.snomed_code, read_mapping.snomed_code) as snomed_code
-        , coalesce(snomed.preferred_term, read_mapping.snomed_code_name) as snomed_code_name
+        , case when snomed.snomed_code is not null then snomed.preferred_term
+            else read_mapping.snomed_code_name end as snomed_code_name
         , case when snomed.snomed_code is not null then 'Recorded as SNOMED CT'
             else read_mapping.snomed_mapping_method end as snomed_mapping_method
         , iff(snomed.snomed_code is null, read_mapping.is_assured, null) as is_snomed_mapping_assured

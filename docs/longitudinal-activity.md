@@ -435,8 +435,7 @@ SUS clinical and all event adapter schemas retain their existing columns.
 
 Other models that store the revised status values or consume them, including
 ECDS observation/assessment facts and MHSDS assessment summaries, need the normal
-deployment selection after the backfill. They are outside the restricted DEV
-rehearsal selection for this cleanup.
+deployment selection after the backfill.
 
 Coordinate #1371's view-based counters, examples and analyst guide with these
 renames. Adapter `source_*` and `mapped_*` names remain unchanged, so its

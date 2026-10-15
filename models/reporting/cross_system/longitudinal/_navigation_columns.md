@@ -350,7 +350,7 @@ Route supplying the selected SNOMED code: Recorded as SNOMED CT, OLIDS concept m
 {% enddocs %}
 
 {% docs navigation_is_snomed_mapping_assured %}
-Assurance flag supplied by the selected national Read map. False means explicitly unassured. Null means no selected national map, including recorded SNOMED, MHSDS supplied targets, OLIDS concept maps, legacy dictionary targets and unresolved records.
+Assurance flag supplied by the selected national Read map. False means explicitly unassured. Null means assurance is unavailable or not applicable, including a selected national map without a supplied flag. Use snomed_mapping_method to identify the mapping route.
 {% enddocs %}
 
 {% docs navigation_event_original_code %}

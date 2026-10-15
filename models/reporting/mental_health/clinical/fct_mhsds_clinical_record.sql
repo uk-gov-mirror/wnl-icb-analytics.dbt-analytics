@@ -34,7 +34,11 @@ with resolved as (
                 then snomed.preferred_term
         end as clinical_description
         , coalesce(snomed.snomed_code, supplied_snomed.snomed_code, read_mapping.snomed_code) as snomed_code
-        , coalesce(snomed.preferred_term, supplied_snomed.preferred_term, read_mapping.snomed_code_name) as snomed_code_name
+        , case
+            when snomed.snomed_code is not null then snomed.preferred_term
+            when supplied_snomed.snomed_code is not null then supplied_snomed.preferred_term
+            else read_mapping.snomed_code_name
+        end as snomed_code_name
         , case
             when snomed.snomed_code is not null then 'Recorded as SNOMED CT'
             when supplied_snomed.snomed_code is not null then 'MHSDS supplied SNOMED'
