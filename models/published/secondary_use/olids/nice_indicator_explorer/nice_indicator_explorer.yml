@@ -97,8 +97,8 @@ models:
       Results are recalculated with current rules, so later corrections can change past
       months. Breakdown 'Total' holds every person once; each other breakdown splits the same
       people into exhaustive values, so filter to one breakdown before summing. The Cambridge
-      Multimorbidity Score breakdown is current only. Practice, PCN, neighbourhood and borough
-      use the current mapping.
+      Multimorbidity Score and housebound or care home breakdowns are current only. Practice, PCN,
+      neighbourhood and borough use the current mapping.
     config:
       meta:
         owner:
@@ -163,7 +163,7 @@ models:
         description: Current population segment number and name, or 'Not segmented'.
       - name: frailty
         description: >-
-          Current eFI2 frailty category (Fit, Mild, Moderate, Severe); 'Not scored' under 65.
+          Current eFI2 frailty category (Fit, Mild, Moderate, Severe); 'Not scored' under 65 or with no score.
       - name: imd_quintile
         description: National IMD 2025 quintile of the resident LSOA; 1 is most deprived.
       - name: ethnicity
