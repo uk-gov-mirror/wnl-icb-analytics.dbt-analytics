@@ -84,6 +84,16 @@ models:
           given, or an anticoagulant choice did not meet the rule.
       - name: not_assessable
         description: Not achieved because the latest result could not be assessed.
+      - name: numerator_at_age_rates
+        description: >-
+          Achievements the row's people would have at the rate of everyone in their ESP 2013
+          five-year age band on the same indicator, across all practices (indirect age
+          standardisation). Additive like numerator: numerator minus this, over the denominator,
+          is the age-adjusted gap.
+      - name: variance_at_age_rates
+        description: >-
+          Sum of p(1 - p) over the row's people, where p is their age band's rate. Binomial
+          variance of numerator around numerator_at_age_rates, for intervals.
 
   - name: nice_indicator_explorer_achievement_by_month
     description: >-

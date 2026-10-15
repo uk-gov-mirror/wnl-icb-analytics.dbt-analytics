@@ -5,6 +5,9 @@
     opt-out are excluded.
     Args: reference is current or by_month.
     Returns: one row per reporting date, indicator, practice, breakdown and value.
+    Current only: numerator_at_age_rates sums, over the people in the row, the
+    achievement rate of everyone in the same ESP 2013 age band on that indicator
+    (indirect age standardisation); variance_at_age_rates sums p(1 - p).
 -#}
 {% if reference not in ['current', 'by_month'] %}
     {{ exceptions.raise_compiler_error('Unsupported NICE reference: ' ~ reference) }}
@@ -130,7 +133,8 @@ person_breakdowns AS (
             WHEN ch.is_care_home_resident THEN 'Care home'
             WHEN hb.is_housebound THEN 'Housebound'
             ELSE 'Neither recorded'
-        END AS residence
+        END AS residence,
+        COALESCE(d.age_band_esp, 'Unknown') AS age_band_esp
         {%- endif %}
     FROM person_dates AS pd
     LEFT JOIN {{ ref('dim_person_demographics') }} AS d
@@ -173,6 +177,12 @@ enriched AS (
         {%- for column, label in breakdowns if column != 'age_band' %}
         pb.{{ column }}{{ ',' if not loop.last }}
         {%- endfor %}
+        {%- if not by_month %},
+        -- Achievement rate of everyone in the same ESP age band on this indicator
+        AVG(IFF(s.is_in_numerator, 1, 0)::FLOAT) OVER (
+            PARTITION BY s.reporting_date, s.indicator_id, pb.age_band_esp
+        ) AS age_band_rate
+        {%- endif %}
     FROM status AS s
     INNER JOIN person_breakdowns AS pb
         ON s.person_id = pb.person_id
@@ -206,6 +216,10 @@ grouped AS (
             'VKA_WITHOUT_DOAC_EXCEPTION', 'DOAC_WHERE_VKA_INDICATED'
         )) AS not_treated,
         COUNT_IF(indicator_status = 'NOT_ASSESSABLE') AS not_assessable
+        {%- if not by_month %},
+        SUM(age_band_rate) AS numerator_at_age_rates,
+        SUM(age_band_rate * (1 - age_band_rate)) AS variance_at_age_rates
+        {%- endif %}
     FROM enriched
     GROUP BY GROUPING SETS (
         (reporting_date, indicator_id, practice_code)
@@ -234,6 +248,10 @@ SELECT
     g.outside_target,
     g.not_treated,
     g.not_assessable
+    {%- if not by_month %},
+    g.numerator_at_age_rates,
+    g.variance_at_age_rates
+    {%- endif %}
 FROM grouped AS g
 LEFT JOIN {{ ref('dim_practice') }} AS p
     ON g.practice_code = p.practice_code
