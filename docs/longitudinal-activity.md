@@ -422,21 +422,31 @@ Numeric and assessment statuses use readable values such as `no value`,
 
 ### Deploying the cleanup
 
-Merge with `[skip deploy]`. The changed stored adapter schemas use
-`on_schema_change='fail'`, and their historical mappings and statuses need
-recomputing. Follow the owner-approved production backfill procedure in
-[longitudinal activity validation](longitudinal-activity-validation.md).
-Build `read_code_snomed_map`, both clinical domain facts and their partner copies,
-then full-refresh only the CSDS, MHSDS and ECDS clinical adapters. Recreate the
-OLIDS clinical adapter view and both longitudinal views, then run their tests.
-Dispatch a normal deployment afterwards to publish the production state artefacts.
-Reordering or renaming reporting columns alone does not require adapter refreshes.
-SUS clinical and all event adapter schemas retain their existing columns.
+The CSDS, MHSDS and ECDS clinical adapters gain columns and store revised
+mappings and statuses. They use `on_schema_change='fail'` and reprocess only new
+deliveries, so the normal deployment would fail and older rows would keep their
+previous values. Merge with `[skip deploy]` and follow the controlled rollout in
+[longitudinal activity validation](longitudinal-activity-validation.md), pausing
+scheduled production builds, with this selection:
 
-Other models that store the revised status values or consume them, including
-ECDS observation/assessment facts and MHSDS assessment summaries, need the normal
-deployment selection after the backfill.
+```bash
+set -euo pipefail
+rollout_target=prod
+adapters=(int_csds_person_clinical_record int_mhsds_person_clinical_record int_ecds_person_clinical_record)
+changed=(read_code_snomed_map fct_csds_clinical_record fct_mhsds_clinical_record
+  fct_mhsds_care_activity fct_mhsds_assessment_instance fct_mhsds_assessment_observation
+  fct_sus_uec_observation fct_sus_uec_scored_assessment
+  int_olids_person_clinical_record fct_person_healthcare_event)
 
-Coordinate #1371's view-based counters, examples and analyst guide with these
-renames. Adapter `source_*` and `mapped_*` names remain unchanged, so its
-adapter-based coverage SQL retains its existing input names.
+dbt deps
+# Changed models and their consumers, except the three adapters and their descendants.
+dbt build --target "$rollout_target" --profiles-dir . --select "${changed[@]/%/+}" --exclude "${adapters[@]/%/+}"
+# Recompute adapter history.
+dbt build --target "$rollout_target" --profiles-dir . --full-refresh --select "${adapters[@]}"
+# Exercise the next increment, then rebuild the clinical view and other adapter consumers.
+dbt build --target "$rollout_target" --profiles-dir . --select "${adapters[@]/%/+}"
+```
+
+The next production deployment publishes state and rebuilds these models
+incrementally. Renaming or reordering reporting columns alone does not need an
+adapter refresh; SUS clinical and all event adapters keep their stored columns.
