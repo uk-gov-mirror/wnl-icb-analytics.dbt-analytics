@@ -252,7 +252,7 @@ models:
     description: NHS England first employment status recorded during the referral (EmploymentStatus_First), as
       supplied.
   - name: employment_status_first_name
-    description: UKHFD employment status label from the shared mhsds_domain_code_lookup; single digits are matched
+    description: UKHFD employment status label from the shared mhsds_employment_status; single digits are matched
       as two-character codes.
   - name: employment_status_last_code
     description: NHS England last employment status recorded during the referral (EmploymentStatus_Last).

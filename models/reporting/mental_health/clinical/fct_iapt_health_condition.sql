@@ -230,9 +230,8 @@ left join dated_complaints as dated
 left join {{ ref('nhs_dd_diagnosis_scheme') }} as diagnosis_scheme
     on v.source_table = 'IDS601'
     and v.coding_scheme_code = diagnosis_scheme.code
-left join {{ ref('mhsds_care_activity_code_lookup') }} as finding_scheme
+left join {{ ref('nhs_dd_finding_scheme') }} as finding_scheme
     on v.source_table <> 'IDS601'
-    and finding_scheme.code_set_name = 'finding_scheme'
     and v.coding_scheme_code = finding_scheme.code
 left join {{ ref('icd10_code') }} as icd10
     on v.icd10_lookup_code = icd10.code

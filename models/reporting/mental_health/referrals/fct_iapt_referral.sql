@@ -317,12 +317,10 @@ left join {{ ref('snomed_concept') }} as first_therapy_concept
     on o.therapy_type_first = first_therapy_concept.snomed_code
 left join {{ ref('snomed_concept') }} as last_therapy_concept
     on o.therapy_type_last = last_therapy_concept.snomed_code
-left join {{ ref('mhsds_domain_code_lookup') }} as employment_first
-    on employment_first.code_set_name = 'employment_status'
-    and o.employment_status_first_normalised = employment_first.code
-left join {{ ref('mhsds_domain_code_lookup') }} as employment_last
-    on employment_last.code_set_name = 'employment_status'
-    and o.employment_status_last_normalised = employment_last.code
+left join {{ ref('mhsds_employment_status') }} as employment_first
+    on o.employment_status_first_normalised = employment_first.code
+left join {{ ref('mhsds_employment_status') }} as employment_last
+    on o.employment_status_last_normalised = employment_last.code
 left join {{ ref('iapt_code_lookup') }} as psychotropic_first
     on psychotropic_first.code_set_name = 'psychotropic_medication_usage'
     and upper(o.psychotropic_indicator_first) = psychotropic_first.code

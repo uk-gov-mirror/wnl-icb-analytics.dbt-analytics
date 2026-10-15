@@ -220,18 +220,14 @@ left join {{ ref('iapt_code_lookup') }} as psychotropic
 left join {{ ref('iapt_code_lookup') }} as integrated_ltc
     on integrated_ltc.code_set_name = 'integrated_ltc_service_indicator'
     and upper(c.iaptltc_service_ind) = integrated_ltc.code
-left join {{ ref('mhsds_care_contact_code_lookup') }} as planned
-    on planned.code_set_name = 'planned_care_contact_indicator'
-    and upper(c.planned_care_cont_indicator) = planned.code
-left join {{ ref('mhsds_care_contact_code_lookup') }} as medium
-    on medium.code_set_name = 'consultation_medium_used'
-    and upper(c.consultation_code) = medium.code
-left join {{ ref('mhsds_care_contact_code_lookup') }} as therapy_mode
-    on therapy_mode.code_set_name = 'patient_therapy_mode'
-    and upper(c.care_cont_patient_ther_mode) = therapy_mode.code
-left join {{ ref('mhsds_care_contact_code_lookup') }} as interpreter
-    on interpreter.code_set_name = 'interpreter_present_indicator'
-    and upper(c.interpreter_present_ind) = interpreter.code
+left join {{ ref('nhs_dd_planned_care_contact_indicator') }} as planned
+    on upper(c.planned_care_cont_indicator) = planned.code
+left join {{ ref('nhs_dd_consultation_medium_used') }} as medium
+    on upper(c.consultation_code) = medium.code
+left join {{ ref('nhs_dd_care_contact_patient_therapy_mode') }} as therapy_mode
+    on upper(c.care_cont_patient_ther_mode) = therapy_mode.code
+left join {{ ref('nhs_dd_interpreter_present_indicator') }} as interpreter
+    on upper(c.interpreter_present_ind) = interpreter.code
 left join {{ ref('nhs_dd_consultation_mechanism') }} as mechanism
     on upper(c.consultation_code) = mechanism.code
 left join {{ ref('nhs_dd_activity_location_type') }} as location
