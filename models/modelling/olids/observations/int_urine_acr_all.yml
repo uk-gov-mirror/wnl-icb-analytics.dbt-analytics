@@ -56,10 +56,59 @@ models:
       - name: is_valid_acr
         description: Whether acr_value is populated. Kept for existing consumers; it carries no meaning beyond acr_value being non-null.
       - name: acr_category
-        description: Normal, mildly, moderately or severely increased by ACR band; Invalid for an ACR result outside range; null otherwise.
+        description: NICE NG203 albuminuria category (mg/mmol), A1 below 3, A2 3-30 inclusive, A3 above 30; Invalid for out-of-range ACR, null otherwise.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['A1 normal to mildly increased (<3)', 'A2 moderately increased (3-30)', 'A3 severely increased (>30)', 'Invalid']
       - name: is_acr_elevated
         description: ACR at or above 3 mg/mmol. False when no valid ACR value.
       - name: is_microalbuminuria
-        description: ACR from 3 to below 30 mg/mmol. False when no valid ACR value.
+        description: ACR from 3 to 30 mg/mmol inclusive (A2). False when no valid ACR value.
       - name: is_macroalbuminuria
-        description: ACR at or above 30 mg/mmol. False when no valid ACR value.
+        description: ACR above 30 mg/mmol (A3). False when no valid ACR value.
+
+unit_tests:
+- name: acr_nice_categories
+  model: int_urine_acr_all
+  overrides:
+    macros:
+      get_observations: |-
+        SELECT column1::VARCHAR id, column2::NUMBER person_id,
+        column3::TIMESTAMP_NTZ clinical_effective_date, column3::TIMESTAMP_NTZ date_recorded,
+        column4::VARCHAR result_value, column5::VARCHAR result_unit_code,
+        column5::VARCHAR result_unit_display, '1023491000000104'::VARCHAR mapped_concept_code,
+        'Synthetic observation'::VARCHAR mapped_concept_display, column6::VARCHAR cluster_id
+        FROM VALUES ('SYN_0', -9300, '2026-01-01', 2.9, 'mg/mmol', 'NDAALB_COD'),
+        ('SYN_1', -9301, '2026-01-01', 3, 'mg/mmol', 'NDAALB_COD'),
+        ('SYN_2', -9302, '2026-01-01', 30, 'mg/mmol', 'NDAALB_COD'),
+        ('SYN_3', -9303, '2026-01-01', 30.1, 'mg/mmol', 'NDAALB_COD'),
+        ('SYN_4', -9304, '2026-01-01', 350, 'mg/mmol', 'NDAALB_COD'),
+        ('SYN_5', -9305, '2026-01-01', 10000, 'mg/mmol', 'NDAALB_COD')
+  given: []
+  expect:
+    rows:
+    - id: SYN_0
+      acr_category: A1 normal to mildly increased (<3)
+      is_microalbuminuria: false
+      is_macroalbuminuria: false
+    - id: SYN_1
+      acr_category: A2 moderately increased (3-30)
+      is_microalbuminuria: true
+      is_macroalbuminuria: false
+    - id: SYN_2
+      acr_category: A2 moderately increased (3-30)
+      is_microalbuminuria: true
+      is_macroalbuminuria: false
+    - id: SYN_3
+      acr_category: A3 severely increased (>30)
+      is_microalbuminuria: false
+      is_macroalbuminuria: true
+    - id: SYN_4
+      acr_category: A3 severely increased (>30)
+      is_microalbuminuria: false
+      is_macroalbuminuria: true
+    - id: SYN_5
+      acr_category: Invalid
+      is_microalbuminuria: false
+      is_macroalbuminuria: false
