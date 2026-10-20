@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: dq_monitoring_status
+    description: >
+      Current monitoring status for all configured objects.
+      Applies freshness thresholds from dq_monitoring_config
+      to the latest measurements from dq_monitoring_metrics.
+    config:
+      meta:
+        owner:
+          name: Jonathan Linney
+    columns:
+      - name: table_id
+        description: Monitored object identifier.
+        tests:
+          - not_null
+
+      - name: measured_at
+        description: Timestamp when metrics were collected.
+        tests:
+          - not_null
+
+      - name: refresh_date
+        description: Most recent refresh date found within the monitored object.
+
+      - name: days_since_refresh
+        description: Days between refresh_date and current date.
+
+      - name: warn_stale_days
+        description: Warning threshold from monitoring configuration.
+
+      - name: critical_stale_days
+        description: Critical threshold from monitoring configuration.
+
+      - name: status
+        description: Current traffic-light status.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['GREEN', 'AMBER', 'RED']
+      - name: status_reason
+        description: Human readable explanation of the assigned status.

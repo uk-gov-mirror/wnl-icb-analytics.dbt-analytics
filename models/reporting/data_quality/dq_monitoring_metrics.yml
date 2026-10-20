@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: dq_monitoring_metrics
+    description: >
+      proof-of-concept metric model for the Data Quality monitoring framework.
+    config:
+      meta:
+        owner:
+          name: Jonathan Linney
+    columns:
+      - name: measured_at
+        description: Timestamp of when the metric was measured.
+        tests:  
+          - not_null
