@@ -1,10 +1,11 @@
-{{ config(materialized='view') }}
-
 select
     measurement_date,
     measured_at,
     table_id,
     row_count,
+    refresh_date,
+    days_since_refresh,
+    frequency_type,
 
     lag(row_count) over (
         partition by table_id
