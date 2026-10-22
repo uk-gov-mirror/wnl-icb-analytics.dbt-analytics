@@ -31,9 +31,12 @@ models:
       the QOF register macros (macros/qof_registers), the as-at pairs of the
       live fct_person_*_register models behind dim_person_conditions.
 
-      Two features take today's value at every index date: town (current
-      LSOA, as address history is not held) and ethrisk (latest recorded
-      ethnicity, as the QAdmissions paper did).
+      Ethnicity (ethrisk and the BMI imputation group) is the record
+      dim_person_ethnicity would have chosen from the records known by the
+      index date, as live scoring would have seen it then. The QAdmissions
+      paper used the latest recorded ethnicity, including records made after
+      baseline. One feature takes today's value at every index date: town
+      (current LSOA, as address history is not held).
 
       Differences from qadmissions_input_features: platelet and LFT features
       (high_platelet, high_lft) keep extreme outliers, while the live model
@@ -98,8 +101,9 @@ models:
           is none, the mean recorded BMI at that index date of people with the
           same sex, age decade (at the month-end) and ethnicity category,
           falling back as in qadmissions_input_features. The means use only
-          that index date's population and the BMIs known by then. Ethnicity
-          is today's category, like ethrisk. Not clipped.
+          that index date's population and the BMIs known by then. The
+          ethnicity category is the one known by the index date, like
+          ethrisk. Not clipped.
         data_tests:
           - dbt_utils.accepted_range:
               arguments:
@@ -326,10 +330,16 @@ models:
           QAdmissions ethnicity risk group (1 = White / NotRecorded, 2 =
           Indian, 3 = Pakistani, 4 = Bangladeshi, 5 = Other Asian, 6 = Black
           Caribbean, 7 = Black African, 8 = Chinese, 9 = Other Ethnic Group)
-          from the person's latest recorded ethnicity, via
-          qadmissions_ethrisk. Not as at the index date: the QAdmissions
-          paper also used the latest recorded ethnicity, including records
-          made after baseline. 1 when there is no mapped ethnicity.
+          from the ethnicity known by the index date: of the records
+          (int_ethnicity_all) with a clinical date and, where held, a
+          recording date on or before it, the one dim_person_ethnicity's rule
+          picks (not deprioritised, then most specific, then latest, then
+          observation id). Mapped with the qadmissions_eth2016_to_ethrisk9
+          seed, as qadmissions_ethrisk maps today's ethnicity. 1 when no
+          record was known by the index date or the subcategory isn't
+          mapped. The QAdmissions paper instead used the latest recorded
+          ethnicity, including records made after baseline, so people
+          recorded only later count as group 1 here.
 
 unit_tests:
 - name: qadmissions_history_rejects_out_of_range_haemoglobin
@@ -482,14 +492,14 @@ unit_tests:
     format: sql
     rows: |-
       SELECT NULL::NUMBER AS person_id, NULL::FLOAT AS townsend_score WHERE FALSE
-  - input: ref('qadmissions_ethrisk')
+  - input: ref('int_ethnicity_all')
     format: sql
     rows: |-
-      SELECT NULL::NUMBER AS person_id, NULL::FLOAT AS ethrisk WHERE FALSE
-  - input: ref('dim_person_ethnicity')
+      SELECT NULL::NUMBER AS person_id, NULL::TIMESTAMP_NTZ AS clinical_effective_date, NULL::TIMESTAMP_NTZ AS date_recorded, NULL::VARCHAR AS observation_lds_id, NULL::BOOLEAN AS deprioritise_flag, NULL::NUMBER AS preference_rank, NULL::VARCHAR AS ethnicity_category, NULL::VARCHAR AS ethnicity_subcategory WHERE FALSE
+  - input: ref('qadmissions_eth2016_to_ethrisk9')
     format: sql
     rows: |-
-      SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS ethnicity_category WHERE FALSE
+      SELECT NULL::VARCHAR AS ethnicity_subcategory, NULL::NUMBER AS ethrisk WHERE FALSE
   expect:
     rows:
     - person_id: -18114
@@ -630,14 +640,14 @@ unit_tests:
     format: sql
     rows: |-
       select null::number person_id, null::number townsend_score where false
-  - input: ref('qadmissions_ethrisk')
+  - input: ref('int_ethnicity_all')
     format: sql
     rows: |-
-      select null::number person_id, null::number ethrisk where false
-  - input: ref('dim_person_ethnicity')
+      select null::number person_id, null::timestamp_ntz clinical_effective_date, null::timestamp_ntz date_recorded, null::varchar observation_lds_id, null::boolean deprioritise_flag, null::number preference_rank, null::varchar ethnicity_category, null::varchar ethnicity_subcategory where false
+  - input: ref('qadmissions_eth2016_to_ethrisk9')
     format: sql
     rows: |-
-      select null::number person_id, null::varchar ethnicity_category where false
+      select null::varchar ethnicity_subcategory, null::number ethrisk where false
   expect:
     format: sql
     rows: |-
@@ -647,3 +657,177 @@ unit_tests:
       get_empty_subquery_sql: >-
         select null::date as end_date, null::number as person_id, null::boolean as b_antidepressant where false
       qadmissions_history_index_dates: "select '2024-03-31'::date reference_date"
+# Ethnicity as at each index date, chosen as dim_person_ethnicity chooses it
+# from the records known by then. All people and records are synthetic.
+#   -18401 record dated before 2024-01-31 but entered after it: 1, then 2
+#   -18402 specific record beats a newer 'Not stated' one: 2 at both dates
+#   -18403 an older record entered late doesn't displace a later one: 7, 7
+#   -18404 two specific records on one date: the higher id wins: 8, 8
+#   -18405 no record: 1 at both dates
+#   -18406 no recorded date, dated between the index dates: 1, then 7
+- name: qadmissions_history_ethnicity_as_at
+  model: qadmissions_input_features_validation
+  given:
+  - input: ref('int_segmentation_person_month_spine')
+    format: sql
+    rows: |-
+      select d.column1::date month_end_date,p.column1::number person_id,'SYN_SK'::varchar sk_patient_id,50::number(3,0) age,'Male'::varchar gender,true::boolean is_active from values ('2024-01-31'),('2024-03-31') d cross join (select column1 from values (-18401),(-18402),(-18403),(-18404),(-18405),(-18406)) p
+  - input: ref('int_ethnicity_all')
+    format: sql
+    rows: |-
+      select column1::number person_id,column2::timestamp_ntz clinical_effective_date,column3::timestamp_ntz date_recorded,column4::varchar observation_lds_id,column5::boolean deprioritise_flag,column6::number preference_rank,column7::varchar ethnicity_category,column8::varchar ethnicity_subcategory from values
+        (-18401,'2023-06-01','2024-02-15','SYN_01',false,1,'Asian','Asian: Indian'),
+        (-18402,'2020-01-01','2020-01-01','SYN_02',false,1,'Asian','Asian: Indian'),
+        (-18402,'2023-12-01','2023-12-01','SYN_03',true,3,'Unknown','Not stated'),
+        (-18403,'2023-01-01','2023-01-01','SYN_04',false,1,'Black','Black: African'),
+        (-18403,'2022-01-01','2024-02-01','SYN_05',false,1,'Asian','Asian: Chinese'),
+        (-18404,'2023-01-01','2023-01-01','SYN_06',false,1,'Asian','Asian: Indian'),
+        (-18404,'2023-01-01','2023-01-01','SYN_07',false,1,'Asian','Asian: Chinese'),
+        (-18406,'2024-02-10',null,'SYN_08',false,1,'Black','Black: African')
+  - input: ref('qadmissions_eth2016_to_ethrisk9')
+    format: sql
+    rows: |-
+      select column1::varchar ethnicity_subcategory,column2::number ethrisk from values ('Asian: Indian',2),('Asian: Chinese',8),('Black: African',7),('Not stated',1)
+  - input: ref('int_anticoagulant_medications_all')
+    format: sql
+    rows: |-
+      select null::number person_id, null::date order_date where false
+  - input: ref('int_antidepressant_medications_all')
+    format: sql
+    rows: |-
+      select null::number person_id, null::date order_date where false
+  - input: ref('int_antipsychotic_medications_all')
+    format: sql
+    rows: |-
+      select null::number person_id, null::date order_date where false
+  - input: ref('int_systemic_corticosteroid_medications_all')
+    format: sql
+    rows: |-
+      select null::number person_id, null::date order_date where false
+  - input: ref('int_nsaid_medications_all')
+    format: sql
+    rows: |-
+      select null::number person_id, null::date order_date where false
+  - input: ref('fct_person_atrial_fibrillation_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_asthma_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_cancer_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_chd_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_ckd_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_copd_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_epilepsy_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_heart_failure_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_pad_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_smi_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_stroke_tia_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id where false
+  - input: ref('fct_person_diabetes_register_by_month')
+    format: sql
+    rows: |-
+      select null::date month_end_date, null::number person_id, null::varchar diabetes_type where false
+  - input: ref('int_segmentation_acute_activity_history')
+    format: sql
+    rows: |-
+      select null::date end_date, null::number person_id, null::number nel_admissions_12mo where false
+  - input: ref('qadmissions_lab_thresholds')
+    format: sql
+    rows: |-
+      select null::varchar measurement, null::varchar direction, null::number threshold where false
+  - input: ref('int_haemoglobin_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded, null::number inferred_value, null::boolean is_negative, null::boolean is_out_of_range where false
+  - input: ref('int_platelets_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded, null::number inferred_value, null::boolean is_negative where false
+  - input: ref('int_alt_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded, null::number inferred_value, null::boolean is_negative where false
+  - input: ref('int_ggt_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded, null::number inferred_value, null::boolean is_negative where false
+  - input: ref('int_bilirubin_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded, null::number inferred_value, null::boolean is_negative where false
+  - input: ref('int_bmi_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded, null::number bmi_value, null::boolean is_valid_bmi where false
+  - input: ref('int_smoking_status_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded, null::varchar source_cluster_id, null::boolean is_current_smoker, null::boolean is_ex_smoker where false
+  - input: ref('int_alcohol_audit_scores')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded, null::number audit_score, null::varchar audit_type, null::boolean is_valid_score where false
+  - input: ref('int_falls_observations_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded where false
+  - input: ref('int_malabsorption_diagnoses_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded where false
+  - input: ref('int_vte_diagnoses_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded where false
+  - input: ref('int_liver_pancreatitis_diagnoses_all')
+    format: sql
+    rows: |-
+      select null::varchar id, null::number person_id, null::date clinical_effective_date, null::timestamp_ntz date_recorded where false
+  - input: ref('int_person_geography')
+    format: sql
+    rows: |-
+      select null::number person_id, null::number townsend_score where false
+  expect:
+    format: sql
+    rows: |-
+      select column1::date end_date,column2::number person_id,column3::number ethrisk from values
+        ('2024-01-31',-18401,1),('2024-03-31',-18401,2),
+        ('2024-01-31',-18402,2),('2024-03-31',-18402,2),
+        ('2024-01-31',-18403,7),('2024-03-31',-18403,7),
+        ('2024-01-31',-18404,8),('2024-03-31',-18404,8),
+        ('2024-01-31',-18405,1),('2024-03-31',-18405,1),
+        ('2024-01-31',-18406,1),('2024-03-31',-18406,7)
+  overrides:
+    macros:
+      get_empty_subquery_sql: >-
+        select null::date as end_date, null::number as person_id, null::number as ethrisk where false
+      qadmissions_history_index_dates: "select '2024-01-31'::date reference_date union all select '2024-03-31'::date"
