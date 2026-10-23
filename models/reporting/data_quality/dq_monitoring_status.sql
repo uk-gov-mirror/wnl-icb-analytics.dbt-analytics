@@ -35,6 +35,36 @@ select
         else 'GREEN'
     end as freshness_status,
 
+case
+    when
+        (
+            v.days_since_refresh > c.critical_stale_days
+            or
+            (
+                v.previous_row_count is not null
+                and abs(v.row_count_change_pct) > c.critical_row_change_pct
+            )
+        )
+        then 1
+    when
+        (
+            v.days_since_refresh > c.warn_stale_days
+            or
+            (
+                v.previous_row_count is not null
+                and abs(v.row_count_change_pct) > c.warn_row_change_pct
+            )
+        )
+        then 2
+    when
+        (
+            v.refresh_date is null
+            or v.row_count is null
+        )
+        then 3
+    else 4
+end as status_rank,
+
     -- Variance status
     case
         -- First measurement has no comparison

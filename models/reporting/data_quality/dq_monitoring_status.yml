@@ -35,6 +35,11 @@ models:
               arguments:
                 values: ['GREEN', 'AMBER', 'RED', 'GREY']
 
+      - name: status_rank
+        description: Sort order for monitoring severity.
+        tests:
+          - not_null
+
       - name: variance_status
         description: Status derived from row count variance thresholds.
         tests:
