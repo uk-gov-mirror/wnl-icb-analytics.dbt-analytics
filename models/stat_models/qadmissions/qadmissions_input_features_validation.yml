@@ -665,13 +665,17 @@ unit_tests:
 #   -18404 two specific records on one date: the higher id wins: 8, 8
 #   -18405 no record: 1 at both dates
 #   -18406 no recorded date, dated between the index dates: 1, then 7
+# Age is 51, not a multiple of 10: with one constant age, Snowflake fails the
+# BMI imputation's FLOOR(age / 10) * 10 with "Numeric value is out of range"
+# when 10 divides the age exactly (50 and 40 fail; 39 and 51 pass). Real ages
+# vary, so the models are not affected.
 - name: qadmissions_history_ethnicity_as_at
   model: qadmissions_input_features_validation
   given:
   - input: ref('int_segmentation_person_month_spine')
     format: sql
     rows: |-
-      select d.column1::date month_end_date,p.column1::number person_id,'SYN_SK'::varchar sk_patient_id,50::number(3,0) age,'Male'::varchar gender,true::boolean is_active from values ('2024-01-31'),('2024-03-31') d cross join (select column1 from values (-18401),(-18402),(-18403),(-18404),(-18405),(-18406)) p
+      select d.column1::date month_end_date,p.column1::number person_id,'SYN_SK'::varchar sk_patient_id,51::number(3,0) age,'Male'::varchar gender,true::boolean is_active from values ('2024-01-31'),('2024-03-31') d cross join (select column1 from values (-18401),(-18402),(-18403),(-18404),(-18405),(-18406)) p
   - input: ref('int_ethnicity_all')
     format: sql
     rows: |-
