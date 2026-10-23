@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 select
     measurement_date,
     measured_at,
