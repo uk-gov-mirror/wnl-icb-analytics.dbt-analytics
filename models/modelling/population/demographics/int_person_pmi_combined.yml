@@ -134,8 +134,13 @@ unit_tests:
           - {lsoa_2021_code: SYNTHETIC_NCL, resident_flag: NCL}
           - {lsoa_2021_code: SYNTHETIC_NWL, resident_flag: NWL}
           - {lsoa_2021_code: SYNTHETIC_OUTSIDE, resident_flag: OOA}
+      # SQL fixture: Fusion cannot type the UUID columns of dim_practice.
       - input: ref('dim_practice')
-        rows: []
+        format: sql
+        rows: |
+          select null::varchar as practice_code, null::boolean as is_wnl_practice,
+              null::boolean as is_active_practice
+          where false
     expect:
       rows:
         - {sk_patient_id: -1, lsoa21_code: SYNTHETIC_NCL, last_known_wnl_lsoa21_code: SYNTHETIC_NCL, flag_current_resident: true, flag_current_registered: true}

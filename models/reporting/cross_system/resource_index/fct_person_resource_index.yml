@@ -168,7 +168,7 @@ unit_tests:
       - input: ref('int_organisation_borough_mapping')
         rows:
           - {practice_code: SYNTHETIC_GP, borough_registered: Synthetic registered borough, sub_icb_code: '93C', sub_icb_name: Synthetic sub-ICB}
-      - input: ref('stg_reference_wnl_gp_practice_neighbourhood')
+      - input: ref('practice_wnl_all')
         rows:
           - {practice_code: SYNTHETIC_GP, neighbourhood_name: Synthetic neighbourhood}
     expect:
