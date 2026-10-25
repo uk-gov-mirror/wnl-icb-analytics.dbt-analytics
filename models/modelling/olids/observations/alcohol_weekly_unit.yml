@@ -5,6 +5,7 @@ unit_tests:
     macros:
       get_observations: |-
         select column1::varchar id,column2::number person_id,'2024-03-01'::timestamp_ntz clinical_effective_date,
+         '2024-03-01 09:00:00'::timestamp_ntz date_recorded,
          column3::varchar mapped_concept_code,'Synthetic alcohol'::varchar mapped_concept_display,
          column4::number(10,2) result_value,column5::varchar result_unit_display,
          case when column1='SYN_WEEK_33' then 'SYN_UNKNOWN' end::varchar result_units_source_concept_id
