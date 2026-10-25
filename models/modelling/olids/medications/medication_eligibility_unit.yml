@@ -90,7 +90,7 @@ unit_tests:
     rows: select 'SYN_REPEAT'::varchar code,'REPEAT_PRESCRIPTION'::varchar cluster_id
   - input: ref('stg_olids_medication_statement')
     format: sql
-    rows: select 'SYN_STATEMENT'::varchar id,'SYN_REPEAT'::varchar authorisation_type_code
+    rows: select 'SYN_STATEMENT'::varchar id,'SYN_REPEAT'::varchar authorisation_type_code,null::date cancellation_date
   - input: ref('stg_olids_medication_order')
     format: sql
     rows: |-
@@ -117,16 +117,16 @@ unit_tests:
       latest_duration: 28
     - person_id: -9104
       mapped_concept_code: SYN_D
-      medication_order_id: SYN_41
-      latest_duration: 28
-    - person_id: -9105
-      mapped_concept_code: SYN_E
-      medication_order_id: SYN_51
-      latest_duration: null
+      medication_order_id: SYN_49
+      latest_duration: 56
     - person_id: -9106
       mapped_concept_code: SYN_F
-      medication_order_id: SYN_62
+      medication_order_id: SYN_61
       latest_duration: 28
+    - person_id: -9107
+      mapped_concept_code: SYN_G
+      medication_order_id: SYN_72
+      latest_duration: 0
     - person_id: -9108
       mapped_concept_code: SYN_H
       medication_order_id: SYN_82

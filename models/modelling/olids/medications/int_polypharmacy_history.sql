@@ -35,9 +35,9 @@ medication_periods AS (
     -- Get all repeat medications in polypharmacy scope for last 5 years
     SELECT
         mo.person_id,
-        mo.mapped_concept_code,
+        LEFT(bnf.bnf_code, 9) AS bnf_chemical_code,
         mo.clinical_effective_date AS start_date,
-        DATEADD(day, COALESCE(mo.duration_days, 28), mo.clinical_effective_date) AS end_date
+        {{ medication_supply_columns('mo.duration_days', 'mo.clinical_effective_date', 'ms.cancellation_date') }}
     FROM {{ ref('stg_olids_medication_order') }} mo
     INNER JOIN {{ ref('stg_olids_medication_statement') }} ms
         ON mo.medication_statement_id = ms.id
@@ -49,13 +49,14 @@ medication_periods AS (
         AND mo.clinical_effective_date <= CURRENT_DATE()
         AND mo.clinical_effective_date IS NOT NULL
         AND mo.mapped_concept_code IS NOT NULL
+        AND supply_end_date >= start_date
 ),
 
 medication_events AS (
     -- Generate start and end events for each medication period
     SELECT
         person_id,
-        mapped_concept_code,
+        bnf_chemical_code,
         start_date AS event_date
     FROM medication_periods
 
@@ -63,8 +64,8 @@ medication_events AS (
 
     SELECT
         person_id,
-        mapped_concept_code,
-        DATEADD(day, 1, end_date) AS event_date
+        bnf_chemical_code,
+        DATEADD(day, 1, supply_end_date) AS event_date
     FROM medication_periods
 ),
 
@@ -82,11 +83,11 @@ medication_counts_by_date AS (
     SELECT
         ded.person_id,
         ded.event_date,
-        COUNT(DISTINCT mp.mapped_concept_code) AS medication_count
+        COUNT(DISTINCT mp.bnf_chemical_code) AS medication_count
     FROM distinct_event_dates ded
     LEFT JOIN medication_periods mp
         ON ded.person_id = mp.person_id
-        AND ded.event_date BETWEEN mp.start_date AND mp.end_date
+        AND ded.event_date BETWEEN mp.start_date AND mp.supply_end_date
     GROUP BY ded.person_id, ded.event_date
 ),
 
