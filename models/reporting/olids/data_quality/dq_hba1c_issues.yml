@@ -114,5 +114,5 @@ unit_tests:
       rows:
         - {id: SYN_IFCC_BELOW, is_hba1c_out_of_range: true, hba1c_category_with_issues: 'IFCC Below Valid Range (< 20)'}
         - {id: SYN_IFCC_ABOVE, is_hba1c_out_of_range: true, hba1c_category_with_issues: 'IFCC Above Valid Range (> 195)'}
-        - {id: SYN_DCCT_BELOW, is_hba1c_out_of_range: true, hba1c_category_with_issues: 'DCCT Below Valid Range (< 3.979993595)'}
+        - {id: SYN_DCCT_BELOW, is_hba1c_out_of_range: true, hba1c_category_with_issues: 'DCCT Below NDA Range'}
         - {id: SYN_DCCT_MAX, is_hba1c_out_of_range: true, hba1c_category_with_issues: 'DCCT Above Valid Range (>= 20)'}

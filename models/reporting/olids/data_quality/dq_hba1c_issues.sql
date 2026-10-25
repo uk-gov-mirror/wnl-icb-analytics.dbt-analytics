@@ -54,7 +54,7 @@ SELECT
     CASE
         WHEN is_ifcc AND numeric_result < 20 THEN 'IFCC Below Valid Range (< 20)'
         WHEN is_ifcc AND numeric_result > 195 THEN 'IFCC Above Valid Range (> 195)'
-        WHEN is_dcct AND numeric_result < 3.979993595 THEN 'DCCT Below Valid Range (< 3.979993595)'
+        WHEN is_dcct AND numeric_result < 3.979993595 THEN 'DCCT Below NDA Range'
         WHEN is_dcct AND numeric_result >= 20 THEN 'DCCT Above Valid Range (>= 20)'
         WHEN is_ifcc AND hba1c_original_value > 150 THEN 'IFCC Extremely High (> 150)'
         WHEN is_dcct AND hba1c_original_value > 15 THEN 'DCCT Extremely High (> 15)'
