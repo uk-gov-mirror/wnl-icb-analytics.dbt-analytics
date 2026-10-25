@@ -28,8 +28,10 @@ following the waking-hours basis
 in [NICE NG136](https://www.nice.org.uk/guidance/ng136/chapter/Recommendations).
 The original figures below predate this selection update. Revalidation uses the same
 March NCL geography and period, with published practice membership. Applying inclusive
-targets brings the comparable CVDPREVENT measures within the project's benchmark
-tolerance. Register populations and retrospective records still differ between extracts.
+targets separates the threshold difference from evidence selection. With the agreed
+average-only monitoring evidence, the younger hypertension comparison falls outside
+the project's benchmark tolerance. The other comparable BP measures remain within it.
+Register populations and retrospective records still differ between extracts.
 The general BP control and diabetes triple-target flags use the same eligible context
 evidence, retaining their existing populations and targets. Recording-only indicators,
 general BP events and LTC LCS keep their existing rules.
