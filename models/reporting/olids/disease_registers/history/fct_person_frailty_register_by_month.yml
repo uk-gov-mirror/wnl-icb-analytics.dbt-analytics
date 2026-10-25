@@ -5,6 +5,8 @@ models:
       a MILDFRAIL_COD, MODFRAIL_COD or SEVFRAIL_COD finding, with no age restriction or
       resolution codes. Latest coded severity takes precedence; equal clinical timestamps prefer
       greater severity, then the higher observation ID; calculated frailty scores are excluded.
+      Counts include each person, concept, clinical calendar date and recorded
+      value once, including value-free findings.
       {{ doc('ltc_register_by_month_scope') }}
     config:
       meta:

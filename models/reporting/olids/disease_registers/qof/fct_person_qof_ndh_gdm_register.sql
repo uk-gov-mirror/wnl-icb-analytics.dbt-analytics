@@ -212,6 +212,7 @@ qualifying_diagnoses AS (
         diagnosis.person_id,
         diagnosis.clinical_effective_date,
         diagnosis.concept_code,
+        diagnosis.result_value,
         diagnosis.concept_display,
         diagnosis.is_ndh_diagnosis_code,
         diagnosis.is_igt_diagnosis_code,
@@ -227,6 +228,7 @@ qualifying_diagnoses AS (
         diagnosis.person_id,
         diagnosis.clinical_effective_date,
         diagnosis.concept_code,
+        diagnosis.result_value,
         diagnosis.concept_display,
         FALSE AS is_ndh_diagnosis_code,
         FALSE AS is_igt_diagnosis_code,
@@ -257,13 +259,13 @@ diagnosis_details AS (
         MAX(CASE WHEN diagnosis.is_gestational_diabetes_code
             THEN diagnosis.clinical_effective_date END)
             AS latest_gestational_diabetes_date,
-        COUNT(CASE WHEN diagnosis.is_ndh_diagnosis_code THEN 1 END)
+        COUNT(DISTINCT IFF(diagnosis.is_ndh_diagnosis_code, {{ observation_reading_key(alias='diagnosis') }}, NULL))
             AS total_ndh_episodes,
-        COUNT(CASE WHEN diagnosis.is_igt_diagnosis_code THEN 1 END)
+        COUNT(DISTINCT IFF(diagnosis.is_igt_diagnosis_code, {{ observation_reading_key(alias='diagnosis') }}, NULL))
             AS total_igt_episodes,
-        COUNT(CASE WHEN diagnosis.is_pre_diabetes_diagnosis_code THEN 1 END)
+        COUNT(DISTINCT IFF(diagnosis.is_pre_diabetes_diagnosis_code, {{ observation_reading_key(alias='diagnosis') }}, NULL))
             AS total_prd_episodes,
-        COUNT(CASE WHEN diagnosis.is_gestational_diabetes_code THEN 1 END)
+        COUNT(DISTINCT IFF(diagnosis.is_gestational_diabetes_code, {{ observation_reading_key(alias='diagnosis') }}, NULL))
             AS total_gestational_diabetes_episodes,
         MAX(diagnosis.is_ndh_diagnosis_code) AS has_ndh_diagnosis,
         MAX(diagnosis.is_igt_diagnosis_code) AS has_igt_diagnosis,

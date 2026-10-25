@@ -1,16 +1,19 @@
 models:
   - name: fct_person_frailty_register
-    description: >-
+    description: >
       Coded frailty project register. One row per register member.
-
 
       Registration status is not filtered. The model includes all ages and coded mild,
       moderate or severe frailty. Latest clinical timestamps determine severity; equal
-      timestamps prefer greater severity. No resolution rule applies. Future-dated
-      findings can affect membership. Calculated electronic frailty index scores do not
-      determine membership. Code lists: MILDFRAIL_COD, MODFRAIL_COD, SEVFRAIL_COD (PCD).
-      The registered, age 65 or over, moderate or severe population for NICE IND206 is in
+      timestamps prefer greater severity. No resolution rule applies. Future-dated findings
+      can affect membership. Calculated electronic frailty index scores do not determine
+      membership. Code lists: MILDFRAIL_COD, MODFRAIL_COD, SEVFRAIL_COD (PCD). The registered,
+      age 65 or over, moderate or severe population for NICE IND206 is in
       fct_person_nice_frailty_register.
+
+      Observation counts include each person, concept, clinical calendar date and recorded
+      value once, including value-free entries. Register membership and first/last dates use
+      the full evidence history.
     tests:
       - dbt_utils.at_least_one:
           column_name: person_id

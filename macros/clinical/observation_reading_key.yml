@@ -1,0 +1,15 @@
+version: 2
+
+macros:
+  - name: observation_reading_key
+    description: >
+      Person, mapped concept, clinical calendar date and recorded value for
+      distinct observation counts. Null values and dates remain part of the key.
+      Use the corrected clinical date supplied by the observation model.
+    arguments:
+      - name: alias
+        description: Optional table alias for the reading columns.
+      - name: clinical_date
+        description: Corrected clinical date column, compared as a calendar date.
+      - name: value
+        description: Original result column, including null for value-free events.

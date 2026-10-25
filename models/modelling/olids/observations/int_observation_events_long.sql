@@ -5,7 +5,7 @@
 }}
 
 /*
-Long-format biomarker observation history — one row per observation event.
+Biomarker history with repeated non-BP readings counted once per clinical day.
 
 Unions the per-observation "_all" biomarker models into a single tall table
 (person_id, observation_type, clinical_effective_date, value, unit, category)
@@ -247,8 +247,23 @@ SELECT
     blood_pressure_stages.hypertension_stage,
     events.source_observation_id
 FROM events
+LEFT JOIN {{ ref('stg_olids_observation') }} AS source_observation
+    ON events.source_observation_id = source_observation.id
 LEFT JOIN blood_pressure_stages
     ON events.source_observation_id = blood_pressure_stages.source_observation_id
 -- Date sanity: a reading cannot post-date today. Legacy pre-1990 dates are
 -- kept (transferred records) — window filters should state their range.
 WHERE events.clinical_effective_date <= CURRENT_DATE
+
+-- BP keeps its established measurement grain. Other series count each concept,
+-- calendar date and recorded value once, including cross-cluster copies.
+QUALIFY events.observation_type IN ('Systolic BP', 'Diastolic BP')
+    OR ROW_NUMBER() OVER (
+        PARTITION BY events.person_id, events.observation_type,
+            COALESCE(source_observation.mapped_concept_code, events.source_observation_id::VARCHAR),
+            events.clinical_effective_date::DATE, source_observation.result_value,
+            events.value, events.unit
+        ORDER BY events.clinical_effective_date DESC,
+            source_observation.date_recorded DESC NULLS LAST,
+            events.source_observation_id DESC
+    ) = 1

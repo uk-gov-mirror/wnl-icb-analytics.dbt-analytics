@@ -8,6 +8,8 @@ models:
         owner:
           name: EddieDavison92
     columns:
+      - name: result_value
+        description: Original numeric result; null for a value-free event. Used to distinguish repeated readings.
       - name: id
         description: 'Observation identifier (not unique - same observation may appear for multiple cluster matches)'
         tests:
