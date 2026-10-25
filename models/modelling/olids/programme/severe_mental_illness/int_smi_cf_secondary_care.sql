@@ -192,7 +192,7 @@ p.person_id
 ,sp.admission_type
 ,sp.ward_type
 ,sp.ward_code
-,sp.site_name
+,sp.site_name::VARCHAR(10) AS site_name
 ,p.age
 ,p.age_band_5y
 ,p.gender

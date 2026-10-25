@@ -8,7 +8,15 @@ models:
       prescription details describe each issue; demographics and practice context are
       current. An order does not establish indication or confirm use.
       sem_olids_population supplies condition cohorts. person_id supports cohort
-      linkage; final results must be aggregate-only.
+      linkage; final results must be aggregate-only. Valproate indication and daily
+      dose categories are not inferred from product names or dose text.
+    data_tests:
+      - semantic_grain_count:
+          arguments:
+            source_model: int_valproate_medications_all
+            entity: valproate
+            metric: valproate_order_count
+            grain_key: medication_order_id
     config:
       materialized: semantic_view
       schema: SEMANTIC

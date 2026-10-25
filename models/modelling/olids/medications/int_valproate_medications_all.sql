@@ -143,33 +143,6 @@ valproate_enhanced AS (
         -- Clinical risk assessment flags
         TRUE AS is_high_teratogenic_risk,
 
-        -- Pregnancy risk assessment
-        CASE
-            WHEN
-                vo.valproate_product_type IN ('SODIUM_VALPROATE', 'EPILIM')
-                THEN 'ANTI_EPILEPTIC'
-            WHEN
-                vo.valproate_product_type IN ('DEPAKOTE')
-                THEN 'MOOD_STABILISER'
-            ELSE 'UNSPECIFIED'
-        END AS clinical_indication,
-
-        -- Dosage categorisation for monitoring
-        CASE
-            WHEN vo.order_dose ILIKE '%MG%'
-                THEN
-                    CASE
-                        WHEN
-                            REGEXP_SUBSTR(vo.order_dose, '[0-9]+')::INT <= 500
-                            THEN 'LOW_DOSE'
-                        WHEN
-                            REGEXP_SUBSTR(vo.order_dose, '[0-9]+')::INT <= 1000
-                            THEN 'MODERATE_DOSE'
-                        ELSE 'HIGH_DOSE'
-                    END
-            ELSE 'UNKNOWN_DOSE'
-        END AS dose_category,
-
         -- Keep the published label vocabulary; exact dm+d form is available separately.
         CASE
             WHEN dmd.form_description ILIKE 'Modified-release%'
@@ -218,8 +191,6 @@ SELECT
     ve.matched_on_concept_id,
     ve.valproate_product_type,
     ve.is_high_teratogenic_risk,
-    ve.clinical_indication,
-    ve.dose_category,
     ve.formulation_type,
     ve.is_recent_3m,
     ve.is_recent_6m,
