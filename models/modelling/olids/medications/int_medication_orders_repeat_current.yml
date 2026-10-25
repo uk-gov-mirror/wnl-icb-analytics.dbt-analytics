@@ -4,10 +4,11 @@ models:
     description: |
       Estimated current repeat supply, one row per person and SNOMED product with a
       latest eligible GP issue whose inclusive supply end reaches the build date.
-      Recorded duration of 1 to 365 days is used; otherwise the local estimate is
-      28 days with is_duration_imputed set. Cancellation following the latest issue
-      stops the product across authorisations, even if an older issue has supply left.
-      An issue from any authorisation after cancellation can make it current again.
+      Supply duration, fallback, grace and cancellation cap follow the
+      medication_supply_columns macro. Cancellation of the latest issue's
+      authorisation ends supply from that date, even if an older authorisation's
+      issue has supply left; cancellations of other authorisations are ignored;
+      a later issue from an uncancelled authorisation restarts supply.
       Future and missing clinical dates are excluded. Latest selection uses clinical
       date, recorded time (nulls last), then higher order ID, before testing expiry.
       An issue is not evidence of dispensing. QOF six-month recency is separate.

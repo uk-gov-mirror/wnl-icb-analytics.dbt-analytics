@@ -5,14 +5,15 @@ models:
       date over issues in the last five years. Counts distinct nine-character BNF
       chemicals in chapters 01 to 04 and 06 to 10, including each fixed combination
       as one chemical code. Overlapping products of one chemical count once.
-      Uses recorded duration of 1 to 365 days, otherwise a local 28-day estimate.
+      Supply duration, fallback, grace and cancellation cap follow the
+      medication_supply_columns macro.
       Selects one issue per person, product and clinical date by recorded time
       (nulls last), then higher order ID, before checking expiry or cancellation.
       Each later issue replaces the product's previous supply across authorisations.
-      Cancellation following the latest issue stops the product from that date,
-      even if an older authorisation has supply left. An issue from any authorisation
-      after cancellation can restart supply. Issue date plus duration is inclusive,
-      giving one day's grace. Future issues are excluded, although
+      Cancellation of the latest issue's authorisation ends supply from that date,
+      even if an older authorisation's issue has supply left; cancellations of other
+      authorisations are ignored; a later issue from an uncancelled authorisation
+      restarts supply. Future issues are excluded, although
       expiry of existing issues can create future periods. Changes lasting under
       three days are smoothed, except the final point; adjacent equal counts merge.
       Zero-count periods are omitted. Five or more is local; ten or more supports

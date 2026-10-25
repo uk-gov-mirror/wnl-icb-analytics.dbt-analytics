@@ -40,7 +40,9 @@ unit_tests:
        ('SYN_FUTURE',-244216,'SYN_A',1,365,'SYN_OPEN',1),
        ('SYN_MISSING_DATE',-244217,'SYN_A',null,365,'SYN_OPEN',1),
        ('SYN_CANCELLED_OLD',-244218,'SYN_A',-20,365,'SYN_CANCEL_PAST',1),
-       ('SYN_RESTART',-244218,'SYN_A',-3,28,'SYN_OPEN',1))
+       ('SYN_RESTART',-244218,'SYN_A',-3,28,'SYN_OPEN',1),
+       ('SYN_OLDER_CANCELLED_LATER',-244219,'SYN_A',-20,28,'SYN_CANCEL_PAST',1),
+       ('SYN_NEWER_OPEN',-244219,'SYN_A',-10,28,'SYN_OPEN',1))
        v(id,person,code,days,duration,statement,record_hour)
   expect:
     format: sql
@@ -51,7 +53,7 @@ unit_tests:
        (-244203,'SYN_NULL',28,true,0),(-244204,'SYN_ZERO',28,true,0),
        (-244205,'SYN_NEGATIVE',28,true,0),(-244206,'SYN_366',28,true,0),
        (-244210,'SYN_STOP_TOMORROW',28,false,0),(-244214,'SYN_TIE_SHORT',28,false,18),
-       (-244218,'SYN_RESTART',28,false,25))
+       (-244218,'SYN_RESTART',28,false,25),(-244219,'SYN_NEWER_OPEN',28,false,18))
        v(person,id,duration,imputed,end_days)
   overrides:
     macros:
@@ -189,7 +191,9 @@ unit_tests:
        ('SYN_ID_A',-244244,-40,1,365,'SYN_OPEN'),
        ('SYN_ID_Z',-244244,-40,1,28,'SYN_OPEN'),
        ('SYN_LONG_OLDER',-244245,-40,1,365,'SYN_OPEN'),
-       ('SYN_SHORT_NEWER',-244245,-35,1,28,'SYN_OPEN'))
+       ('SYN_SHORT_NEWER',-244245,-35,1,28,'SYN_OPEN'),
+       ('SYN_OLDER_CANCELLED_LATER',-244246,-20,1,28,'SYN_STOP'),
+       ('SYN_NEWER_OPEN',-244246,-10,1,28,'SYN_OPEN'))
        v(id,person,start_days,record_hour,duration,statement)
   - input: ref('int_polypharmacy_medications_list')
     format: sql
@@ -202,7 +206,7 @@ unit_tests:
        dateadd(day,end_days,current_date())::date valid_to,current_period::boolean is_current from (values
        (-244240,-40,-12,false),(-244241,-20,-6,false),
        (-244242,-20,-6,false),(-244242,-2,26,true),(-244243,-20,-11,false),
-       (-244244,-40,-12,false),(-244245,-40,-7,false))
+       (-244244,-40,-12,false),(-244245,-40,-7,false),(-244246,-20,18,true))
        v(person,start_days,end_days,current_period)
   overrides:
     macros:

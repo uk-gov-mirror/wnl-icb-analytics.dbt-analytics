@@ -94,7 +94,7 @@ unit_tests:
   - input: ref('stg_olids_medication_order')
     format: sql
     rows: |-
-      select id::varchar id, person::number person_id, iff(id in ('SYN_49','SYN_NULL'), 'SYN_PATIENT_COPY', 'SYN_PATIENT_' || person)::varchar patient_id,
+      select id::varchar id, person::number person_id,
        code::varchar mapped_concept_code,
        dateadd(day,days,current_date())::date clinical_effective_date, iff(id in ('SYN_NULL','SYN_N_A','SYN_N_Z'),null,dateadd(day,iff(id in ('SYN_41','SYN_62','SYN_81'),-2,-1),current_date()))::timestamp_ntz date_recorded,
        duration::number duration_days, 'SYN_STATEMENT'::varchar medication_statement_id
