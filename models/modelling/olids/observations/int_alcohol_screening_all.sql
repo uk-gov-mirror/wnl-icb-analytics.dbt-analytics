@@ -21,13 +21,7 @@ WITH base AS (
         obs.id,
         obs.person_id,
         obs.clinical_effective_date,
-        CASE obs.cluster_id
-            WHEN 'FAST_COD' THEN 'FAST'
-            WHEN 'AUDITC_COD' THEN 'AUDIT-C'
-            WHEN 'AUDIT_COD' THEN
-                CASE WHEN obs.mapped_concept_code IN ('774089008', '774090004')
-                    THEN 'AUDIT-PC' ELSE 'AUDIT' END
-        END AS screening_tool,
+        {{ alcohol_screening_tool('obs.cluster_id', 'obs.mapped_concept_code') }} AS screening_tool,
         TRY_CAST(obs.result_value::VARCHAR AS FLOAT) AS numeric_result,
         obs.result_value AS original_result_value,
         obs.mapped_concept_code AS concept_code,

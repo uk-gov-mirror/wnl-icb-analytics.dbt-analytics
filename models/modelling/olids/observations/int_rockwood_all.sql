@@ -25,7 +25,7 @@ Clinical categorisation:
 - 4: Vulnerable
 - 5: Mild Frailty
 - 6: Moderate Frailty
-- 7-8: Severely Frail
+- 7-8: Severe Frailty
 - 9: Terminally Ill
 */
 

@@ -16,7 +16,7 @@ UK AUDIT-C Scoring (0-12):
 - 5-7: Increasing risk
 - 8-10: Higher risk
 - 11-12: Possible dependence
-- Score Ã¢â€°Â¥5 is positive screen indicating potential harm
+- Score 5 or more is a positive screen indicating potential harm
 
 UK Full AUDIT Scoring (0-40):
 - 0: Non-drinker
@@ -40,11 +40,7 @@ WITH base_observations AS (
         obs.cluster_id AS source_cluster_id,
         obs.result_value AS original_result_value,
         TRY_CAST(obs.result_value::VARCHAR AS FLOAT) AS numeric_result,
-        CASE
-            WHEN obs.cluster_id = 'AUDITC_COD' THEN 'AUDIT-C'
-            WHEN obs.mapped_concept_code IN ('774089008', '774090004') THEN 'AUDIT-PC'
-            WHEN obs.cluster_id = 'AUDIT_COD' THEN 'AUDIT'
-        END AS screening_tool
+        {{ alcohol_screening_tool('obs.cluster_id', 'obs.mapped_concept_code') }} AS screening_tool
 
     FROM ({{ get_observations("'AUDITC_COD', 'AUDIT_COD'") }}) obs
     WHERE obs.clinical_effective_date IS NOT NULL
