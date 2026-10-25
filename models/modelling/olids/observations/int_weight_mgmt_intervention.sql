@@ -25,8 +25,8 @@ with exercise_membership as (
         and obs.clinical_effective_date <= current_date()
 )
 select person_id, clinical_effective_date, source_cluster_id, concept_code, concept_display,
-    iff(regexp_like(wording, '.*(diet|nutriti).*'), intervention_outcome, null)::varchar(8) as referral_diet_advice,
-    iff(is_national_exercise or regexp_like(wording, '.*(exercise|physical activit|activity tolerance|activity group).*'), intervention_outcome, null)::varchar(8) as referral_exercise_advice,
+    iff(regexp_like(wording, '.*(diet|nutriti).*'), intervention_outcome, null)::varchar(16777216) as referral_diet_advice,
+    iff(is_national_exercise or regexp_like(wording, '.*(exercise|physical activit|activity tolerance|activity group).*'), intervention_outcome, null)::varchar(16777216) as referral_exercise_advice,
     evidence_type, intervention_outcome, id, date_recorded
 from evidence
 qualify row_number() over (
