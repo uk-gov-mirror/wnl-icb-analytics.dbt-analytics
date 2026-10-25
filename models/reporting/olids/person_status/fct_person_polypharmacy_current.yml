@@ -7,8 +7,8 @@ models:
       fixed combinations count once under their own chemical code, without splitting
       ingredients. Uses the local supply and cancellation rules in
       int_medication_orders_repeat_current. Five or more is a local threshold and
-      ten or more supports medication review prioritisation. The existing bands are
-      unchanged. These GP-issued repeat estimates differ from NHSBSA monthly acute
+      ten or more supports medication review prioritisation. Bands are 1-4, 5-9,
+      10-14 and 15+. These GP-issued repeat estimates differ from NHSBSA monthly acute
       and repeat dispensing comparators, whose thresholds are 8, 10, 15 and 20.
       Product arrays retain full BNF codes/names and can exceed the chemical count.
 

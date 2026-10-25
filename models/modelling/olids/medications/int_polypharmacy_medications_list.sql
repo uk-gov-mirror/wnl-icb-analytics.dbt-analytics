@@ -5,7 +5,8 @@ select
     snomed_code,
     bnf_code,
     left(bnf_code, 2) as bnf_chapter,
-    bnf_name
+    bnf_name,
+    left(bnf_code, 9) as bnf_chemical_code
 from {{ ref('stg_reference_bnf_latest') }}
 where snomed_code is not null
     and length(bnf_code) >= 9

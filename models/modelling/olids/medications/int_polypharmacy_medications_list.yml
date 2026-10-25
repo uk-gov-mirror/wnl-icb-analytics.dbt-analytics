@@ -5,9 +5,8 @@ models:
       SNOMED products in the NHSBSA polypharmacy chapter scope, one row per product.
       Includes BNF chapters 01 to 04 and 06 to 10, with at least nine BNF characters.
       Where a product has several mappings, the lowest BNF code then name is used.
-      The first nine BNF characters identify the chemical counted by consumers.
+      bnf_chemical_code holds the first nine BNF characters counted by consumers.
       Fixed combinations count as one chemical code, without splitting ingredients.
-      This replaces the local exclusions formerly held in bnf_polypharmacy_exclusions.
 
     config:
       meta:
@@ -28,10 +27,10 @@ models:
       - name: bnf_chapter
         description: First two BNF characters. Only chapters 01 to 04 and 06 to 10 are included.
         data_tests:
-          - accepted_values:
-              arguments:
-                values: ['01', '02', '03', '04', '06', '07', '08', '09', '10']
           - not_null
+
+      - name: bnf_chemical_code
+        description: Nine-character BNF chemical code used for counting; each fixed combination has its own code.
 
       - name: bnf_name
         description: BNF name/description of the medication

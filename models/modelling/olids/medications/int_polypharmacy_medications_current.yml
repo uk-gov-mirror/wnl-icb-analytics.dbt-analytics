@@ -33,6 +33,9 @@ models:
         data_tests:
           - not_null
 
+      - name: bnf_chemical_code
+        description: Nine-character BNF chemical code used for counting; each fixed combination has its own code.
+
       - name: bnf_name
         description: BNF name/description of the medication
 
@@ -48,7 +51,7 @@ models:
       - name: is_duration_imputed
         description: True when the local 28-day fallback replaces a missing or implausible duration.
       - name: supply_end_date
-        description: Inclusive estimated supply end, capped at the day before authorisation cancellation.
+        description: Issue date plus effective duration, inclusive, giving one day's grace. Capped at the day before authorisation cancellation.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:

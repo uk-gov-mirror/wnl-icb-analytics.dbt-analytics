@@ -6,23 +6,8 @@
     )
 }}
 
-/*
-Historical polypharmacy medication counts as SCD Type 2 (last 5 years).
-
-Event-based slowly changing dimension tracking polypharmacy medication burden
-over time. Only creates new rows when medication count changes, providing
-efficient storage and accurate historical tracking.
-
-Example output for a patient:
-- 2020-01-15 to 2021-08-10: 4 medications (not polypharmacy)
-- 2021-08-11 to 2023-03-05: 5 medications (polypharmacy starts)
-- 2023-03-06 to 2026-11-02: 6 medications (current; valid_to is always
-  set, and periods can start in the future as current issues run out)
-
-Future-dated issues are excluded. Supply expiry can still create future periods.
-
-Grain: One row per person per distinct medication count period
-*/
+-- One row per person and smoothed BNF chemical-count period, using issues from
+-- the last five years. Current issues can produce future expiry periods.
 
 WITH repeat_prescription_codes AS (
     -- Get SNOMED codes for repeat prescriptions from cluster
@@ -31,11 +16,11 @@ WITH repeat_prescription_codes AS (
     WHERE cluster_id = 'REPEAT_PRESCRIPTION'
 ),
 
-medication_periods AS (
-    -- Get all repeat medications in polypharmacy scope for last 5 years
+same_day_issues AS (
     SELECT
         mo.person_id,
-        LEFT(bnf.bnf_code, 9) AS bnf_chemical_code,
+        mo.mapped_concept_code,
+        bnf.bnf_chemical_code,
         mo.clinical_effective_date AS start_date,
         {{ medication_supply_columns('mo.duration_days', 'mo.clinical_effective_date', 'ms.cancellation_date') }}
     FROM {{ ref('stg_olids_medication_order') }} mo
@@ -49,7 +34,32 @@ medication_periods AS (
         AND mo.clinical_effective_date <= CURRENT_DATE()
         AND mo.clinical_effective_date IS NOT NULL
         AND mo.mapped_concept_code IS NOT NULL
-        AND supply_end_date >= start_date
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY mo.person_id, mo.mapped_concept_code, mo.clinical_effective_date
+        ORDER BY mo.date_recorded DESC NULLS LAST, mo.id DESC
+    ) = 1
+),
+
+product_issue_periods AS (
+    SELECT
+        person_id,
+        bnf_chemical_code,
+        start_date,
+        -- A later issue replaces the product's previous supply, across authorisations.
+        LEAST_IGNORE_NULLS(
+            supply_end_date,
+            DATEADD(day, -1, LEAD(start_date) OVER (
+                PARTITION BY person_id, mapped_concept_code ORDER BY start_date
+            ))
+        ) AS supply_end_date
+    FROM same_day_issues
+),
+
+medication_periods AS (
+    SELECT person_id, bnf_chemical_code, start_date, supply_end_date
+    FROM product_issue_periods
+    -- Rank and supersede before filtering, so a stopped issue cannot revive older supply.
+    WHERE supply_end_date >= start_date
 ),
 
 medication_events AS (

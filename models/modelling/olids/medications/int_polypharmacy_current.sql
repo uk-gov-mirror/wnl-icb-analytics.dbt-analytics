@@ -24,7 +24,7 @@ WITH current_medication_details AS (
     -- Count and aggregate current medications directly
     SELECT
         person_id,
-        COUNT(DISTINCT LEFT(bnf_code, 9)) AS medication_count,
+        COUNT(DISTINCT bnf_chemical_code) AS medication_count,
         ARRAY_AGG(DISTINCT bnf_code) WITHIN GROUP (ORDER BY bnf_code) AS medication_bnf_list,
         -- Filter out NULL bnf_name values to ensure array contains only valid strings
         -- Using ARRAY_COMPACT to remove NULLs after aggregation
