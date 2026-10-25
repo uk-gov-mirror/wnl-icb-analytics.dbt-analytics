@@ -3,7 +3,7 @@
 with exercise_membership as (
     select distinct code
     from {{ ref('stg_reference_combined_codesets') }}
-    where upper(cluster_id) = 'EXERCISEINT_COD'
+    where upper(cluster_id) in ({{ observation_evidence_cluster_ids('weight_management', 'PCD') }})
 ), evidence as (
     select obs.id, obs.person_id, obs.clinical_effective_date, obs.date_recorded,
         obs.cluster_id as source_cluster_id,
@@ -15,6 +15,7 @@ with exercise_membership as (
         case
             when classification.evidence_type = 'declined' then 'Declined'
             when not classification.is_offer
+                and not classification.is_planned_or_awaited
                 and classification.evidence_type in ('completed', 'requested_or_referred', 'advised') then 'Yes'
         end as intervention_outcome
     from ({{ get_observations(observation_evidence_cluster_ids('weight_management')) }}) as obs

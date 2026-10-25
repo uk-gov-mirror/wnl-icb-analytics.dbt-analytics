@@ -37,5 +37,7 @@ models:
                 values: [completed, requested_or_referred, advised, declined, finding, administrative]
       - name: is_offer
         description: True when wording records an offer rather than actual referral or intervention.
+      - name: is_planned_or_awaited
+        description: True for planned procedure context or planned or awaited wording; this does not establish activity or referral.
       - name: classification_basis
         description: Source of the classification or reason review is required.

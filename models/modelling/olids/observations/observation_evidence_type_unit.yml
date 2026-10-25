@@ -313,7 +313,10 @@ unit_tests:
 
       (-716, -716, ''SYN_WTDECL'', ''2026-09-01'', ''2026-09-02 12:00:00''), (-717, -717, ''286321000000102'', ''2026-09-01'',
       ''2026-09-02 12:00:00''), (-718, -718, ''439140001'', ''2026-09-01'', ''2026-09-02 12:00:00''), (-719, -719,
-      ''913431000000101'', ''2026-09-01'', ''2026-09-02 12:00:00'')'
+      ''913431000000101'', ''2026-09-01'', ''2026-09-02 12:00:00''),
+      (-720, -720, ''SYN_PLAN'', ''2026-09-01'', ''2026-09-02 12:00:00''),
+      (-721, -721, ''SYN_AWAIT'', ''2026-09-01'', ''2026-09-02 12:00:00''),
+      (-722, -722, ''SYN_CONTEXT'', ''2026-09-01'', ''2026-09-02 12:00:00'')'
   - input: ref('stg_reference_combined_codesets')
     rows:
     - code: SYN_DIET
@@ -376,48 +379,40 @@ unit_tests:
       source: PCD
       cluster_description: Synthetic list
       code_description: Education about chair based exercise programme (procedure)
+    - code: SYN_PLAN
+      cluster_id: WTMGINT_COD
+      source: PCD
+      cluster_description: Synthetic list
+      code_description: SYN_PLAN
+    - code: SYN_AWAIT
+      cluster_id: WTMGINT_COD
+      source: PCD
+      cluster_description: Synthetic list
+      code_description: SYN_AWAIT
+    - code: SYN_CONTEXT
+      cluster_id: WTMGINT_COD
+      source: PCD
+      cluster_description: Synthetic list
+      code_description: SYN_CONTEXT
   - input: ref('snomed_evidence_type')
-    rows:
-    - snomed_code: SYN_DIET
-      concept_name: Dietary advice (procedure)
-      evidence_type: advised
-      is_offer: false
-    - snomed_code: SYN_EXER
-      concept_name: Referral to exercise (procedure)
-      evidence_type: requested_or_referred
-      is_offer: false
-    - snomed_code: SYN_DECL
-      concept_name: Referral to exercise declined (situation)
-      evidence_type: declined
-      is_offer: false
-    - snomed_code: SYN_OFFER
-      concept_name: Referral to exercise offered (finding)
-      evidence_type: requested_or_referred
-      is_offer: true
-    - snomed_code: SYN_BOTH
-      concept_name: Advice about diet and physical activity (procedure)
-      evidence_type: advised
-      is_offer: false
-    - snomed_code: SYN_GENERIC
-      concept_name: Referral to weight management service (procedure)
-      evidence_type: requested_or_referred
-      is_offer: false
-    - snomed_code: SYN_WTDECL
-      concept_name: Weight management referral declined (situation)
-      evidence_type: declined
-      is_offer: false
-    - snomed_code: '286321000000102'
-      concept_name: Advice to aim for 30 minutes of moderate activity on 5 days or more each week (procedure)
-      evidence_type: advised
-      is_offer: false
-    - snomed_code: '439140001'
-      concept_name: Exercise leaflet given (situation)
-      evidence_type: advised
-      is_offer: false
-    - snomed_code: '913431000000101'
-      concept_name: Education about chair based exercise programme (procedure)
-      evidence_type: advised
-      is_offer: false
+    format: sql
+    rows: >-
+      select column1::varchar as snomed_code, column2::varchar as concept_name,
+      column3::varchar as evidence_type, column4::boolean as is_offer,
+      column5::boolean as is_planned_or_awaited from values
+      ('SYN_DIET', 'Dietary advice (procedure)', 'advised', false, false),
+      ('SYN_EXER', 'Referral to exercise (procedure)', 'requested_or_referred', false, false),
+      ('SYN_DECL', 'Referral to exercise declined (situation)', 'declined', false, false),
+      ('SYN_OFFER', 'Referral to exercise offered (finding)', 'requested_or_referred', true, false),
+      ('SYN_BOTH', 'Advice about diet and physical activity (procedure)', 'advised', false, false),
+      ('SYN_GENERIC', 'Referral to weight management service (procedure)', 'requested_or_referred', false, false),
+      ('SYN_WTDECL', 'Weight management referral declined (situation)', 'declined', false, false),
+      ('286321000000102', 'Advice to aim for 30 minutes of moderate activity on 5 days or more each week (procedure)', 'advised', false, false),
+      ('439140001', 'Exercise leaflet given (situation)', 'advised', false, false),
+      ('913431000000101', 'Education about chair based exercise programme (procedure)', 'advised', false, false),
+      ('SYN_PLAN', 'Exercise planned (situation)', 'requested_or_referred', false, true),
+      ('SYN_AWAIT', 'Dietary intervention awaited (situation)', 'requested_or_referred', false, true),
+      ('SYN_CONTEXT', 'Synthetic exercise (situation)', 'requested_or_referred', false, true)
   overrides:
     macros:
       get_empty_subquery_sql: select null::number as person_id, null::varchar as intervention_outcome, null::varchar
@@ -464,6 +459,18 @@ unit_tests:
       intervention_outcome: 'Yes'
       referral_diet_advice: null
       referral_exercise_advice: 'Yes'
+    - person_id: -720
+      intervention_outcome: null
+      referral_diet_advice: null
+      referral_exercise_advice: null
+    - person_id: -721
+      intervention_outcome: null
+      referral_diet_advice: null
+      referral_exercise_advice: null
+    - person_id: -722
+      intervention_outcome: null
+      referral_diet_advice: null
+      referral_exercise_advice: null
 - name: medication_review_latest_uses_save_time_then_id
   model: int_medication_review_latest
   given:

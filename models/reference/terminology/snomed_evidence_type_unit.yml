@@ -76,6 +76,12 @@ unit_tests:
     - cluster_id: WTMGINT_COD
       code: '-991003'
       code_description: Synthetic review completed (situation)
+    - cluster_id: WTMGINT_COD
+      code: '-991004'
+      code_description: Synthetic exercise planned (situation)
+    - cluster_id: WTMGINT_COD
+      code: '-991005'
+      code_description: Synthetic exercise awaited (situation)
   - input: ref('snomed_concept')
     rows:
     - snomed_code: '-990000'
@@ -126,6 +132,10 @@ unit_tests:
       fully_specified_name: Synthetic review completed (situation)
     - snomed_code: '-991003'
       fully_specified_name: Synthetic review completed (situation)
+    - snomed_code: '-991004'
+      fully_specified_name: Synthetic exercise planned (situation)
+    - snomed_code: '-991005'
+      fully_specified_name: Synthetic exercise awaited (situation)
   - input: ref('stg_nhsd_snomed_sct_relationship')
     rows:
     - source_id: -990012
@@ -188,76 +198,108 @@ unit_tests:
     - snomed_code: '-990000'
       evidence_type: completed
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990001'
       evidence_type: requested_or_referred
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990002'
       evidence_type: declined
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990003'
       evidence_type: advised
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990004'
       evidence_type: advised
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990005'
       evidence_type: administrative
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990006'
       evidence_type: administrative
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990007'
       evidence_type: administrative
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990008'
       evidence_type: finding
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990009'
       evidence_type: advised
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990010'
       evidence_type: completed
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990011'
       evidence_type: completed
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990012'
       evidence_type: completed
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990013'
       evidence_type: requested_or_referred
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990014'
       evidence_type: declined
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990015'
       evidence_type: requested_or_referred
       is_offer: true
+      is_planned_or_awaited: false
     - snomed_code: '-990016'
       evidence_type: requested_or_referred
       is_offer: false
+      is_planned_or_awaited: true
     - snomed_code: '-990017'
       evidence_type: null
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990018'
       evidence_type: null
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990019'
       evidence_type: completed
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-990020'
       evidence_type: null
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-991001'
       evidence_type: null
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-991002'
       evidence_type: null
       is_offer: false
+      is_planned_or_awaited: false
     - snomed_code: '-991003'
       evidence_type: null
       is_offer: false
+      is_planned_or_awaited: false
+    - snomed_code: '-991004'
+      evidence_type: requested_or_referred
+      is_offer: false
+      is_planned_or_awaited: true
+    - snomed_code: '-991005'
+      evidence_type: requested_or_referred
+      is_offer: false
+      is_planned_or_awaited: true
   overrides:
     macros:
       get_empty_subquery_sql: select null::varchar as snomed_code, null::varchar as evidence_type, null::boolean
-        as is_offer where false
+        as is_offer, null::boolean as is_planned_or_awaited where false

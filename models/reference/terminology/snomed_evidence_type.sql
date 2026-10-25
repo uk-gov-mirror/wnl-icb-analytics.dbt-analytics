@@ -29,6 +29,8 @@ with codes as (
     left join context using (snomed_code)
 ), classified as (
     select *, wording like '%offered%' as is_offer,
+        coalesce(procedure_context = '397943006', false)
+            or regexp_like(wording, '.*(planned|awaited).*') as is_planned_or_awaited,
         case
             when other_subject or unsupported_time_context or procedure_context_count > 1 then null
             when procedure_context not in ('443390004', '385644000', '397943006', '385658003', '385652002') then null
@@ -46,7 +48,7 @@ with codes as (
     from terms
 )
 select classified.snomed_code, concept_name, semantic_tag,
-    coalesce(reviewed.evidence_type, rule_evidence_type) as evidence_type, is_offer,
+    coalesce(reviewed.evidence_type, rule_evidence_type) as evidence_type, is_offer, is_planned_or_awaited,
     case
         when reviewed.evidence_type is not null then reviewed.basis
         when rule_evidence_type is null then 'Requires review: missing, conflicting or unsupported context'
