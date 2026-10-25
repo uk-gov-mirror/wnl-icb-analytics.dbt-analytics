@@ -7,7 +7,7 @@ unit_tests:
   given:
   - input: ref('int_autism_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -30,7 +30,7 @@ unit_tests:
   given:
   - input: ref('int_cerebral_palsy_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -53,7 +53,7 @@ unit_tests:
   given:
   - input: ref('int_chronic_liver_disease_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -171,7 +171,7 @@ unit_tests:
   given:
   - input: ref('int_frailty_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -200,7 +200,7 @@ unit_tests:
   given:
   - input: ref('int_gestational_diabetes_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person_active_patients')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -242,7 +242,7 @@ unit_tests:
   given:
   - input: ref('int_mnd_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -265,7 +265,7 @@ unit_tests:
   given:
   - input: ref('int_ms_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -288,7 +288,7 @@ unit_tests:
   given:
   - input: ref('int_nafld_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person_active_patients')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -349,7 +349,7 @@ unit_tests:
   given:
   - input: ref('int_osteoarthritis_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -412,7 +412,7 @@ unit_tests:
   given:
   - input: ref('int_pad_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   expect:
     rows:
     - person_id: -145441
@@ -444,7 +444,7 @@ unit_tests:
   given:
   - input: ref('int_parkinsons_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -479,8 +479,7 @@ unit_tests:
           NULL::VARCHAR AS concept_code,
           NULL::VARCHAR AS concept_display,
           NULL::VARCHAR AS source_cluster_id,
-          NULL::BOOLEAN AS is_diagnosis_code,
-          NULL::FLOAT AS result_value
+          NULL::BOOLEAN AS is_diagnosis_code
       WHERE FALSE
   - input: ref('int_diabetes_diagnoses_all')
     format: sql
@@ -544,7 +543,7 @@ unit_tests:
   given:
   - input: ref('int_sickle_cell_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE
@@ -567,7 +566,7 @@ unit_tests:
   given:
   - input: ref('int_stroke_tia_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   expect:
     rows:
     - person_id: -145441
@@ -582,7 +581,7 @@ unit_tests:
   given:
   - input: ref('int_thalassaemia_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: value_free_reentered_observation_readings
   - input: ref('dim_person')
     format: sql
     rows: SELECT column1::NUMBER AS person_id, 55::NUMBER AS age, 'Female'::VARCHAR AS gender, '1970-01-01'::DATE

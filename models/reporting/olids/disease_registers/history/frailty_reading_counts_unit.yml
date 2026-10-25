@@ -8,7 +8,7 @@ unit_tests:
     given:
       - input: ref('int_frailty_diagnoses_all')
         format: sql
-        fixture: reentered_observation_readings
+        fixture: value_free_reentered_observation_readings
       - input: ref('int_segmentation_person_month_spine')
         format: sql
         rows: |

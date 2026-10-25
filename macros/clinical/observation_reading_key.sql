@@ -6,8 +6,7 @@
         {{ prefix }}concept_code,
         {{ prefix }}{{ clinical_date }}::DATE,
         {% if value is none %}NULL{% else %}{{ prefix }}{{ value }}{% endif %},
-        IFF({{ prefix }}{{ clinical_date }} IS NULL
-            OR {{ prefix }}{{ clinical_date }}::DATE IN ('1900-01-01'::DATE, '1899-12-31'::DATE),
+        IFF({{ is_unknown_clinical_day(prefix ~ clinical_date) }},
             {{ prefix }}{{ observation_id }}::VARCHAR, NULL)
         {% if record_context is not none %}, {{ prefix }}{{ record_context }}{% endif %}
     )

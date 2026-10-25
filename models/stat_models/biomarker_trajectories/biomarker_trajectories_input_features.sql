@@ -42,8 +42,6 @@ SELECT
 FROM {{ ref('int_hba1c_all') }} AS hb
 INNER JOIN {{ ref('dim_person_active_patients') }} AS ap
     ON hb.person_id = ap.person_id
-LEFT JOIN {{ ref('stg_olids_observation') }} AS source_observation
-    ON hb.id = source_observation.id
 WHERE hb.is_valid_hba1c = TRUE
     AND hb.clinical_effective_date >= DATEADD(year, -5, CURRENT_DATE())
 -- Valid results are always IFCC or DCCT, so NOT is_ifcc means DCCT.
@@ -58,5 +56,5 @@ QUALIFY (
     AND ROW_NUMBER() OVER (
         PARTITION BY hb.person_id, hb.clinical_effective_date::DATE, hb.hba1c_ifcc
         ORDER BY hb.is_ifcc DESC, hb.clinical_effective_date DESC,
-            source_observation.date_recorded DESC NULLS LAST, hb.id DESC
+            hb.date_recorded DESC NULLS LAST, hb.id DESC
     ) = 1

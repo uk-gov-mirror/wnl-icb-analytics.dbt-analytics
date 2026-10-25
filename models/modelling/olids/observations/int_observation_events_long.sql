@@ -103,171 +103,196 @@ events AS (
     UNION ALL
     SELECT person_id, id, 'Total Cholesterol', 'Cardiovascular',
         clinical_effective_date, cholesterol_value::FLOAT, 'mmol/L', cholesterol_category::VARCHAR
-    FROM {{ ref('int_cholesterol_all') }}
-    WHERE cholesterol_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_cholesterol_all', value='cholesterol_value::FLOAT', unit="'mmol/L'",
+            condition='cholesterol_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'LDL Cholesterol', 'Cardiovascular',
         clinical_effective_date, cholesterol_value::FLOAT, 'mmol/L', LDL_CVD_Target_Met::VARCHAR
-    FROM {{ ref('int_cholesterol_ldl_all') }}
-    WHERE cholesterol_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_cholesterol_ldl_all', value='cholesterol_value::FLOAT', unit="'mmol/L'",
+            condition='cholesterol_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'HDL Cholesterol', 'Cardiovascular',
         clinical_effective_date, cholesterol_value::FLOAT, 'mmol/L', cholesterol_category::VARCHAR
-    FROM {{ ref('int_cholesterol_hdl_all') }}
-    WHERE cholesterol_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_cholesterol_hdl_all', value='cholesterol_value::FLOAT', unit="'mmol/L'",
+            condition='cholesterol_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Non-HDL Cholesterol', 'Cardiovascular',
         clinical_effective_date, cholesterol_value::FLOAT, 'mmol/L', cholesterol_category::VARCHAR
-    FROM {{ ref('int_cholesterol_non_hdl_all') }}
-    WHERE cholesterol_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_cholesterol_non_hdl_all', value='cholesterol_value::FLOAT', unit="'mmol/L'",
+            condition='cholesterol_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Triglycerides', 'Cardiovascular',
         clinical_effective_date, triglycerides_value::FLOAT, 'mmol/L', triglycerides_category::VARCHAR
-    FROM {{ ref('int_triglycerides_all') }}
-    WHERE triglycerides_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_triglycerides_all', value='triglycerides_value::FLOAT', unit="'mmol/L'",
+            condition='triglycerides_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Total Cholesterol to HDL Ratio', 'Cardiovascular',
         clinical_effective_date, cholesterol_hdl_ratio::FLOAT, 'ratio', NULL::VARCHAR
-    FROM {{ ref('int_cholesterol_hdl_ratio_all') }}
-    WHERE cholesterol_hdl_ratio IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_cholesterol_hdl_ratio_all', value='cholesterol_hdl_ratio::FLOAT', unit="'ratio'",
+            condition='cholesterol_hdl_ratio IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'QRISK', 'Cardiovascular',
         clinical_effective_date, qrisk_score::FLOAT, '%', cvd_risk_category::VARCHAR
-    FROM {{ ref('int_qrisk_all') }}
-    WHERE qrisk_score IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_qrisk_all', value='qrisk_score::FLOAT', unit="'%'",
+            condition='qrisk_score IS NOT NULL') }}
+    )
 
     -- Metabolic: HbA1c, BMI, Waist circumference
     UNION ALL
     SELECT person_id, id, 'HbA1c', 'Metabolic',
         clinical_effective_date, hba1c_ifcc::FLOAT, 'mmol/mol', hba1c_category::VARCHAR
-    FROM {{ ref('int_hba1c_all') }}
-    WHERE hba1c_ifcc IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_hba1c_all', value='hba1c_ifcc::FLOAT', unit="'mmol/mol'",
+            condition='hba1c_ifcc IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'BMI', 'Metabolic',
         clinical_effective_date, bmi_value::FLOAT, 'kg/m2', bmi_category::VARCHAR
-    FROM {{ ref('int_bmi_all') }}
-    WHERE bmi_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_bmi_all', value='bmi_value::FLOAT', unit="'kg/m2'",
+            condition='bmi_value IS NOT NULL', extra_lookup_cluster='WEIGHT') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Waist Circumference', 'Metabolic',
         clinical_effective_date, waist_circumference_value::FLOAT, 'cm', waist_risk_category::VARCHAR
-    FROM {{ ref('int_waist_circumference_all') }}
-    WHERE waist_circumference_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_waist_circumference_all', value='waist_circumference_value::FLOAT', unit="'cm'",
+            condition='waist_circumference_value IS NOT NULL') }}
+    )
 
     -- Renal: eGFR, Creatinine, Urine ACR
     UNION ALL
     SELECT person_id, id, 'eGFR', 'Renal',
         clinical_effective_date, egfr_value::FLOAT, 'mL/min/1.73m2', ckd_stage::VARCHAR
-    FROM {{ ref('int_egfr_all') }}
-    WHERE egfr_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_egfr_all', value='egfr_value::FLOAT', unit="'mL/min/1.73m2'",
+            condition='egfr_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Creatinine', 'Renal',
         clinical_effective_date, creatinine_value::FLOAT, 'umol/L', creatinine_category::VARCHAR
-    FROM {{ ref('int_creatinine_all') }}
-    WHERE creatinine_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_creatinine_all', value='creatinine_value::FLOAT', unit="'umol/L'",
+            condition='creatinine_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Urine ACR', 'Renal',
         clinical_effective_date, acr_value::FLOAT, 'mg/mmol', acr_category::VARCHAR
-    FROM {{ ref('int_urine_acr_all') }}
-    WHERE acr_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_urine_acr_all', value='acr_value::FLOAT', unit="'mg/mmol'",
+            condition='acr_value IS NOT NULL') }}
+    )
 
     -- Liver: ALT, GGT, Bilirubin
     UNION ALL
     SELECT person_id, id, 'ALT', 'Liver',
         clinical_effective_date, inferred_value::FLOAT, inferred_unit::VARCHAR, alt_category::VARCHAR
-    FROM {{ ref('int_alt_all') }}
-    WHERE NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_alt_all', value='inferred_value::FLOAT', unit="inferred_unit::VARCHAR",
+            condition='NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'GGT', 'Liver',
         clinical_effective_date, inferred_value::FLOAT, inferred_unit::VARCHAR, ggt_category::VARCHAR
-    FROM {{ ref('int_ggt_all') }}
-    WHERE NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_ggt_all', value='inferred_value::FLOAT', unit="inferred_unit::VARCHAR",
+            condition='NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Bilirubin', 'Liver',
         clinical_effective_date, inferred_value::FLOAT, inferred_unit::VARCHAR, bilirubin_category::VARCHAR
-    FROM {{ ref('int_bilirubin_all') }}
-    WHERE NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_bilirubin_all', value='inferred_value::FLOAT', unit="inferred_unit::VARCHAR",
+            condition='NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL') }}
+    )
 
     -- Haematology: Haemoglobin, Platelets, Eosinophils
     UNION ALL
     SELECT person_id, id, 'Haemoglobin', 'Haematology',
         clinical_effective_date, inferred_value::FLOAT, inferred_unit::VARCHAR, haemoglobin_category::VARCHAR
-    FROM {{ ref('int_haemoglobin_all') }}
-    WHERE NOT is_negative AND NOT is_extreme_outlier AND NOT is_out_of_range AND inferred_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_haemoglobin_all', value='inferred_value::FLOAT', unit="inferred_unit::VARCHAR",
+            condition='NOT is_negative AND NOT is_extreme_outlier AND NOT is_out_of_range AND inferred_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Platelets', 'Haematology',
         clinical_effective_date, inferred_value::FLOAT, inferred_unit::VARCHAR, platelets_category::VARCHAR
-    FROM {{ ref('int_platelets_all') }}
-    WHERE NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_platelets_all', value='inferred_value::FLOAT', unit="inferred_unit::VARCHAR",
+            condition='NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Eosinophils', 'Haematology',
         clinical_effective_date, inferred_value::FLOAT, inferred_unit::VARCHAR, eosinophil_category::VARCHAR
-    FROM {{ ref('int_eosinophil_count') }}
-    WHERE NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_eosinophil_count', value='inferred_value::FLOAT', unit="inferred_unit::VARCHAR",
+            condition='NOT is_negative AND NOT is_extreme_outlier AND inferred_value IS NOT NULL') }}
+    )
 
     -- Frailty: explicitly coded eFI/eFI2 scores and Rockwood assessments
     UNION ALL
     SELECT person_id, id, 'Electronic Frailty Index (eFI)', 'Frailty',
         clinical_effective_date, efi_value::FLOAT, 'score', efi_category::VARCHAR
-    FROM {{ ref('int_efi_all') }}
-    WHERE efi_value IS NOT NULL
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_efi_all', value='efi_value::FLOAT', unit="'score'",
+            condition='efi_value IS NOT NULL') }}
+    )
 
     UNION ALL
     SELECT person_id, id, 'Rockwood Frailty Scale', 'Frailty',
         clinical_effective_date, rockwood_score::FLOAT, 'score', frailty_category::VARCHAR
-    FROM {{ ref('int_rockwood_all') }}
-    WHERE rockwood_score IS NOT NULL
-),
-
-non_bp_events AS (
-    SELECT *
-    FROM events
-    WHERE observation_type NOT IN ('Systolic BP', 'Diastolic BP')
-        AND clinical_effective_date <= CURRENT_DATE
-),
-
-distinct_non_bp_events AS (
-    SELECT events.*
-    FROM non_bp_events AS events
-    LEFT JOIN {{ ref('stg_olids_observation') }} AS source_observation
-        ON events.source_observation_id = source_observation.id
-    -- Retain different standardised values and units for the same source reading.
-    QUALIFY ROW_NUMBER() OVER (
-        PARTITION BY events.person_id, events.observation_type,
-            COALESCE(source_observation.mapped_concept_code, events.source_observation_id::VARCHAR),
-            events.clinical_effective_date::DATE, source_observation.result_value,
-            events.value, events.unit,
-            source_observation.patient_id, source_observation.publisher_organisation_code,
-            IFF(events.clinical_effective_date::DATE IN ('1900-01-01'::DATE, '1899-12-31'::DATE),
-                events.source_observation_id::VARCHAR, NULL)
-        ORDER BY events.clinical_effective_date DESC,
-            source_observation.date_recorded DESC NULLS LAST,
-            events.source_observation_id DESC
-    ) = 1
-),
-
-retained_events AS (
-    SELECT * FROM distinct_non_bp_events
-
-    UNION ALL
-
-    -- BP retains its established grain without a staging lookup or deduplication.
-    SELECT * FROM events
-    WHERE observation_type IN ('Systolic BP', 'Diastolic BP')
-        AND clinical_effective_date <= CURRENT_DATE
+    FROM (
+        {{ distinct_observation_history_readings(
+            'int_rockwood_all', value='rockwood_score::FLOAT', unit="'score'",
+            condition='rockwood_score IS NOT NULL') }}
+    )
 )
 
 SELECT
@@ -284,6 +309,7 @@ SELECT
     events.category,
     blood_pressure_stages.hypertension_stage,
     events.source_observation_id
-FROM retained_events AS events
+FROM events
 LEFT JOIN blood_pressure_stages
     ON events.source_observation_id = blood_pressure_stages.source_observation_id
+WHERE events.clinical_effective_date <= CURRENT_DATE

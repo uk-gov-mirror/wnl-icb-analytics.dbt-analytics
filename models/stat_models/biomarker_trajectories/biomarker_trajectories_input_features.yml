@@ -75,7 +75,9 @@ unit_tests:
       SELECT column1::VARCHAR AS id, column2::NUMBER AS person_id,
           DATEADD(year, YEAR(CURRENT_DATE()) - 2025, column3::TIMESTAMP_NTZ) AS clinical_effective_date, column4::FLOAT AS hba1c_ifcc,
           column5::BOOLEAN AS is_ifcc, IFF(column5, 'IFCC','DCCT')::VARCHAR AS measurement_type,
-          TRUE::BOOLEAN AS is_valid_hba1c
+          TRUE::BOOLEAN AS is_valid_hba1c,
+          CASE column1 WHEN 'SYN_SAVE_A' THEN '2024-02-03'
+              WHEN 'SYN_SAVE_Z' THEN '2024-02-02' ELSE '2024-03-02' END::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
           ('SYN_EARLY', -145421, '2024-01-01 09:00:00', 50, TRUE),
           ('SYN_LATE', -145421, '2024-01-01 18:00:00', 50, TRUE),
@@ -90,18 +92,13 @@ unit_tests:
           ('SYN_INACTIVE', -145423, '2024-01-01', 50, TRUE)
       UNION ALL
       SELECT 'SYN_BOUNDARY', -145421, DATEADD(year,-5,CURRENT_DATE())::TIMESTAMP_NTZ,
-          80, TRUE, 'IFCC', TRUE
+          80, TRUE, 'IFCC', TRUE, NULL::TIMESTAMP_NTZ
       UNION ALL
       SELECT 'SYN_BEFORE_BOUNDARY', -145421, DATEADD(day,-1,DATEADD(year,-5,CURRENT_DATE()))::TIMESTAMP_NTZ,
-          81, TRUE, 'IFCC', TRUE
+          81, TRUE, 'IFCC', TRUE, NULL::TIMESTAMP_NTZ
   - input: ref('dim_person_active_patients')
     format: sql
     rows: SELECT column1::NUMBER AS person_id FROM VALUES (-145421), (-145422)
-  - input: ref('stg_olids_observation')
-    format: sql
-    rows: |-
-      SELECT column1::VARCHAR AS id, column2::TIMESTAMP_NTZ AS date_recorded
-      FROM VALUES ('SYN_SAVE_A','2024-02-03'), ('SYN_SAVE_Z','2024-02-02'), ('SYN_ID_A','2024-03-02'), ('SYN_ID_Z','2024-03-02')
   expect:
     rows:
     - observation_id: SYN_LATE
