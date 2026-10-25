@@ -5,6 +5,8 @@
     )
 }}
 
+/* Run daily to build data quality metrics history */
+
 with measurements as (
     select
         current_date() as measurement_date,
