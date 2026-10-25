@@ -178,11 +178,10 @@ models:
           1 non-drinker, 0 no data.
 
       - name: audit_score
-        description: Most recent AUDIT or AUDIT-C score
+        description: Most recent valid total for the recorded AUDIT instrument
 
       - name: audit_type
-        description: Type of most recent AUDIT assessment (AUDIT-C or Full 
-          AUDIT)
+        description: Type of most recent AUDIT assessment (AUDIT-C, AUDIT-PC or Full AUDIT)
 
       - name: audit_risk_category
         description: Risk category from most recent AUDIT assessment
@@ -194,7 +193,7 @@ models:
         description: Brief advice or consideration of specialist assessment from valid AUDIT evidence, or an active alcohol disorder.
 
       - name: brief_intervention_indicated
-        description: Brief advice indicated for valid AUDIT 8-19 or AUDIT-C 5-10.
+        description: Brief advice indicated for valid AUDIT 8-19, AUDIT-C 5-10 or AUDIT-PC 5+.
 
       - name: audit_data_recency
         description: Recency classification of AUDIT data (Current, Recent, 

@@ -5,9 +5,9 @@
 }}
 
 /*
-All AUDIT and AUDIT-C alcohol screening scores from observations.
+All AUDIT, AUDIT-PC and AUDIT-C alcohol screening scores from observations.
 Includes ALL persons (active, inactive, deceased).
-Captures both AUDIT-C (brief 3-question screen) and full AUDIT (10-question assessment).
+Captures AUDIT-C (3 questions), AUDIT-PC (5 questions) and full AUDIT (10 questions).
 
 UK AUDIT-C Scoring (0-12):
 - 0: Non-drinker
@@ -16,7 +16,7 @@ UK AUDIT-C Scoring (0-12):
 - 5-7: Increasing risk
 - 8-10: Higher risk
 - 11-12: Possible dependence
-- Score ≥5 is positive screen indicating potential harm
+- Score Ã¢â€°Â¥5 is positive screen indicating potential harm
 
 UK Full AUDIT Scoring (0-40):
 - 0: Non-drinker
@@ -38,7 +38,13 @@ WITH base_observations AS (
         obs.mapped_concept_code AS concept_code,
         obs.mapped_concept_display AS concept_display,
         obs.cluster_id AS source_cluster_id,
-        obs.result_value AS original_result_value
+        obs.result_value AS original_result_value,
+        TRY_CAST(obs.result_value::VARCHAR AS FLOAT) AS numeric_result,
+        CASE
+            WHEN obs.cluster_id = 'AUDITC_COD' THEN 'AUDIT-C'
+            WHEN obs.mapped_concept_code IN ('774089008', '774090004') THEN 'AUDIT-PC'
+            WHEN obs.cluster_id = 'AUDIT_COD' THEN 'AUDIT'
+        END AS screening_tool
 
     FROM ({{ get_observations("'AUDITC_COD', 'AUDIT_COD'") }}) obs
     WHERE obs.clinical_effective_date IS NOT NULL
@@ -57,12 +63,7 @@ observations_with_demographics AS (
 ),
 scored AS (
     SELECT *,
-        -- AUDIT totals use whole points: AUDIT-C 0-12; full AUDIT 0-40.
-        COALESCE(
-            original_result_value = FLOOR(original_result_value)
-            AND ((source_cluster_id = 'AUDITC_COD' AND original_result_value BETWEEN 0 AND 12)
-              OR (source_cluster_id = 'AUDIT_COD' AND original_result_value BETWEEN 0 AND 40)),
-            FALSE) AS is_valid_score
+        {{ alcohol_score_is_valid('numeric_result', 'screening_tool') }} AS is_valid_score
     FROM observations_with_demographics
 )
 
@@ -81,8 +82,8 @@ SELECT
 
     -- Determine AUDIT type
     CASE 
-        WHEN source_cluster_id = 'AUDITC_COD' THEN 'AUDIT-C'
-        WHEN source_cluster_id = 'AUDIT_COD' THEN 'Full AUDIT'
+        WHEN screening_tool = 'AUDIT' THEN 'Full AUDIT'
+        WHEN screening_tool IN ('AUDIT-C', 'AUDIT-PC') THEN screening_tool
         ELSE 'Unknown'
     END AS audit_type,
 
@@ -90,6 +91,13 @@ SELECT
 
     -- Risk categorisation using UK AUDIT thresholds with detailed lower end
     CASE
+        -- AUDIT-PC has a binary screen, with no higher-risk or referral band.
+        WHEN screening_tool = 'AUDIT-PC' THEN
+            CASE
+                WHEN NOT is_valid_score THEN 'Invalid'
+                WHEN audit_score < 5 THEN 'Lower Risk'
+                ELSE 'Increasing Risk'
+            END
         WHEN source_cluster_id = 'AUDITC_COD' THEN
             CASE
                 WHEN NOT is_valid_score THEN 'Invalid'
@@ -116,6 +124,8 @@ SELECT
     -- Simplified risk level (for easier aggregation)
     CASE
         WHEN NOT is_valid_score THEN NULL
+        WHEN screening_tool = 'AUDIT-PC' THEN
+            CASE WHEN audit_score < 5 THEN 'Lower Risk' ELSE 'Increasing Risk' END
         WHEN source_cluster_id IN ('AUDITC_COD', 'AUDIT_COD') THEN
             CASE
                 WHEN audit_score = 0 THEN 'Non-Drinker'
@@ -137,9 +147,10 @@ SELECT
     -- GOV.UK screening guidance separates brief advice from specialist assessment.
     is_valid_score AND source_cluster_id = 'AUDITC_COD' AND audit_score >= 5 AS auditc_positive_screen,
     is_valid_score AND ((source_cluster_id = 'AUDITC_COD' AND audit_score >= 11)
-        OR (source_cluster_id = 'AUDIT_COD' AND audit_score >= 20)) AS requires_specialist_intervention,
+        OR (screening_tool = 'AUDIT' AND audit_score >= 20)) AS requires_specialist_intervention,
     is_valid_score AND ((source_cluster_id = 'AUDITC_COD' AND audit_score BETWEEN 5 AND 10)
-        OR (source_cluster_id = 'AUDIT_COD' AND audit_score BETWEEN 8 AND 19)) AS brief_intervention_indicated
+        OR (screening_tool = 'AUDIT' AND audit_score BETWEEN 8 AND 19)
+        OR (screening_tool = 'AUDIT-PC' AND audit_score >= 5)) AS brief_intervention_indicated
 
 FROM scored
 

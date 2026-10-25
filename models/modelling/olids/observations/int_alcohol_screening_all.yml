@@ -6,7 +6,7 @@ models:
       deceased. Observations dated after the build date are excluded. score_value
       holds a whole-number total within the tool's range. is_positive_screen applies
       the NICE hazardous-drinking thresholds, FAST 3 or more and AUDIT-C 5 or
-      more, plus full AUDIT 8 or more as a local extension. An assessment code
+      more, plus full AUDIT 8 or more as a local extension. AUDIT-PC (SNOMED 774089008 or 774090004) is positive at 5 or more under government guidance. An assessment code
       without a score is a screen but not a positive one. int_alcohol_audit_scores
       remains the risk-banded AUDIT model used by the SMI programme.
     config:
@@ -33,13 +33,13 @@ models:
       - name: clinical_effective_date
         description: Date of the screen.
       - name: screening_tool
-        description: FAST, AUDIT-C or AUDIT.
+        description: FAST, AUDIT-C, AUDIT-PC or AUDIT.
         data_tests:
           - accepted_values:
               arguments:
-                values: ['FAST', 'AUDIT-C', 'AUDIT']
+                values: ['FAST', 'AUDIT-C', 'AUDIT-PC', 'AUDIT']
       - name: score_value
-        description: Whole-number total within FAST 0-16, AUDIT-C 0-12 or AUDIT 0-40. Null when missing, fractional or out of range.
+        description: Whole-number total within FAST 0-16, AUDIT-C 0-12, AUDIT-PC 0-20 or AUDIT 0-40. Null when missing, fractional or out of range.
       - name: original_result_value
         description: Result as recorded.
       - name: is_positive_screen

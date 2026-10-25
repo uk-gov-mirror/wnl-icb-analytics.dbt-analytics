@@ -1,12 +1,14 @@
 models:
   - name: int_alcohol_audit_scores
     description: >
-      AUDIT and AUDIT-C assessments, one row per observation and source cluster.
+      AUDIT, AUDIT-PC and AUDIT-C assessments, one row per observation and source cluster.
       Includes people aged at least 16 at the assessment, including inactive and
       deceased people, with a scored observation dated no later than the build date.
       Whole-number totals use government screening guidance: brief advice at AUDIT
       8-19 or AUDIT-C 5-10, and possible dependence with consideration of specialist
-      assessment at AUDIT 20+ or AUDIT-C 11+. These are screening bands, not diagnoses.
+      assessment at AUDIT 20+ or AUDIT-C 11+. AUDIT-PC (SNOMED 774089008 or 774090004)
+      uses 0-20 whole points and brief advice at 5+, with no specialist band.
+      These are screening bands, not diagnoses.
 
     config:
       meta:
@@ -45,27 +47,27 @@ models:
           can be back-dated. May be NULL.
 
       - name: audit_score
-        description: Numeric AUDIT or AUDIT-C score value
+        description: Numeric total for the recorded AUDIT instrument
 
       - name: audit_type
-        description: Type of AUDIT assessment (AUDIT-C or Full AUDIT)
+        description: Type of AUDIT assessment (AUDIT-C, AUDIT-PC or Full AUDIT)
 
       - name: is_valid_score
         description: >-
-          Whole-number total within the instrument range (AUDIT-C 0-12, AUDIT 0-40).
+          Whole-number total within the instrument range (AUDIT-C 0-12, AUDIT-PC 0-20, AUDIT 0-40).
           All risk fields and flags are null, Invalid or false when this is false.
 
       - name: risk_category
-        description: Clinical risk category based on score thresholds
+        description: Instrument-specific screening category. AUDIT-PC uses Lower Risk below 5 and Increasing Risk at 5+; it has no higher-risk or dependence band.
 
       - name: auditc_positive_screen
-        description: Flag for AUDIT-C scores ≥5 indicating positive screen for potential harm
+        description: Flag for AUDIT-C scores ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥5 indicating positive screen for potential harm
 
       - name: requires_specialist_intervention
         description: Consider specialist alcohol assessment for valid AUDIT 20+ or AUDIT-C 11+; not a dependence diagnosis.
 
       - name: brief_intervention_indicated
-        description: Brief advice indicated for valid AUDIT 8-19 or AUDIT-C 5-10, per government screening guidance.
+        description: Brief advice indicated for valid AUDIT 8-19, AUDIT-C 5-10 or AUDIT-PC 5+, per government screening guidance.
 
       - name: simplified_risk_level
         description: Simplified risk categorisation for aggregation. Null for invalid scores.

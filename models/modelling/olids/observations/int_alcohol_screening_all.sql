@@ -10,7 +10,8 @@ AUDITC_COD and AUDIT_COD. screening_tool names the tool; score_value holds a
 whole-number result within the tool's range; is_positive_screen applies the NICE
 thresholds for hazardous drinking: FAST 3 or more, AUDIT-C 5 or more, and full
 AUDIT 8 or more (the standard hazardous threshold, a local extension as NICE
-names only FAST and AUDIT-C). An assessment code without a score counts as a
+names only FAST and AUDIT-C). AUDIT-PC is positive at 5 or more under government
+guidance. An assessment code without a score counts as a
 screen but cannot be positive. Includes ALL persons (active, inactive, deceased)
 following intermediate layer principles.
 */
@@ -23,9 +24,11 @@ WITH base AS (
         CASE obs.cluster_id
             WHEN 'FAST_COD' THEN 'FAST'
             WHEN 'AUDITC_COD' THEN 'AUDIT-C'
-            WHEN 'AUDIT_COD' THEN 'AUDIT'
+            WHEN 'AUDIT_COD' THEN
+                CASE WHEN obs.mapped_concept_code IN ('774089008', '774090004')
+                    THEN 'AUDIT-PC' ELSE 'AUDIT' END
         END AS screening_tool,
-        TRY_CAST(obs.result_value AS FLOAT) AS numeric_result,
+        TRY_CAST(obs.result_value::VARCHAR AS FLOAT) AS numeric_result,
         obs.result_value AS original_result_value,
         obs.mapped_concept_code AS concept_code,
         obs.mapped_concept_display AS concept_display,
@@ -36,13 +39,7 @@ WITH base AS (
 
 validated AS (
     SELECT *,
-        COALESCE(
-            numeric_result = FLOOR(numeric_result)
-            AND ((screening_tool = 'FAST' AND numeric_result BETWEEN 0 AND 16)
-              OR (screening_tool = 'AUDIT-C' AND numeric_result BETWEEN 0 AND 12)
-              OR (screening_tool = 'AUDIT' AND numeric_result BETWEEN 0 AND 40)),
-            FALSE
-        ) AS is_valid_score
+        {{ alcohol_score_is_valid('numeric_result', 'screening_tool') }} AS is_valid_score
     FROM base
 )
 
@@ -57,6 +54,7 @@ SELECT
         is_valid_score AND (
             (screening_tool = 'FAST' AND numeric_result >= 3)
             OR (screening_tool = 'AUDIT-C' AND numeric_result >= 5)
+            OR (screening_tool = 'AUDIT-PC' AND numeric_result >= 5)
             OR (screening_tool = 'AUDIT' AND numeric_result >= 8)),
         FALSE
     ) AS is_positive_screen,

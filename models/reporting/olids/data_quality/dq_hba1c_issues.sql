@@ -52,10 +52,10 @@ SELECT
     END AS is_measurement_type_ambiguous,
     
     CASE
-        WHEN is_ifcc AND numeric_result < 20 THEN 'IFCC Below Valid Range (< 20)'
-        WHEN is_ifcc AND numeric_result > 195 THEN 'IFCC Above Valid Range (> 195)'
-        WHEN is_dcct AND numeric_result < 3.979993595 THEN 'DCCT Below NDA Range'
-        WHEN is_dcct AND numeric_result >= 20 THEN 'DCCT Above Valid Range (>= 20)'
+        WHEN NOT is_valid_hba1c AND is_ifcc AND numeric_result < 20 THEN 'IFCC Below Valid Range'
+        WHEN NOT is_valid_hba1c AND is_ifcc AND numeric_result >= 20 THEN 'IFCC Above Valid Range'
+        WHEN NOT is_valid_hba1c AND is_dcct AND numeric_result < 20 THEN 'DCCT Below Valid Range'
+        WHEN NOT is_valid_hba1c AND is_dcct AND numeric_result >= 20 THEN 'DCCT Above Valid Range'
         WHEN is_ifcc AND hba1c_original_value > 150 THEN 'IFCC Extremely High (> 150)'
         WHEN is_dcct AND hba1c_original_value > 15 THEN 'DCCT Extremely High (> 15)'
         WHEN (is_ifcc = FALSE AND is_dcct = FALSE) THEN 'Measurement Type Unknown'
