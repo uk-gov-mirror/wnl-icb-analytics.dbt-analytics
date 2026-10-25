@@ -312,7 +312,8 @@ unit_tests:
       (-715, -715, ''SYN_GENERIC'', ''2026-09-01'', ''2026-09-02 12:00:00''),
 
       (-716, -716, ''SYN_WTDECL'', ''2026-09-01'', ''2026-09-02 12:00:00''), (-717, -717, ''286321000000102'', ''2026-09-01'',
-      ''2026-09-02 12:00:00'')'
+      ''2026-09-02 12:00:00''), (-718, -718, ''439140001'', ''2026-09-01'', ''2026-09-02 12:00:00''), (-719, -719,
+      ''913431000000101'', ''2026-09-01'', ''2026-09-02 12:00:00'')'
   - input: ref('stg_reference_combined_codesets')
     rows:
     - code: SYN_DIET
@@ -365,6 +366,16 @@ unit_tests:
       source: PCD
       cluster_description: Synthetic list
       code_description: Advice to aim for 30 minutes of moderate activity on 5 days or more each week
+    - code: '439140001'
+      cluster_id: WTMGINT_COD
+      source: PCD
+      cluster_description: Synthetic list
+      code_description: Exercise leaflet given (situation)
+    - code: '913431000000101'
+      cluster_id: WTMGINT_COD
+      source: PCD
+      cluster_description: Synthetic list
+      code_description: Education about chair based exercise programme (procedure)
   - input: ref('snomed_evidence_type')
     rows:
     - snomed_code: SYN_DIET
@@ -397,6 +408,14 @@ unit_tests:
       is_offer: false
     - snomed_code: '286321000000102'
       concept_name: Advice to aim for 30 minutes of moderate activity on 5 days or more each week (procedure)
+      evidence_type: advised
+      is_offer: false
+    - snomed_code: '439140001'
+      concept_name: Exercise leaflet given (situation)
+      evidence_type: advised
+      is_offer: false
+    - snomed_code: '913431000000101'
+      concept_name: Education about chair based exercise programme (procedure)
       evidence_type: advised
       is_offer: false
   overrides:
@@ -434,6 +453,14 @@ unit_tests:
       referral_diet_advice: null
       referral_exercise_advice: null
     - person_id: -717
+      intervention_outcome: 'Yes'
+      referral_diet_advice: null
+      referral_exercise_advice: 'Yes'
+    - person_id: -718
+      intervention_outcome: 'Yes'
+      referral_diet_advice: null
+      referral_exercise_advice: 'Yes'
+    - person_id: -719
       intervention_outcome: 'Yes'
       referral_diet_advice: null
       referral_exercise_advice: 'Yes'

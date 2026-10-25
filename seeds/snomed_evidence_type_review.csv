@@ -25,3 +25,5 @@ snomed_code,evidence_type,basis
 286321000000102,advised,National exercise intervention advice applies despite its moderate activity wording
 226074007,completed,Food frequency questionnaire records a dietary intake assessment procedure
 170752001,completed,Reviewed has seen dietitian code records attended contact despite its finding tag
+439140001,advised,Exercise leaflet in a retained weight list keeps its exercise subject outside EXERCISEINT_COD
+913431000000101,advised,Chair based exercise education keeps its exercise subject outside EXERCISEINT_COD
