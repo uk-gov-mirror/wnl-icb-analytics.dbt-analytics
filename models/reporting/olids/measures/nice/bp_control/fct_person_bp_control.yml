@@ -1,20 +1,21 @@
 models:
   - name: fct_person_bp_control
     description: >-
-      Blood pressure control, monitoring and blood pressure categories based on NICE NG136. One
-      row per person in the existing BP-reading population with an applicable target. Control uses
-      independent context minima on the latest eligible day, including invalid-only days.
-      Clinic readings, daytime or waking ABPM averages and home averages qualify. People
-      without eligible evidence remain present and do not meet control targets.
+      Blood pressure control, monitoring and blood pressure categories based on NICE NG136. One row
+      per person in the existing BP-reading population with an applicable target. Control uses
+      independent context minima on the latest eligible day, including invalid-only days. Clinic
+      readings qualify. Home averages take priority over self-reported or unspecified home readings
+      on the same date. Daytime or waking ABPM averages take priority, followed by unspecified and
+      24-hour ABPM. Night-time, interval, minimum and maximum ABPM codes are excluded before
+      pairing. People without eligible evidence remain present and do not meet control targets.
 
-
-      Targets use current age, type 2 diabetes and kidney disease. Under 80, the clinic target
-      is below 140/90 mmHg, or below 130/80 with kidney disease and urine albumin-to-creatinine
-      ratio at least 70 mg/mmol; at 80 or over it is below 150/90. Home and ambulatory targets
-      are 5 mmHg lower. Both components must be below target. Monitoring is annual for listed
-      long-term conditions, every 5 years for other people aged 40 or over, and not routinely
-      recommended below 40. Blood pressure categories use the higher component and measurement
-      type. Based on NICE NG136.
+      Targets use current age, type 2 diabetes and kidney disease. Under 80, the clinic target is
+      below 140/90 mmHg, or below 130/80 with kidney disease and urine albumin-to-creatinine ratio
+      at least 70 mg/mmol; at 80 or over it is below 150/90. Home and ambulatory targets are 5 mmHg
+      lower. Both components must be below target. Monitoring is annual for listed long-term
+      conditions, every 5 years for other people aged 40 or over, and not routinely recommended
+      below 40. Blood pressure categories use the higher component and measurement type. Based on
+      NICE NG136.
     config:
       meta:
         owner:
@@ -131,9 +132,9 @@ models:
       - name: latest_diastolic_value
         description: "Independent minimum valid diastolic in mmHg within the selected date and context. May come from a different reading to systolic. Invalid-only dates retain the latest complete reading. Null when absent."
       - name: is_home_bp_event
-        description: "Whether the selected daily minima use eligible home averages."
+        description: "Whether the selected daily minima use home evidence, with an average preferred on that date."
       - name: is_abpm_bp_event
-        description: "Whether the selected daily minima use eligible daytime or waking ABPM averages."
+        description: "Whether the selected daily minima use ABPM, preferring daytime, then unspecified, then 24-hour averages."
       - name: age
         description: "Current age in completed years, calculated from the approximate birth date."
         

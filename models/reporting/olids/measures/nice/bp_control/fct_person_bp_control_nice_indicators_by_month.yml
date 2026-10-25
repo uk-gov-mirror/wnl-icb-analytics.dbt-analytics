@@ -6,10 +6,11 @@ models:
     IND246. Each indicator has its own denominator, measurement window and exclusions. Supporting
     evidence accompanies the achievement status. No personalised care adjustments are applied.
     Recalculated for each of the last 60 month-ends with current rules, code lists and records, so
-    later corrections can change past months. Control evidence includes clinic readings, daytime or
-    waking ABPM averages and home averages only. Other monitoring evidence is excluded before
-    pairing and daily minima. Daily components use independent minima within each context on the
-    latest eligible date; either context can meet its own target.
+    later corrections can change past months. Clinic readings qualify. Home averages take priority
+    over self-reported or unspecified home readings on the same date. Daytime or waking ABPM
+    averages take priority, followed by unspecified and 24-hour ABPM. Night-time, interval, minimum
+    and maximum ABPM codes are excluded before pairing. Daily components use independent minima
+    within each context on the latest eligible date; either context can meet its own target.
   config:
     meta:
       owner:
@@ -53,9 +54,9 @@ models:
   - name: latest_diastolic_value
     description: "Independent minimum valid diastolic in mmHg within the selected date and context. May come from a different reading to systolic. Invalid-only dates retain the latest complete reading. Null when absent."
   - name: is_home_bp_event
-    description: "Whether the selected daily minima use eligible home averages."
+    description: "Whether the selected daily minima use home evidence, with an average preferred on that date."
   - name: is_abpm_bp_event
-    description: "Whether the selected daily minima use eligible daytime or waking ABPM averages."
+    description: "Whether the selected daily minima use ABPM, preferring daytime, then unspecified, then 24-hour averages."
   - name: applied_measurement_context
     description: "CLINIC or HBPM_ABPM for the selected context. On the latest eligible date a context meeting this indicator target takes priority. Otherwise prefer valid clinic, home, then ambulatory evidence."
   - name: indicator_systolic_threshold

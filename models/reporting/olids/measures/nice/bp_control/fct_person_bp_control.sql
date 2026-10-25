@@ -8,8 +8,9 @@
 -- Applies patient-specific NG136 BP targets with priority ranking (most stringent first).
 -- Targets come from the bp_thresholds seed, which holds both CLINIC and HBPM_ABPM
 -- variants for each TARGET_UPPER rule (HBPM_ABPM is clinic -5 mmHg per NG136 rec 1.4.22).
--- Eligible clinic readings, daytime ABPM averages and home averages use daily
--- context minima. A context passing its own target wins on the latest eligible day.
+-- Eligible BP readings use daily context minima, with monitoring priorities
+-- defined in int_nice_blood_pressure_daily_by_context. A passing context wins
+-- on the latest eligible day.
 -- Also produces NG136 hypertension staging using the measurement-appropriate thresholds.
 
 -- One row per person in the existing BP population after target-aware context selection.

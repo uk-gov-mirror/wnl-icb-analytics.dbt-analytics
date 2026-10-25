@@ -1,11 +1,17 @@
 models:
 - name: int_nice_blood_pressure_daily_by_context
-  description: Blood pressure control minima, one row per person, clinical date and measurement context.
-    Includes all people with complete numeric evidence through the build date. Independent minima use
-    valid readings within each clinic, home or ambulatory context. This local NDA-consistent rule can
-    combine components from different readings. Validity requires systolic 40 to 350 mmHg, diastolic 20
-    to 200 mmHg, inclusive, and systolic above diastolic. Invalid-only dates remain. Control evidence includes clinic readings, daytime or waking ABPM averages and home averages only. Other monitoring evidence is excluded before pairing and daily minima. Recording-only
-    indicators and LTC LCS do not use this model.
+  description: Blood pressure control minima, one row per person, clinical date and measurement
+    context. Includes all people with eligible complete numeric evidence through the build date.
+    Independent minima use valid readings within each clinic, home or ambulatory context. This local
+    NDA-consistent rule can combine components from different readings. Validity requires systolic
+    40 to 350 mmHg, diastolic 20 to 200 mmHg, inclusive, and systolic above diastolic. Invalid-only
+    dates remain. Clinic readings qualify. Home averages take priority over self-reported or
+    unspecified home readings on the same date. Daytime or waking ABPM averages take priority,
+    followed by unspecified and 24-hour ABPM. Night-time, interval, minimum and maximum ABPM codes
+    are excluded before pairing. Recording-only indicators and LTC LCS do not use this model. A
+    recorded home average blocks single home readings even when that average is invalid. ABPM
+    preference is applied among complete readings, with valid evidence preferred before daytime,
+    unspecified and 24-hour priority.
   config:
     meta:
       owner:
@@ -126,16 +132,22 @@ unit_tests:
           (-14414, '2026-08-01', 'SYN_SELF', 'SYN_SELFD', '2026-08-03', 80, FALSE, TRUE, 'HOME', 'HOME_SELF_REPORTED'),
           (-14415, '2026-08-01', 'SYN_DAY_OLD', 'SYN_DAY_OLDS', '2026-08-03', 150, TRUE, FALSE, 'ABPM', 'ABPM_DAY'),
           (-14415, '2026-08-01', 'SYN_DAY_OLD', 'SYN_DAY_OLDD', '2026-08-03', 95, FALSE, TRUE, 'ABPM', 'ABPM_DAY'),
-          (-14415, '2026-08-02', 'SYN_24_NEW', 'SYN_24_NEWS', '2026-08-03', 120, TRUE, FALSE, 'ABPM', 'ABPM_24H'),
-          (-14415, '2026-08-02', 'SYN_24_NEW', 'SYN_24_NEWD', '2026-08-03', 70, FALSE, TRUE, 'ABPM', 'ABPM_24H'),
-          (-14416, '2026-08-01', 'SYN_EXCLUDE_14416', 'SYN_EXCLUDE_14416S', '2026-08-03', 120, TRUE, FALSE, 'ABPM', 'ABPM_24H'),
-          (-14416, '2026-08-01', 'SYN_EXCLUDE_14416', 'SYN_EXCLUDE_14416D', '2026-08-03', 70, FALSE, TRUE, 'ABPM', 'ABPM_24H'),
-          (-14417, '2026-08-01', 'SYN_EXCLUDE_14417', 'SYN_EXCLUDE_14417S', '2026-08-03', 120, TRUE, FALSE, 'ABPM', 'ABPM_UNSPECIFIED'),
-          (-14417, '2026-08-01', 'SYN_EXCLUDE_14417', 'SYN_EXCLUDE_14417D', '2026-08-03', 70, FALSE, TRUE, 'ABPM', 'ABPM_UNSPECIFIED'),
-          (-14418, '2026-08-01', 'SYN_EXCLUDE_14418', 'SYN_EXCLUDE_14418S', '2026-08-03', 120, TRUE, FALSE, 'HOME', 'HOME_SELF_REPORTED'),
-          (-14418, '2026-08-01', 'SYN_EXCLUDE_14418', 'SYN_EXCLUDE_14418D', '2026-08-03', 70, FALSE, TRUE, 'HOME', 'HOME_SELF_REPORTED'),
-          (-14419, '2026-08-01', 'SYN_EXCLUDE_14419', 'SYN_EXCLUDE_14419S', '2026-08-03', 120, TRUE, FALSE, 'HOME', 'HOME_UNSPECIFIED'),
-          (-14419, '2026-08-01', 'SYN_EXCLUDE_14419', 'SYN_EXCLUDE_14419D', '2026-08-03', 70, FALSE, TRUE, 'HOME', 'HOME_UNSPECIFIED')
+          (-14415, '2026-08-02', 'SYN_24_FALLBACK', 'SYN_24_FALLBACKS', '2026-08-03', 120, TRUE, FALSE, 'ABPM', 'ABPM_24H'),
+          (-14415, '2026-08-02', 'SYN_24_FALLBACK', 'SYN_24_FALLBACKD', '2026-08-03', 70, FALSE, TRUE, 'ABPM', 'ABPM_24H'),
+          (-14415, '2026-08-01', 'SYN_24_SAME_DAY', 'SYN_24_SAME_DAYS', '2026-08-03', 120, TRUE, FALSE, 'ABPM', 'ABPM_24H'),
+          (-14415, '2026-08-01', 'SYN_24_SAME_DAY', 'SYN_24_SAME_DAYD', '2026-08-03', 70, FALSE, TRUE, 'ABPM', 'ABPM_24H'),
+          (-14416, '2026-08-01', 'SYN_FALLBACK_14416', 'SYN_FALLBACK_14416S', '2026-08-03', 120, TRUE, FALSE, 'ABPM', 'ABPM_24H'),
+          (-14416, '2026-08-01', 'SYN_FALLBACK_14416', 'SYN_FALLBACK_14416D', '2026-08-03', 70, FALSE, TRUE, 'ABPM', 'ABPM_24H'),
+          (-14417, '2026-08-01', 'SYN_FALLBACK_14417', 'SYN_FALLBACK_14417S', '2026-08-03', 120, TRUE, FALSE, 'ABPM', 'ABPM_UNSPECIFIED'),
+          (-14417, '2026-08-01', 'SYN_FALLBACK_14417', 'SYN_FALLBACK_14417D', '2026-08-03', 70, FALSE, TRUE, 'ABPM', 'ABPM_UNSPECIFIED'),
+          (-14418, '2026-08-01', 'SYN_FALLBACK_14418', 'SYN_FALLBACK_14418S', '2026-08-03', 120, TRUE, FALSE, 'HOME', 'HOME_SELF_REPORTED'),
+          (-14418, '2026-08-01', 'SYN_FALLBACK_14418', 'SYN_FALLBACK_14418D', '2026-08-03', 70, FALSE, TRUE, 'HOME', 'HOME_SELF_REPORTED'),
+          (-14419, '2026-08-01', 'SYN_FALLBACK_14419', 'SYN_FALLBACK_14419S', '2026-08-03', 120, TRUE, FALSE, 'HOME', 'HOME_UNSPECIFIED'),
+          (-14419, '2026-08-01', 'SYN_FALLBACK_14419', 'SYN_FALLBACK_14419D', '2026-08-03', 70, FALSE, TRUE, 'HOME', 'HOME_UNSPECIFIED'),
+          (-14420, '2026-08-01', 'SYN_BAD_AVG', 'SYN_BAD_AVGS', '2026-08-03', 100, TRUE, FALSE, 'HOME', 'HOME_AVERAGE'),
+          (-14420, '2026-08-01', 'SYN_BAD_AVG', 'SYN_BAD_AVGD', '2026-08-03', 100, FALSE, TRUE, 'HOME', 'HOME_AVERAGE'),
+          (-14420, '2026-08-01', 'SYN_GOOD_SINGLE', 'SYN_GOOD_SINGLES', '2026-08-03', 120, TRUE, FALSE, 'HOME', 'HOME_SELF_REPORTED'),
+          (-14420, '2026-08-01', 'SYN_GOOD_SINGLE', 'SYN_GOOD_SINGLED', '2026-08-03', 70, FALSE, TRUE, 'HOME', 'HOME_SELF_REPORTED')
   expect:
     rows:
     - person_id: -14401
@@ -234,3 +246,51 @@ unit_tests:
       is_valid_bp: true
       is_home_bp_event: false
       is_abpm_bp_event: true
+    - person_id: -14415
+      reading_date: '2026-08-02'
+      bp_context_group: ABPM
+      systolic_value: 120
+      diastolic_value: 70
+      is_valid_bp: true
+      is_home_bp_event: false
+      is_abpm_bp_event: true
+    - person_id: -14416
+      reading_date: '2026-08-01'
+      bp_context_group: ABPM
+      systolic_value: 120
+      diastolic_value: 70
+      is_valid_bp: true
+      is_home_bp_event: false
+      is_abpm_bp_event: true
+    - person_id: -14417
+      reading_date: '2026-08-01'
+      bp_context_group: ABPM
+      systolic_value: 120
+      diastolic_value: 70
+      is_valid_bp: true
+      is_home_bp_event: false
+      is_abpm_bp_event: true
+    - person_id: -14418
+      reading_date: '2026-08-01'
+      bp_context_group: HOME
+      systolic_value: 120
+      diastolic_value: 70
+      is_valid_bp: true
+      is_home_bp_event: true
+      is_abpm_bp_event: false
+    - person_id: -14419
+      reading_date: '2026-08-01'
+      bp_context_group: HOME
+      systolic_value: 120
+      diastolic_value: 70
+      is_valid_bp: true
+      is_home_bp_event: true
+      is_abpm_bp_event: false
+    - person_id: -14420
+      reading_date: '2026-08-01'
+      bp_context_group: HOME
+      systolic_value: 100
+      diastolic_value: 100
+      is_valid_bp: false
+      is_home_bp_event: true
+      is_abpm_bp_event: false

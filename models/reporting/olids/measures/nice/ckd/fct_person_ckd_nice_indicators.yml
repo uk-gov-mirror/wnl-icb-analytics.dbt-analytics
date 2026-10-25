@@ -279,9 +279,11 @@ models:
       adjustments are applied. Based on NICE NG203. Code lists: CKD_COD, CKD1AND2_COD, CKDRES_COD,
       NDAALB_COD (PCD); BP_COD, SYSBP_COD, DIASBP_COD, HOMEAMBBP_COD, HOMEBP_COD, ABPM_COD (PCD). At
       the latest eligible date, any clinic, home or ambulatory context can meet its own strict NICE
-      target. Daily components use independent minima within each context. Control evidence includes
-      clinic readings, daytime or waking ABPM averages and home averages only. Other monitoring
-      evidence is excluded before pairing and daily minima. This is a local rule.
+      target. Daily components use independent minima within each context. Clinic readings qualify.
+      Home averages take priority over self-reported or unspecified home readings on the same date.
+      Daytime or waking ABPM averages take priority, followed by unspecified and 24-hour ABPM.
+      Night-time, interval, minimum and maximum ABPM codes are excluded before pairing. This is a
+      local rule.
     config:
       meta:
         owner:
@@ -380,9 +382,11 @@ models:
       adjustments are applied. Based on NICE NG203. Code lists: CKD_COD, CKD1AND2_COD, CKDRES_COD,
       NDAALB_COD (PCD); BP_COD, SYSBP_COD, DIASBP_COD, HOMEAMBBP_COD, HOMEBP_COD, ABPM_COD (PCD). At
       the latest eligible date, any clinic, home or ambulatory context can meet its own strict NICE
-      target. Daily components use independent minima within each context. Control evidence includes
-      clinic readings, daytime or waking ABPM averages and home averages only. Other monitoring
-      evidence is excluded before pairing and daily minima. This is a local rule.
+      target. Daily components use independent minima within each context. Clinic readings qualify.
+      Home averages take priority over self-reported or unspecified home readings on the same date.
+      Daytime or waking ABPM averages take priority, followed by unspecified and 24-hour ABPM.
+      Night-time, interval, minimum and maximum ABPM codes are excluded before pairing. This is a
+      local rule.
     config:
       meta:
         owner:

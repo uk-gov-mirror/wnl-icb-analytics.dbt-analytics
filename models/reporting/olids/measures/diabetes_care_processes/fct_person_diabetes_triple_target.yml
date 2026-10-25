@@ -1,14 +1,16 @@
 models:
   - name: fct_person_diabetes_triple_target
     description: >-
-      Diabetes care targets for current OLIDS diabetes-register members, one row per
-      person. Targets are HbA1c at or below 58 mmol/mol, blood pressure below 130/80
-      mmHg using the local target, and total cholesterol below 5 mmol/L. Uses the
-      latest HbA1c and cholesterol measurements, with separate 12-month recency flags. BP uses
-      independent context minima on the latest eligible day, including invalid-only days.
-      Clinic readings, daytime or waking ABPM averages and home averages qualify. The local
-      BP target remains below 130/80 mmHg in every context. Target
-      achievement does not require recency, and missing values do not meet the target.
+      Diabetes care targets for current OLIDS diabetes-register members, one row per person. Targets
+      are HbA1c at or below 58 mmol/mol, blood pressure below 130/80 mmHg using the local target,
+      and total cholesterol below 5 mmol/L. Uses the latest HbA1c and cholesterol measurements, with
+      separate 12-month recency flags. BP uses independent context minima on the latest eligible
+      day, including invalid-only days. Clinic readings qualify. Home averages take priority over
+      self-reported or unspecified home readings on the same date. Daytime or waking ABPM averages
+      take priority, followed by unspecified and 24-hour ABPM. Night-time, interval, minimum and
+      maximum ABPM codes are excluded before pairing. The local BP target remains below 130/80 mmHg
+      in every context. Target achievement does not require recency, and missing values do not meet
+      the target.
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:

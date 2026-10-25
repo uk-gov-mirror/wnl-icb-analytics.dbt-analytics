@@ -50,8 +50,8 @@ DIMENSIONS(
     -- Indicator evidence and status
     indicators.latest_bp_date AS latest_bp_date COMMENT = 'Latest eligible control date, including invalid-only evidence; null when absent',
     indicators.applied_measurement_context AS applied_measurement_context WITH SYNONYMS = ('BP setting', 'clinic or home') COMMENT = 'CLINIC or HBPM_ABPM context used for the indicator threshold',
-    indicators.is_home_bp_event AS is_home_bp_event COMMENT = 'Selected latest-day context uses home averages',
-    indicators.is_abpm_bp_event AS is_abpm_bp_event COMMENT = 'Selected latest-day context uses daytime or waking ABPM averages',
+    indicators.is_home_bp_event AS is_home_bp_event COMMENT = 'Selected latest-day context uses home evidence, preferring an average on that date',
+    indicators.is_abpm_bp_event AS is_abpm_bp_event COMMENT = 'Selected latest-day context uses ABPM, preferring daytime, then unspecified, then 24-hour averages',
     indicators.is_in_denominator AS is_in_denominator COMMENT = 'Person is in the indicator denominator before personalised care adjustments; always TRUE on these rows',
     indicators.is_bp_recorded_in_last_12m AS is_bp_recorded_in_last_12m COMMENT = 'Latest BP was recorded in the 12 months up to the reporting date',
     indicators.is_latest_bp_within_indicator_target AS is_latest_bp_within_indicator_target COMMENT = 'Latest BP is below both indicator thresholds, regardless of recording date',

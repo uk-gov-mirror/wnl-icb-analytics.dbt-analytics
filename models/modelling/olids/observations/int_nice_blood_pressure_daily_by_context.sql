@@ -12,11 +12,20 @@ WITH reading_rows AS (
         date_recorded,
         result_value,
         is_systolic_row,
-        is_diastolic_row
+        is_diastolic_row,
+        CASE bp_context
+            WHEN 'ABPM_DAY' THEN 1
+            WHEN 'ABPM_24H' THEN 3
+            ELSE 2
+        END AS monitoring_priority
     FROM {{ ref('int_blood_pressure_observations_base') }}
     WHERE effective_date::DATE <= CURRENT_DATE()
-        -- NG136 monitoring uses waking-hours averages, not interval extremes.
-        AND (bp_context_group = 'CLINIC' OR bp_context IN ('ABPM_DAY', 'HOME_AVERAGE'))
+        AND bp_context NOT IN ('ABPM_NIGHT', 'ABPM_MIN_MAX')
+    -- Single home readings must not lower a recorded average on the same date.
+    QUALIFY bp_context_group <> 'HOME' OR bp_context = 'HOME_AVERAGE'
+        OR COUNT_IF(bp_context = 'HOME_AVERAGE') OVER (
+            PARTITION BY person_id, effective_date::DATE, bp_context_group
+        ) = 0
 ),
 
 complete_readings AS (
@@ -25,6 +34,7 @@ complete_readings AS (
         reading_date,
         bp_context_group,
         reading_id,
+        monitoring_priority,
         CASE WHEN STARTSWITH(reading_id, 'NOPARENT:') THEN COALESCE(
             MIN(IFF(is_systolic_row AND result_value BETWEEN 40 AND 350, result_value, NULL)),
             MAX(IFF(is_systolic_row, result_value, NULL)))
@@ -36,7 +46,7 @@ complete_readings AS (
         MAX(date_recorded) AS date_recorded,
         MAX(observation_id) AS observation_id
     FROM reading_rows
-    GROUP BY person_id, reading_date, bp_context_group, reading_id
+    GROUP BY person_id, reading_date, bp_context_group, reading_id, monitoring_priority
     HAVING systolic_value IS NOT NULL AND diastolic_value IS NOT NULL
 ),
 
@@ -53,7 +63,7 @@ preferred_readings AS (
     FROM assessed
     QUALIFY DENSE_RANK() OVER (
         PARTITION BY person_id, reading_date, bp_context_group
-        ORDER BY is_valid_bp DESC
+        ORDER BY is_valid_bp DESC, monitoring_priority
     ) = 1
 ),
 
