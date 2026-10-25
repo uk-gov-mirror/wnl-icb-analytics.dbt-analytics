@@ -48,7 +48,7 @@ models:
       - name: bnf_name
         description: 'BNF classification name'
       - name: corticosteroid_type
-        description: 'dm+d class: MINERALOCORTICOID for fludrocortisone, GLUCOCORTICOID for other known VTMs, UNKNOWN when no VTM is available.'
+        description: 'dm+d class: MINERALOCORTICOID for fludrocortisone, GLUCOCORTICOID for other known VTMs, UNKNOWN when no VTM is available. Equal to corticosteroid_type_dmd.'
       - name: is_anti_inflammatory
         description: 'dm+d glucocorticoid product for C-LTCS course evidence, not prescribed indication. False for fludrocortisone; null when no VTM is available.'
       - name: is_mineralocorticoid
@@ -63,5 +63,5 @@ models:
         description: Order dated after the build date; kept as source evidence, never recent.
       - name: corticosteroid_type_dmd
         description: >-
-          MINERALOCORTICOID for current or previous fludrocortisone VTM, GLUCOCORTICOID for other
-          known VTMs, UNKNOWN when no VTM is available.
+          Equal to corticosteroid_type. Retained name for the dm+d class, including UNKNOWN when
+          no VTM is available.

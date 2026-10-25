@@ -79,8 +79,8 @@ models:
       date. Recorded taken-treatment evidence is separate.
   - name: latest_anticoagulant_type
     description: >-
-      DOAC or VKA from national refsets for the selected oral anticoagulant order. Null when
-      no order is recorded or its product is missing from the lists. The highest order id
+      DOAC or VKA for the selected oral anticoagulant order, using national membership then
+      the retained BNF chemical. Null when no order is recorded. The highest order id
       wins ties on the same order date.
   - name: latest_doac_order_date
     description: >-
