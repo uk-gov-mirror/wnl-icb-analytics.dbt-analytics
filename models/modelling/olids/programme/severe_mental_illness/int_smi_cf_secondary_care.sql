@@ -111,7 +111,7 @@ WHEN ws.ward_site_code in ('A1D5T','A1X5K') AND ws.ward_code <> 'FXAvew' THEN 'C
 WHEN ws.ward_site_code = 'A1D5T' and ws.ward_code in ('FXAvew') THEN 'Avesbury'
 WHEN ws.ward_site_code is null and ws.ward_code = 'CumbriaFX' THEN 'Chase Farm'
 WHEN ws.ward_site_code is null and ws.ward_code = 'HCPH' THEN 'Haringey'
-ELSE 'Unknown' END AS site_name
+ELSE 'Unknown' END::VARCHAR(10) AS site_name
     ,sp.admitted_at
     ,ws.ward_stay_started_at
     ,DATE(sp.admission_date) as spell_start_date
