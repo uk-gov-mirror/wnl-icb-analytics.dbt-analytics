@@ -23,9 +23,13 @@ models:
               - end_date
     columns:
       - name: observation_id
-        description: Source observation selected within the existing evidence grain.
+        description: >-
+          Source observation selected within the existing evidence grain. Months stored
+          before this change have nulls until the history full refresh backfills them.
       - name: date_recorded
-        description: EMIS save time of that observation; null when unavailable.
+        description: >-
+          EMIS save time of that observation; null when unavailable. Months stored
+          before this change have nulls until the history full refresh backfills them.
       - name: evidence_id
         description: Identifier derived from the current eFI2 evidence grain.
         data_tests:

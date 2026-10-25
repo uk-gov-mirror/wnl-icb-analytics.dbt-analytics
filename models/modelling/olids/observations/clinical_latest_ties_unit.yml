@@ -1358,3 +1358,61 @@ unit_tests:
   overrides:
     macros:
       get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id WHERE FALSE
+
+- name: exercise_assessment_retains_decline_membership_before_save_time
+  model: int_exercise_assessment
+  given: []
+  overrides:
+    macros:
+      get_observations: |-
+        SELECT column1::VARCHAR AS id, column2::NUMBER AS person_id,
+            '2024-03-01'::TIMESTAMP_NTZ AS clinical_effective_date,
+            column3::TIMESTAMP_NTZ AS date_recorded, column4::VARCHAR AS cluster_id,
+            'SYN_DECLINE'::VARCHAR AS mapped_concept_code,
+            'Synthetic decline'::VARCHAR AS mapped_concept_display,
+            NULL::FLOAT AS result_value, NULL::VARCHAR AS result_unit_display
+        FROM VALUES
+            ('SYN_A', -144581, '2024-03-02', 'EXERASSDEC_COD'),
+            ('SYN_A', -144581, '2024-03-02', 'EXERASS_COD'),
+            ('SYN_A', -144581, '2024-03-02', 'SMI_LONGER_LIVES_EXERCISE_ASSESSMENT'),
+            ('SYN_A', -144582, NULL, 'EXERASSDEC_COD'),
+            ('SYN_Z', -144582, '2024-03-03', 'EXERASS_COD'),
+            ('SYN_A', -144583, '2024-03-02', 'EXERASSDEC_COD'),
+            ('SYN_Z', -144583, '2024-03-02', 'EXERASSDEC_COD'),
+            ('SYN_A', -144584, '2024-03-03', 'EXERASSDEC_COD'),
+            ('SYN_Z', -144584, '2024-03-02', 'EXERASSDEC_COD')
+  expect:
+    rows:
+    - {person_id: -144581, observation_id: SYN_A, source_cluster_id: EXERASSDEC_COD, low_exercise_flag: Declined}
+    - {person_id: -144582, observation_id: SYN_A, source_cluster_id: EXERASSDEC_COD, low_exercise_flag: Declined}
+    - {person_id: -144583, observation_id: SYN_Z, source_cluster_id: EXERASSDEC_COD, low_exercise_flag: Declined}
+    - {person_id: -144584, observation_id: SYN_A, source_cluster_id: EXERASSDEC_COD, low_exercise_flag: Declined}
+
+- name: nutrition_review_retains_decline_membership_before_save_time
+  model: int_nutrition_review
+  given: []
+  overrides:
+    macros:
+      get_observations: |-
+        SELECT column1::VARCHAR AS id, column2::NUMBER AS person_id,
+            '2024-03-01'::TIMESTAMP_NTZ AS clinical_effective_date,
+            column3::TIMESTAMP_NTZ AS date_recorded, column4::VARCHAR AS cluster_id,
+            'SYN_DECLINE'::VARCHAR AS mapped_concept_code,
+            'Synthetic decline'::VARCHAR AS mapped_concept_display,
+            NULL::FLOAT AS result_value, NULL::VARCHAR AS result_unit_display
+        FROM VALUES
+            ('SYN_A', -144581, '2024-03-02', 'NUTRIASSDEC_COD'),
+            ('SYN_A', -144581, '2024-03-02', 'NUTRIASS_COD'),
+            ('SYN_A', -144581, '2024-03-02', 'SMI_LONGER_LIVES_NUTRITION_ACTIVITY'),
+            ('SYN_A', -144582, NULL, 'NUTRIASSDEC_COD'),
+            ('SYN_Z', -144582, '2024-03-03', 'NUTRIASS_COD'),
+            ('SYN_A', -144583, '2024-03-02', 'NUTRIASSDEC_COD'),
+            ('SYN_Z', -144583, '2024-03-02', 'NUTRIASSDEC_COD'),
+            ('SYN_A', -144584, '2024-03-03', 'NUTRIASSDEC_COD'),
+            ('SYN_Z', -144584, '2024-03-02', 'NUTRIASSDEC_COD')
+  expect:
+    rows:
+    - {person_id: -144581, observation_id: SYN_A, source_cluster_id: NUTRIASSDEC_COD, poor_diet_flag: Declined}
+    - {person_id: -144582, observation_id: SYN_A, source_cluster_id: NUTRIASSDEC_COD, poor_diet_flag: Declined}
+    - {person_id: -144583, observation_id: SYN_Z, source_cluster_id: NUTRIASSDEC_COD, poor_diet_flag: Declined}
+    - {person_id: -144584, observation_id: SYN_A, source_cluster_id: NUTRIASSDEC_COD, poor_diet_flag: Declined}

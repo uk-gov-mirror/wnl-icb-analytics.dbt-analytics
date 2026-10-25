@@ -7,8 +7,8 @@ models:
       declined assessments. poor_diet_flag is 'Yes' or 'No' for listed diet concept codes,
       'Declined' for NUTRIASSDEC_COD rows and null otherwise. Observations dated after
       today are excluded. Undated observations are kept with clinical date 1900-01-01.
-      Where duplicates exist one row is kept arbitrarily, so source_cluster_id may name
-      any matching cluster.
+      Overlapping clusters retain decline membership first, then the latest save time
+      and highest ID.
 
     config:
       meta:

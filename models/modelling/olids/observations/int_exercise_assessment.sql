@@ -39,4 +39,8 @@ WHEN source_cluster_id = 'EXERASSDEC_COD' THEN 'Declined'
 ELSE 'Unknown'
 END AS low_exercise_flag
 from EXER
-QUALIFY ROW_NUMBER() OVER (PARTITION BY PERSON_ID, CONCEPT_CODE, CLINICAL_EFFECTIVE_DATE ORDER BY date_recorded DESC NULLS LAST, id DESC, source_cluster_id DESC) = 1
+QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY PERSON_ID, CONCEPT_CODE, CLINICAL_EFFECTIVE_DATE
+    ORDER BY IFF(source_cluster_id = 'EXERASSDEC_COD', 0, 1),
+        date_recorded DESC NULLS LAST, id DESC, source_cluster_id DESC
+) = 1

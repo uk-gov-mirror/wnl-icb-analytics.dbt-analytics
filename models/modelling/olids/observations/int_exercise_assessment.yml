@@ -4,7 +4,8 @@ models:
       Exercise assessments and declined assessments in OLIDS GP records, using
       SMI_LONGER_LIVES_EXERCISE_ASSESSMENT, EXERASS_COD and EXERASSDEC_COD. One row
       per person, concept and clinical date up to the build date. Includes inactive
-      and deceased people, without age or SMI-register restrictions.
+      and deceased people, without age or SMI-register restrictions. Overlapping
+      clusters retain decline membership first, then the latest save time and highest ID.
     config:
       meta:
         owner:

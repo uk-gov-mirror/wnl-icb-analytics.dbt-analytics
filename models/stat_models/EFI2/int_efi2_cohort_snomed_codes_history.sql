@@ -1,3 +1,8 @@
+{#
+    append_new_columns adds observation_id and date_recorded on incremental deploy.
+    Months stored before this change keep nulls in both columns until the history
+    full refresh backfills them. Recent months are rebuilt by the incremental window.
+#}
 {{
     config(
         materialized='incremental',
@@ -34,7 +39,8 @@ codelist AS (
 
 relevant_observations AS (
     -- Match the current cohort's evidence grain before month expansion.
-    -- The hash retains hidden grain fields without carrying them across 60 months.
+    -- The hash replaces the wider codelist grain fields across month-ends.
+    -- Observation ID and save time are retained for the BMI selection tie-break.
     SELECT
         obs.id AS observation_id,
         obs.date_recorded,
