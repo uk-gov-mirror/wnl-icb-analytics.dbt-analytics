@@ -293,6 +293,7 @@ unit_tests:
       get_observations: |
         SELECT column1::VARCHAR id, -201439::NUMBER person_id,
                '2026-01-01'::TIMESTAMP_NTZ clinical_effective_date,
+               '2026-01-01 09:00:00'::TIMESTAMP_NTZ date_recorded,
                column2::VARCHAR result_value, column3::VARCHAR result_unit_code,
                column3::VARCHAR result_unit_display,
                'SYN_CODE'::VARCHAR mapped_concept_code,
