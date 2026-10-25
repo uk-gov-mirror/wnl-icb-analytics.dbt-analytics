@@ -1,6 +1,6 @@
 {{ config(tags=['monthly-full', 'nice-history']) }}
 
-{% set latest = calculate_blood_pressure_control_latest_by_context('by_month') %}
+{% set latest = calculate_nice_blood_pressure_control_latest_by_context('by_month') %}
 {% set latest = latest | replace(nice_blood_pressure_register_population('by_month') | string, 'synthetic_population') %}
 {% set latest = latest | replace(ref('int_blood_pressure_control_daily_by_context') | string, 'synthetic_context') %}
 {% set evidence = nice_blood_pressure_for_target('by_month', 140, 90, 135, 85) %}

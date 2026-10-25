@@ -1,4 +1,4 @@
-{% macro calculate_blood_pressure_control_latest_by_context(reference='current') %}
+{% macro calculate_nice_blood_pressure_control_latest_by_context(reference='current') %}
 {# Latest eligible clinical day across contexts, one person/date/context. #}
 WITH candidates AS (
     SELECT population.person_id, population.reporting_date, context.column1 AS bp_context_group
