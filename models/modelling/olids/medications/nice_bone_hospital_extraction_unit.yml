@@ -65,7 +65,7 @@ unit_tests:
           (-9915, NULL, '2026-01-01', 'Electronic'),
           (-9916, NULL, '2026-01-01', 'Electronic'),
           (-9917, NULL, '2026-01-01', 'Electronic'),
-          (-9918, NULL, '2026-01-01', 'Electronic')
+          (-9918, NULL, '2026-01-01', NULL)
   - input: ref('stg_olids_medication_statement')
     format: sql
     rows: |-
@@ -174,7 +174,7 @@ unit_tests:
       is_authorisation_only: false
       has_administration_evidence: false
       is_oncology_regimen: false
-      is_outside_prescription: false
+      is_outside_prescription: null
     - record_id: '-9921'
       therapy_source: MEDICATION_STATEMENT
       therapy_type: ZOLEDRONIC_ACID

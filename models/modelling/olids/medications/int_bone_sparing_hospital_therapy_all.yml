@@ -53,7 +53,7 @@ models:
   - name: has_administration_evidence
     description: True for a BSA_COD therapy observation. A prescription or authorisation alone does not prove administration.
   - name: is_outside_prescription
-    description: True for an order with an issue method beginning Outside. Null for observations and authorisations.
+    description: True for an order with an issue method beginning Outside. Null for missing issue methods, observations and authorisations.
   - name: unit_dose_strength_mg
     description: dm+d ingredient amount in mg per unit-dose form. Null for therapy codes or unknown product attributes.
   - name: is_oncology_regimen

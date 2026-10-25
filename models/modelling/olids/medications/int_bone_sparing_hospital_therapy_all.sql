@@ -22,7 +22,7 @@ WITH observations AS (
             THEN 'ZOLEDRONIC_ACID' ELSE 'DENOSUMAB' END AS therapy_type,
         'PRESCRIPTION' AS evidence_type, FALSE AS is_authorisation_only,
         FALSE AS has_administration_evidence,
-        COALESCE(source_order.issue_method_description ILIKE 'Outside%', FALSE) AS is_outside_prescription,
+        source_order.issue_method_description ILIKE 'Outside%' AS is_outside_prescription,
         product.unit_dose_strength_mg
     FROM {{ ref('int_bone_sparing_medications_all') }} AS orders
     LEFT JOIN {{ ref('stg_olids_medication_order') }} AS source_order
