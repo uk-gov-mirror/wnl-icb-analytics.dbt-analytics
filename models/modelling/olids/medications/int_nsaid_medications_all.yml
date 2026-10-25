@@ -5,6 +5,8 @@ models:
       moiety identifies coxibs, including withdrawn products in historical orders.
       Meloxicam is not classed as COX-2 selective. QAdmissions uses recency, not COX-2
       classification.
+      Combinations are included only within BNF 100101. Topical NSAIDs outside that
+      prefix are excluded; is_topical is retained as false pending interface approval.
     config:
       meta:
         owner:

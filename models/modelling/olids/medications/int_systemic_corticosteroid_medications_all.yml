@@ -5,6 +5,8 @@ models:
       dm+d therapeutic moiety identifies fludrocortisone as mineralocorticoid. Products do
       not establish replacement or anti-inflammatory indication; legacy indication columns
       remain pending interface approval.
+      Combinations are included only within BNF 0603; corticosteroid ingredients in
+      products outside that section do not qualify them.
     config:
       meta:
         owner:

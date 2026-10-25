@@ -144,13 +144,18 @@ unit_tests:
     format: sql
     rows: |-
       select v.id::varchar id, 'SYN_PAT'::varchar patient_id, -9200::number person_id,
-       current_date()::date clinical_effective_date, '10'::varchar bnf_chapter, '1001'::varchar bnf_section,
+       current_date()::date clinical_effective_date, left(v.bnf,2)::varchar bnf_chapter, left(v.bnf,4)::varchar bnf_section,
        v.bnf::varchar bnf_code, null::varchar bnf_name, null::varchar medication_statement_id,
        null::varchar medication_name, null::timestamp_ntz date_recorded, null::varchar dose,
        null::number quantity_value, null::varchar quantity_unit, null::number duration_days,
        null::number estimated_cost, null::varchar statement_medication_name,
        v.code::varchar mapped_concept_code, null::varchar mapped_concept_display
-       from (values ('SYN_ONE','SYN_ONE','100101SYN'),('SYN_TWO','SYN_TWO','100101SYN'),('SYN_THREE','SYN_THREE','100101SYN'),('SYN_FOUR','SYN_FOUR','100101SYN')) v(id,code,bnf)
+       from (values ('SYN_ONE','SYN_ONE','100101SYN'),('SYN_TWO','SYN_TWO','1001010ASYN'),
+       ('SYN_THREE','SYN_THREE','100101SYN'),('SYN_FOUR','SYN_FOUR','100101SYN'),
+       ('SYN_IBUPROFEN_LYSINE','SYN_IBUPROFEN_LYSINE','1001010ASYN'),
+       ('SYN_DICLOFENAC','SYN_DICLOFENAC','1001010ASYN'),
+       ('SYN_TOPICAL','SYN_TOPICAL','130601SYN'),
+       ('SYN_OTHER_RHEUM','SYN_OTHER_RHEUM','100103SYN')) v(id,code,bnf)
   - input: ref('stg_olids_patient')
     format: sql
     rows: select 'SYN_PAT'::varchar id,-9200::number person_id,null::number sk_patient_id
@@ -158,29 +163,45 @@ unit_tests:
     format: sql
     rows: >-
       select code::varchar product_code,vtm::varchar vtm_id from (values
-      ('SYN_ONE','775123001'),('SYN_TWO','SYN_MELOXICAM'),('SYN_FOUR','370187009')) v(code,vtm)
+      ('SYN_ONE','775123001'),('SYN_TWO','SYN_MELOXICAM'),('SYN_FOUR','370187009'),
+      ('SYN_IBUPROFEN_LYSINE','SYN_IBUPROFEN_LYSINE'),
+      ('SYN_DICLOFENAC','SYN_DICLOFENAC')) v(code,vtm)
   expect:
     rows:
     - medication_order_id: SYN_ONE
+      is_topical: false
       is_non_selective: false
       nsaid_type: COX2_SELECTIVE
       is_cox2_selective: true
     - medication_order_id: SYN_TWO
+      is_topical: false
       is_non_selective: true
       nsaid_type: NON_SELECTIVE
       is_cox2_selective: false
     - medication_order_id: SYN_THREE
+      is_topical: false
       is_non_selective: null
       nsaid_type: OTHER_NSAID
       is_cox2_selective: null
     - medication_order_id: SYN_FOUR
+      is_topical: false
       nsaid_type: COX2_SELECTIVE
       is_cox2_selective: true
       is_non_selective: false
+    - medication_order_id: SYN_IBUPROFEN_LYSINE
+      is_topical: false
+      nsaid_type: NON_SELECTIVE
+      is_cox2_selective: false
+      is_non_selective: true
+    - medication_order_id: SYN_DICLOFENAC
+      is_topical: false
+      nsaid_type: NON_SELECTIVE
+      is_cox2_selective: false
+      is_non_selective: true
   overrides:
     macros:
       get_empty_subquery_sql: >-
-        select null::varchar medication_order_id,null::boolean is_non_selective,null::varchar nsaid_type,null::boolean
+        select null::varchar medication_order_id,null::boolean is_topical,null::boolean is_non_selective,null::varchar nsaid_type,null::boolean
         is_cox2_selective where false
 - name: ics_combination_by_ingredient_count
   model: int_inhaled_corticosteroid_medications_all
@@ -240,7 +261,8 @@ unit_tests:
        null::number quantity_value, null::varchar quantity_unit, null::number duration_days,
        null::number estimated_cost, null::varchar statement_medication_name,
        v.code::varchar mapped_concept_code, null::varchar mapped_concept_display
-       from (values ('SYN_ONE','SYN_ONE','060302SYN'),('SYN_TWO','SYN_TWO','060302SYN'),('SYN_THREE','SYN_THREE','060302SYN')) v(id,code,bnf)
+       from (values ('SYN_ONE','SYN_ONE','060301SYN'),('SYN_TWO','SYN_TWO','060302SYN'),
+       ('SYN_THREE','SYN_THREE','060302SYN'),('SYN_PREVIOUS','SYN_PREVIOUS','060301SYN')) v(id,code,bnf)
   - input: ref('stg_olids_patient')
     format: sql
     rows: select 'SYN_PAT'::varchar id,-9200::number person_id,null::number sk_patient_id
@@ -248,7 +270,7 @@ unit_tests:
     format: sql
     rows: >-
       select code::varchar product_code,vtm::varchar vtm_id from (values
-      ('SYN_ONE','775983003'),('SYN_TWO','SYN_PREDNISOLONE')) v(code,vtm)
+      ('SYN_ONE','775983003'),('SYN_TWO','SYN_PREDNISOLONE'),('SYN_PREVIOUS','89192008')) v(code,vtm)
   expect:
     rows:
     - medication_order_id: SYN_ONE
@@ -260,6 +282,9 @@ unit_tests:
     - medication_order_id: SYN_THREE
       corticosteroid_type_dmd: UNKNOWN
       is_mineralocorticoid: null
+    - medication_order_id: SYN_PREVIOUS
+      corticosteroid_type_dmd: MINERALOCORTICOID
+      is_mineralocorticoid: true
   overrides:
     macros:
       get_empty_subquery_sql: >-

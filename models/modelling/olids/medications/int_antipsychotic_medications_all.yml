@@ -6,6 +6,8 @@ models:
       inactive and deceased people. Order dates cannot exceed the latest medication-feed
       transformation timestamp. An order does not establish an SMI diagnosis or confirm
       that the medicine was taken.
+      Combinations are included only within these BNF paragraphs. National
+      ANTIPSYDRUG_COD selection awaits agreement because that list excludes depots.
     config:
       meta:
         owner:

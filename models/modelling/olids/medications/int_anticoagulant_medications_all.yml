@@ -5,6 +5,8 @@ models:
       membership and category labels remain pending interface approval. National DOAC and
       vitamin K antagonist refsets identify supported products; heparins and INR test
       strips are not included in those lists.
+      Combinations are included only within BNF 020802; a component alone does not
+      qualify a product outside that prefix.
     config:
       meta:
         owner:
