@@ -14,7 +14,7 @@ with codes as (
         max(iff(r.type_id = 408730004, r.destination_id::varchar, null)) as procedure_context,
         count(distinct iff(r.type_id = 408730004, r.destination_id, null)) as procedure_context_count,
         boolor_agg(r.type_id = 408732007 and r.destination_id <> 410604004) as other_subject,
-        boolor_agg(r.type_id = 408731000 and r.destination_id not in (410511007, 410512000, 410513005)) as non_actual_time
+        boolor_agg(r.type_id = 408731000 and r.destination_id not in (410511007, 410512000, 410513005)) as unsupported_time_context
     from {{ ref('stg_nhsd_snomed_sct_relationship') }} as r
     inner join codes on r.source_id::varchar = codes.snomed_code
     where r.active and r.characteristic_type_id = 900000000000011006
@@ -27,20 +27,20 @@ with codes as (
         regexp_substr(c.fully_specified_name, '\\(([^()]*)\\)$', 1, 1, 'e', 1) as semantic_tag,
         context.procedure_context, context.procedure_context_count,
         coalesce(context.other_subject, false) as other_subject,
-        coalesce(context.non_actual_time, false) as non_actual_time
+        coalesce(context.unsupported_time_context, false) as unsupported_time_context
     from codes
     left join {{ ref('snomed_concept') }} as c using (snomed_code)
     left join context using (snomed_code)
 ), classified as (
     select *, wording like '%offered%' as is_offer,
         case
-            when other_subject or non_actual_time or procedure_context_count > 1 then null
-            when procedure_context not in ('443390004', '385644000', '385658003', '385652002') then null
+            when other_subject or unsupported_time_context or procedure_context_count > 1 then null
+            when procedure_context not in ('443390004', '385644000', '397943006', '385658003', '385652002') then null
             when regexp_like(wording, '.*(not done|not performed|cancelled|canceled|not indicated|contraindicat).*') then null
             when procedure_context = '443390004' or regexp_like(wording, '.*(declined|refused).*') then 'declined'
             when regexp_like(wording, '.*(invitation|invited|labeling amended|labelling amended|synchronization|synchronisation).*') then 'administrative'
             when regexp_like(wording, '.*(offered|requested|awaited|planned|referral|referred|refer to).*')
-                or procedure_context in ('385644000') then 'requested_or_referred'
+                or procedure_context in ('385644000', '397943006') then 'requested_or_referred'
             when regexp_like(wording, '.*(advi[cs]|education|educated|counsel|recommendation|discuss|leaflet|written information|signpost|health promotion).*') then 'advised'
             when procedure_context in ('385658003', '385652002') then 'completed'
             when regexp_like(wording, '.*(seen by|seen in|has seen|completed| done|commenced| started).*') then 'completed'

@@ -54,7 +54,7 @@ unit_tests:
       code_description: Referral to exercise offered (finding)
     - cluster_id: WTMGINT_COD
       code: '-990016'
-      code_description: Synthetic review (situation)
+      code_description: Synthetic review completed (situation)
     - cluster_id: WTMGINT_COD
       code: '-990017'
       code_description: Seen by dietitian (situation)
@@ -72,6 +72,9 @@ unit_tests:
       code_description: Synthetic review not performed (procedure)
     - cluster_id: WTMGINT_COD
       code: '-991002'
+      code_description: Synthetic review completed (situation)
+    - cluster_id: WTMGINT_COD
+      code: '-991003'
       code_description: Synthetic review completed (situation)
   - input: ref('snomed_concept')
     rows:
@@ -108,7 +111,7 @@ unit_tests:
     - snomed_code: '-990015'
       fully_specified_name: Referral to exercise offered (finding)
     - snomed_code: '-990016'
-      fully_specified_name: Synthetic review (situation)
+      fully_specified_name: Synthetic review completed (situation)
     - snomed_code: '-990017'
       fully_specified_name: Seen by dietitian (situation)
     - snomed_code: '-990018'
@@ -120,6 +123,8 @@ unit_tests:
     - snomed_code: '-991001'
       fully_specified_name: Synthetic review not performed (procedure)
     - snomed_code: '-991002'
+      fully_specified_name: Synthetic review completed (situation)
+    - snomed_code: '-991003'
       fully_specified_name: Synthetic review completed (situation)
   - input: ref('stg_nhsd_snomed_sct_relationship')
     rows:
@@ -139,8 +144,8 @@ unit_tests:
       active: true
       characteristic_type_id: 900000000000011006
     - source_id: -990016
-      type_id: 408731000
-      destination_id: 410515003
+      type_id: 408730004
+      destination_id: 397943006
       active: true
       characteristic_type_id: 900000000000011006
     - source_id: -990017
@@ -166,6 +171,11 @@ unit_tests:
     - source_id: -991002
       type_id: 408730004
       destination_id: 385660001
+      active: true
+      characteristic_type_id: 900000000000011006
+    - source_id: -991003
+      type_id: 408731000
+      destination_id: -999
       active: true
       characteristic_type_id: 900000000000011006
   expect:
@@ -219,7 +229,7 @@ unit_tests:
       evidence_type: requested_or_referred
       is_offer: true
     - snomed_code: '-990016'
-      evidence_type: null
+      evidence_type: requested_or_referred
       is_offer: false
     - snomed_code: '-990017'
       evidence_type: null
@@ -237,5 +247,8 @@ unit_tests:
       evidence_type: null
       is_offer: false
     - snomed_code: '-991002'
+      evidence_type: null
+      is_offer: false
+    - snomed_code: '-991003'
       evidence_type: null
       is_offer: false
