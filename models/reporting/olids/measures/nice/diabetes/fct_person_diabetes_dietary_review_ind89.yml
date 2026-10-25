@@ -7,7 +7,9 @@ models:
 
     People registered on the build date aged 17 or over on the diabetes register. Achieved
     with a nutrition assessment, dietitian contact or diabetes dietary review in the 15 months
-    before the build date. Completed diabetes dietitian appointments count. Advice, education,
+    before the build date. This is our local reading; IND89 has no national code list. Intake
+    findings and screening questionnaires do not count. Completed diabetes dietitian appointments
+    count. Advice, education,
     referrals, offers and declines alone do not. Codes cannot establish the professional
     competence required by NICE. No personalised care adjustments are applied. Based on NICE
     NG17. Code lists: NUTRIASS_COD (PCD); NHSD_PRIMARY_CARE_DOMAIN_REFSETS/DIETITIAN_COD;
@@ -27,7 +29,9 @@ models:
         description_long: >-
           People registered on the build date aged 17 or over on the diabetes register.
           Achieved with a nutrition assessment, dietitian contact or diabetes dietary review
-          in the 15 months before the build date. Completed diabetes dietitian appointments
+          in the 15 months before the build date. This is our local reading; IND89 has no national
+          code list. Intake findings and screening questionnaires do not count. Completed diabetes
+          dietitian appointments
           count. Advice, education, referrals, offers and declines alone do not. Codes cannot
           establish the professional competence required by NICE. No personalised care
           adjustments are applied. Based on NICE NG17. Code lists: NUTRIASS_COD (PCD);
@@ -48,7 +52,7 @@ models:
   - name: indicator_name
     description: "Published NICE indicator title."
   - name: indicator_description
-    description: "NICE's published statement of the indicator."
+    description: "Published indicator statement with the local interpretation of qualifying review codes."
   - name: reporting_date
     description: "Build date used to assess the population, age and evidence."
   - name: measurement_period_start

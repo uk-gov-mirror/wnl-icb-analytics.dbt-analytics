@@ -7,7 +7,9 @@ models:
 
     People registered at the month-end aged 17 or over on the diabetes register. Achieved with
     a nutrition assessment, dietitian contact or diabetes dietary review in the 15 months
-    before the month-end. Completed diabetes dietitian appointments count. Advice, education,
+    before the month-end. This is our local reading; IND89 has no national code list. Intake
+    findings and screening questionnaires do not count. Completed diabetes dietitian appointments
+    count. Advice, education,
     referrals, offers and declines alone do not. Codes cannot establish the professional
     competence required by NICE. No personalised care adjustments are applied. Based on NICE
     NG17. Recalculated for each of the last 60 month-ends with current rules, code lists and
@@ -25,7 +27,7 @@ models:
   - name: indicator_name
     description: "Published NICE indicator title."
   - name: indicator_description
-    description: "NICE's published statement of the indicator."
+    description: "Published indicator statement with the local interpretation of qualifying review codes."
   - name: reporting_date
     description: "Month-end used to assess the population, age and evidence."
   - name: measurement_period_start
