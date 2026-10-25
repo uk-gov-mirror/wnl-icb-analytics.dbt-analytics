@@ -19,7 +19,11 @@ models:
       Risk uses coded status or weekly units: low up to 14 units a week; increasing
       above 14; higher above 35 for women or 50 for men (NHS/OHID), using current
       gender. Unit matching is case-insensitive. A bare "per week" is read as
-      weekly units for numeric alcohol-unit concepts.
+      weekly units for numeric alcohol-unit concepts and preserves zero coded
+      Ex-Drinker or Non-Drinker evidence. Non-zero coded status with bare weekly
+      text stays Unclear. Numbered periods such as "2 weekly" and "4wks", and
+      numbered quantities without an alcohol-unit word, stay Unclear. The observed
+      zero labels "0/week" and "0u/week" remain recognised.
     config:
       meta:
         owner:

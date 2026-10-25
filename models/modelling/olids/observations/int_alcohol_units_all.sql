@@ -9,6 +9,7 @@
 MH/SMI record of alcohol consumption QOF Indicator MH007. Date of the alcohol consumption code ALC_COD
 Includes ALL persons (active, inactive, deceased) following intermediate layer principles.
 */
+{% set alcohol_unit = "((arbitrary|alcohol|uk|ukalcohol)?units?|u|unt|\\\\{units\\\\}|\\\\[arb''u\\\\]|units?of(alcohol|wine|beer|spirits))" %}
 WITH base_observations AS (
 SELECT
     obs.id,
@@ -28,19 +29,22 @@ AND obs.clinical_effective_date <= CURRENT_DATE() -- No future dates
 unit_labels AS (
     SELECT *,
         LOWER(REPLACE(TRIM(source_result_unit_display), ' ', '')) AS unit_label,
-        concept_code IN ('1082641000000106','897148007','160573003','219006','160589000','160591008','230086006','230085005','896792007','748381000000102','897148007','926322008','28127009','160588008','230088007','160590009', '1082631000000102') AS is_numeric_units_concept,
+        concept_code IN ('1082641000000106','897148007','160573003','219006','160589000','160591008','230086006','230085005','896792007','748381000000102','926322008','28127009','160588008','230088007','160590009', '1082631000000102') AS is_numeric_units_concept,
         COALESCE(unit_label, '') IN ('', 'u', 'unit', 'units', '{units}', 'arbitraryunit', 'arbitraryunits',
             '[arb''u]', 'alcoholunit', 'alcoholunits', 'unitsofalcohol', 'ukunits', 'ukalcoholunits') AS has_bare_alcohol_unit,
         COALESCE(unit_label IN ('{units}/d', '{units}/day', '[arb''u]/d', 'a/day', 'u/day]')
             OR REGEXP_LIKE(unit_label,
-                '([~]?[0-9.]*((arbitrary)?units?|u)?(/per|per/|/|per)(d|days?|daily)|(u|units?)?daily)([.]|ontypicalday|typicalday)?'),
+                '([~]?[0-9.]*{{ alcohol_unit }}?(/per|per/|/|per)(d|days?|daily)|{{ alcohol_unit }}?daily)([.]|ontypicalday|typicalday)?'),
             FALSE) AS has_daily_unit,
-        COALESCE((REGEXP_LIKE(unit_label,
-                '[~]?[0-9.]*((arbitrary|alcohol|uk|ukalcohol)?units?|u|unt|\\{units\\}|\\[arb''u\\]|units?of(alcohol|wine|beer|spirits))?(/per|per/|/|per)?(w|wk|wks|week|weeks|weekly|wkly)[.]?')
-            -- A time basis alone supplies no alcohol quantity on coded-status concepts.
+        COALESCE(REGEXP_LIKE(unit_label,
+                '([~]?[0-9.]*{{ alcohol_unit }}(/per|per/|/|per)?|(/per|per/|/|per)?)(w|wk|wks|week|weeks|weekly|wkly)[.]?')
+            -- A bare number can describe a multi-week period or a different quantity.
+            OR (original_result_value = 0 AND unit_label IN ('0/week', '0u/week'))
+            OR unit_label IN ('unitspw', 'upw', 'u(nits)/we', 'u/wee0'), FALSE) AS has_weekly_unit_text,
+        has_weekly_unit_text
+            -- Non-zero coded status still needs an alcohol quantity, not just a time basis.
             AND (is_numeric_units_concept OR NOT REGEXP_LIKE(unit_label,
-                '[~]?[0-9.]*(/per|per/|/|per)?(w|wk|wks|week|weeks|weekly|wkly)[.]?')))
-            OR unit_label IN ('unitspw', 'upw', 'u(nits)/we', 'u/wee0'), FALSE) AS has_weekly_unit
+                '(/per|per/|/|per)?(w|wk|wks|week|weeks|weekly|wkly)[.]?')) AS has_weekly_unit
     FROM base_observations
 ),
 observations_with_demographics AS (
@@ -67,6 +71,7 @@ observations_with_demographics AS (
             WHEN is_converted_from_daily THEN 'Explicit daily unit multiplied by 7'
             ELSE 'No daily conversion' END AS conversion_reason,
         bo.is_numeric_units_concept,
+        bo.has_weekly_unit_text,
         CASE
 WHEN is_converted_from_daily THEN 'U/week'
 WHEN bo.has_weekly_unit THEN 'U/week'
@@ -96,14 +101,16 @@ WHEN is_daily_unit_conflict THEN 'Unclear'
 
 --EX DRINKER-----------------------------
 --WHEN (concept_display ILIKE ANY ('Ex%', '%Abstinent%') OR concept_display = 'Stopped drinking alcohol') AND result_value = 0 AND result_unit_display = 'U/week' THEN 'Ex-Drinker'
-WHEN concept_code in ('160582009','160585006','160587003','160584005','286857004','160583004','82581004','300939009','160579004') AND result_value = 0 AND result_unit_display = 'U/week' THEN 'Ex-Drinker'
+WHEN concept_code in ('160582009','160585006','160587003','160584005','286857004','160583004','82581004','300939009','160579004') AND result_value = 0
+    AND (result_unit_display = 'U/week' OR has_weekly_unit_text) THEN 'Ex-Drinker'
 --WHEN (concept_display ILIKE ANY ('Ex%', '%Abstinent%') OR concept_display = 'Stopped drinking alcohol') AND result_value IS NULL THEN 'Ex-Drinker'
 WHEN concept_code in ('160582009','160585006','160587003','160584005','286857004','160583004','82581004','300939009','160579004')  AND result_value IS NULL THEN 'Ex-Drinker'
 --NON DRINKER------------------------------------------------
 --WHEN concept_display in ('Alcohol units consumed per week','Alcoholic beverage intake','Alcohol intake','Alcohol units consumed per day') AND result_value = 0 AND result_unit_display = 'U/week' THEN 'Non-Drinker'
 WHEN concept_code in ('1082641000000106','897148007','160573003','1082631000000102') AND result_value = 0 AND result_unit_display = 'U/week' THEN 'Non-Drinker'
 --WHEN concept_display in ('Lifetime non-drinker of alcohol','Lifetime non-drinker','Current non-drinker of alcohol (finding)') AND result_value = 0 AND result_unit_display = 'U/week' THEN 'Non-Drinker'
-WHEN concept_code in ('783261004','228274009','105542008') AND result_value = 0 AND result_unit_display = 'U/week' THEN 'Non-Drinker'
+WHEN concept_code in ('783261004','228274009','105542008') AND result_value = 0
+    AND (result_unit_display = 'U/week' OR has_weekly_unit_text) THEN 'Non-Drinker'
 --WHEN concept_display in ('Lifetime non-drinker of alcohol','Lifetime non-drinker','Current non-drinker of alcohol (finding)') AND result_value IS NULL THEN 'Non-Drinker'
 WHEN concept_code in ('783261004','228274009','105542008') AND result_value IS NULL THEN 'Non-Drinker'
 --HIGHER RISK-------------------------
