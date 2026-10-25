@@ -3,6 +3,7 @@
 select person_id, clinical_effective_date, source_cluster_id, concept_code, concept_display,
     referral_diet_advice, referral_exercise_advice
 from {{ ref('int_weight_mgmt_intervention') }}
+where intervention_outcome is not null
 qualify row_number() over (
     partition by person_id
     order by clinical_effective_date::date desc,

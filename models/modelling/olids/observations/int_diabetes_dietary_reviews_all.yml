@@ -1,8 +1,8 @@
 models:
 - name: int_diabetes_dietary_reviews_all
   description: Completed dietary reviews, dietitian contacts and nutrition assessments. One row per observation
-    for all people, including inactive and deceased people. Food-intake findings, intake observables and
-    screening questionnaires alone do not count. Professional competence cannot be verified. This is the
+    for all people, including inactive and deceased people. Food-intake findings, intake observables, malnutrition screening tools and appetite
+    questionnaires alone do not count. Professional competence cannot be verified. This is the
     local reading used for IND89, which has no national code list.
   config:
     meta:

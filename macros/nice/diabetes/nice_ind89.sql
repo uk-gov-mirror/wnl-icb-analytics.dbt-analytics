@@ -25,7 +25,7 @@ reviews AS (
 )
 SELECT population.person_id, 'IND89' AS indicator_id,
     'Diabetes: annual dietary review' AS indicator_name,
-    'Local IND89 reading: diabetes dietary reviews, dietitian contacts or assessment procedures in 15 months. No national code list.'::varchar(143) AS indicator_description,
+    'The percentage of patients with diabetes who have a record of a dietary review by a suitably competent professional in the preceding 15 months.' AS indicator_description,
     population.reporting_date, DATEADD(month, -15, population.reporting_date) AS measurement_period_start,
     population.age, 'Diabetes' AS denominator_description,
     {{ nice_practice_columns('population', reference) }},

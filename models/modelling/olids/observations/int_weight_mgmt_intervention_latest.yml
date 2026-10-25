@@ -1,7 +1,7 @@
 models:
 - name: int_weight_mgmt_intervention_latest
   description: Latest recorded weight management, exercise intervention or decline per person in OLIDS,
-    by clinical date up to the build date. Includes inactive and deceased people with qualifying evidence,
+    by clinical date up to the build date. Includes inactive and deceased people with a non-null intervention or decline outcome,
     without age or SMI-register restrictions. Same-day ties use clinical priority where relevant, save
     time and observation identifier.
   config:

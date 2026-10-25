@@ -22,6 +22,8 @@ snomed_code,evidence_type,basis
 767621000000102,requested_or_referred,Referral offer is distinguished by is_offer
 819321000000101,completed,Started context records completed commencement rather than programme completion
 375031000000109,completed,Completed physical activity brief intervention has no retained relationship
-401000009,requested_or_referred,Requested echo is not a completed echo
-169241000,finding,Abnormal echocardiography is result evidence
-40701008,completed,Echocardiography procedure has default completed context
+286321000000102,advised,National exercise intervention advice applies despite its moderate activity wording
+226074007,completed,Food frequency questionnaire records a dietary intake assessment procedure
+170752001,completed,Reviewed has seen dietitian code records attended contact despite its finding tag
+439140001,advised,Exercise leaflet in a retained weight list keeps its exercise subject outside EXERCISEINT_COD
+913431000000101,advised,Chair based exercise education keeps its exercise subject outside EXERCISEINT_COD
