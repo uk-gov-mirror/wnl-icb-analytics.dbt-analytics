@@ -7,7 +7,10 @@
         },
         'heart_failure_confirmation': {'PCD': ['ECOG_COD']},
         'medication_review': {'ECL_CACHE': ['SMI_LONGER_LIVES_MEDICINES_REVIEW']},
-        'weight_management': {'all': ['SMI_LONGER_LIVES_WEIGHT_MANAGEMENT', 'EXERCISEINT_COD', 'WTMGINT_COD', 'WTMGINTDEC_COD']},
+        'weight_management': {
+            'all': ['SMI_LONGER_LIVES_WEIGHT_MANAGEMENT', 'WTMGINT_COD', 'WTMGINTDEC_COD'],
+            'PCD': ['EXERCISEINT_COD']
+        },
         'dental_inspection': {'all': ['SMI_LONGER_LIVES_DENTAL', 'ORALHEALTHREV_COD', 'ORALHEALTHINT_COD']}
     } -%}
     {%- set cluster_ids = [] -%}
