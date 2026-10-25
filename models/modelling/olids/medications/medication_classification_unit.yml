@@ -154,7 +154,7 @@ unit_tests:
        ('SYN_THREE','SYN_THREE','100101SYN'),('SYN_FOUR','SYN_FOUR','100101SYN'),
        ('SYN_IBUPROFEN_LYSINE','SYN_IBUPROFEN_LYSINE','1001010ASYN'),
        ('SYN_DICLOFENAC','SYN_DICLOFENAC','1001010ASYN'),
-       ('SYN_TOPICAL','SYN_TOPICAL','130601SYN'),
+       ('SYN_TOPICAL','SYN_TOPICAL','100302SYN'),
        ('SYN_OTHER_RHEUM','SYN_OTHER_RHEUM','100103SYN')) v(id,code,bnf)
   - input: ref('stg_olids_patient')
     format: sql
