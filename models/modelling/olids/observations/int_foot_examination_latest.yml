@@ -1,9 +1,10 @@
 models:
   - name: int_foot_examination_latest
-    description: 'Most recent diabetic foot examination status per person for diabetes care monitoring and QOF reporting.
-
-      One row per person with their latest foot examination including completion status and current foot risk level assessment.'
-
+    description: >-
+      Last recorded diabetic foot examination date per person, with all statuses
+      combined at that date by int_foot_examination_all. Includes incomplete, declined
+      and unsuitable examinations. One row per person with evidence, including inactive
+      and deceased people. The input has one row per person and clinical date.
     config:
       meta:
         owner:

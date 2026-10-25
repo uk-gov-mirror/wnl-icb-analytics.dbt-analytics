@@ -1,13 +1,18 @@
 models:
   - name: int_triglycerides_latest
-    description: Triglycerides for all people, including inactive and deceased people. One row per person
-      with a valid recorded result. Validity is filtered before ranking by clinical effective date descending,
-      then observation ID descending for ties. People without valid results are absent. When a later
-      result exists that is not valid, the row is the most recent valid one and has_later_unassessable_result
-      is true. Valid means 0.1 to 50 mmol/L inclusive. Concentrations retain source precision after unit
-      conversion; values are not rounded before comparison. Numeric bands support the HEART UK reference
-      levels below 1.7 mmol/L fasting and below 2.0 non-fasting. Sampling context is only assigned where
-      the PCD code description specifies it.
+    description: >-
+      Triglycerides for all people, including inactive and deceased people. One row
+      per person with a valid recorded result. Validity is filtered before ranking by
+      clinical effective date descending, then save time and observation ID descending for ties.
+      People without valid results are absent. When a later result exists that is not
+      valid, the row is the most recent valid one and has_later_unassessable_result is
+      true. Valid means 0.1 to 50 mmol/L inclusive. Concentrations retain source
+      precision after unit conversion; values are not rounded before comparison.
+      Numeric bands support the HEART UK reference levels below 1.7 mmol/L fasting and
+      below 2.0 non-fasting. Sampling context is only assigned where the PCD code
+      description specifies it.
+      The existing _latest name retains this latest-valid behaviour.
+      Ties use the latest save time, then the highest observation ID.
     config:
       meta:
         owner:

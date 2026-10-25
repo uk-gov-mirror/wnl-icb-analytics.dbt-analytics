@@ -44,5 +44,5 @@ FROM results
 WHERE is_valid_cholesterol
 QUALIFY ROW_NUMBER() OVER (
     PARTITION BY person_id
-    ORDER BY clinical_effective_date DESC, id DESC
+    ORDER BY clinical_effective_date DESC, date_recorded DESC NULLS LAST, id DESC
 ) = 1

@@ -1,12 +1,17 @@
 models:
   - name: int_cholesterol_non_hdl_latest
-    description: Non-HDL cholesterol for all people, including inactive and deceased people. One row per
-      person with a valid recorded result. Validity is filtered before ranking by clinical effective date
-      descending, then observation ID descending for ties. People without valid results are absent. When a later
-      result exists that is not valid, the row is the most recent valid one and has_later_unassessable_result
-      is true. Valid means 0.1 to 20 mmol/L inclusive. Concentrations retain source precision after
-      unit conversion; values are not rounded before comparison. The general healthy-adult reference limit
-      is below 4 mmol/L. NICE secondary prevention uses a separate target of 2.6 mmol/L or below.
+    description: >-
+      Non-HDL cholesterol for all people, including inactive and deceased people. One
+      row per person with a valid recorded result. Validity is filtered before ranking
+      by clinical effective date descending, then save time and observation ID descending for ties.
+      People without valid results are absent. When a later result exists that is not
+      valid, the row is the most recent valid one and has_later_unassessable_result is
+      true. Valid means 0.1 to 20 mmol/L inclusive. Concentrations retain source
+      precision after unit conversion; values are not rounded before comparison. The
+      general healthy-adult reference limit is below 4 mmol/L. NICE secondary
+      prevention uses a separate target of 2.6 mmol/L or below.
+      The existing _latest name retains this latest-valid behaviour.
+      Ties use the latest save time, then the highest observation ID.
     config:
       meta:
         owner:

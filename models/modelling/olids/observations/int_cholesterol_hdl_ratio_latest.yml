@@ -1,13 +1,18 @@
 models:
   - name: int_cholesterol_hdl_ratio_latest
-    description: Total cholesterol to HDL ratio for all people, including inactive and deceased people.
-      One row per person with a valid recorded result. Validity is filtered before ranking by clinical
-      effective date descending, then observation ID descending for ties. People without valid results are absent. When a later
-      result exists that is not valid, the row is the most recent valid one and has_later_unassessable_result
-      is true. Valid means a ratio of 1 to 20 inclusive. The observable is dimensionless, so blank, unknown and
-      mislabelled units are all read as a ratio, and mislabelled units are flagged for review. Dimensionless total cholesterol divided by HDL as recorded.
-      The model does not calculate a ratio from separately dated results or assign a universal treatment
-      target.
+    description: >-
+      Total cholesterol to HDL ratio for all people, including inactive and deceased
+      people. One row per person with a valid recorded result. Validity is filtered
+      before ranking by clinical effective date descending, then observation ID
+      descending for ties. People without valid results are absent. When a later
+      result exists that is not valid, the row is the most recent valid one and
+      has_later_unassessable_result is true. Valid means a ratio of 1 to 20 inclusive.
+      The observable is dimensionless, so blank, unknown and mislabelled units are all
+      read as a ratio, and mislabelled units are flagged for review. Dimensionless
+      total cholesterol divided by HDL as recorded. The model does not calculate a
+      ratio from separately dated results or assign a universal treatment target.
+      The existing _latest name retains this latest-valid behaviour.
+      Ties use the latest save time, then the highest observation ID.
     config:
       meta:
         owner:

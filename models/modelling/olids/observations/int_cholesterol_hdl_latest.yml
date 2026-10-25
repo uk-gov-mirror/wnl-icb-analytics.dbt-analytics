@@ -1,13 +1,18 @@
 models:
   - name: int_cholesterol_hdl_latest
-    description: HDL cholesterol for all people, including inactive and deceased people. One row per person
-      with a valid recorded result. Validity is filtered before ranking by clinical effective date descending,
-      then observation ID descending for ties. People without valid results are absent. When a later
-      result exists that is not valid, the row is the most recent valid one and has_later_unassessable_result
-      is true. Valid means 0.1 to 5 mmol/L inclusive. Concentrations retain source precision after unit
-      conversion; values are not rounded before comparison. Numeric bands support the HEART UK reference
-      levels above 1.0 mmol/L for men and above 1.2 for women. No sex is inferred from the observation,
-      and higher HDL is not necessarily protective.
+    description: >-
+      HDL cholesterol for all people, including inactive and deceased people. One row
+      per person with a valid recorded result. Validity is filtered before ranking by
+      clinical effective date descending, then save time and observation ID descending for ties.
+      People without valid results are absent. When a later result exists that is not
+      valid, the row is the most recent valid one and has_later_unassessable_result is
+      true. Valid means 0.1 to 5 mmol/L inclusive. Concentrations retain source
+      precision after unit conversion; values are not rounded before comparison.
+      Numeric bands support the HEART UK reference levels above 1.0 mmol/L for men and
+      above 1.2 for women. No sex is inferred from the observation, and higher HDL is
+      not necessarily protective.
+      The existing _latest name retains this latest-valid behaviour.
+      Ties use the latest save time, then the highest observation ID.
     config:
       meta:
         owner:

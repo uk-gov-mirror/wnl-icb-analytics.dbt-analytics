@@ -34,7 +34,9 @@ codelist AS (
 relevant_observations AS (
     -- Match the current cohort's DISTINCT evidence grain before month expansion.
     -- The hash retains hidden grain fields without carrying them across 60 months.
-    SELECT DISTINCT
+    SELECT
+        obs.id AS observation_id,
+        obs.date_recorded,
         HASH(
             obs.person_id::VARCHAR,
             cd.snomed_code,
@@ -60,6 +62,13 @@ relevant_observations AS (
     FROM {{ ref('stg_olids_observation') }} AS obs
     INNER JOIN codelist AS cd
         ON obs.mapped_concept_code::VARCHAR = cd.snomed_code
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY obs.person_id, cd.snomed_code, cd.code_description,
+            cd.deficit, cd.other_instructions, cd.time_constraint_years,
+            cd.age_limit, obs.result_value, obs.result_unit_display,
+            obs.clinical_effective_date
+        ORDER BY obs.date_recorded DESC NULLS LAST, obs.id DESC
+    ) = 1
 ),
 
 patient_months_to_build AS (
@@ -72,6 +81,8 @@ patient_months_to_build AS (
 
 SELECT
     obs.evidence_id,
+    obs.observation_id,
+    obs.date_recorded,
     pd.person_id,
     obs.deficit,
     obs.other_instructions,

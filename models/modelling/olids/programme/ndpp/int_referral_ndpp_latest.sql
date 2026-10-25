@@ -23,6 +23,6 @@ QUALIFY
                     WHEN '1090701000000104' THEN 0
                     ELSE -1
                 END DESC,
-                concept_code
+                date_recorded DESC NULLS LAST, observation_id DESC
         )
     = 1

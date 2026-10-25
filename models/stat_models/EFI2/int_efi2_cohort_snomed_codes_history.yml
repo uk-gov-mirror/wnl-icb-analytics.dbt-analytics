@@ -10,6 +10,7 @@ models:
       Rule instructions and gender are required by downstream rules. Monthly
       full refreshes incorporate late-arriving observations across all 60
       months.
+      Identical evidence keeps the latest save time, then the highest observation ID.
     config:
       meta:
         owner:
@@ -21,6 +22,10 @@ models:
               - evidence_id
               - end_date
     columns:
+      - name: observation_id
+        description: Source observation selected within the existing evidence grain.
+      - name: date_recorded
+        description: EMIS save time of that observation; null when unavailable.
       - name: evidence_id
         description: Identifier derived from the current eFI2 evidence grain.
         data_tests:
