@@ -10,18 +10,19 @@
 
 WITH valproate_6m_orders AS (
     SELECT
-        person_id,
-        medication_order_id,
-        medication_statement_id,
-        order_date,
-        order_medication_name,
-        order_dose,
-        order_quantity_value,
-        order_quantity_unit,
-        order_duration_days,
-        statement_medication_name,
-        mapped_concept_code,
-        mapped_concept_display,
+        orders.person_id,
+        orders.medication_order_id,
+        orders.medication_statement_id,
+        orders.order_date,
+        orders.order_medication_name,
+        orders.order_dose,
+        orders.order_quantity_value,
+        orders.order_quantity_unit,
+        orders.order_duration_days,
+        orders.statement_medication_name,
+        orders.mapped_concept_code,
+        orders.mapped_concept_display,
+        recorded.date_recorded,
 
         -- Valproate product classification
         CASE
@@ -35,7 +36,9 @@ WITH valproate_6m_orders AS (
             ELSE 'OTHER_VALPROATE'
         END AS valproate_product_term
 
-    FROM {{ ref('int_valproate_medications_all') }}
+    FROM {{ ref('int_valproate_medications_all') }} AS orders
+    LEFT JOIN {{ ref('stg_olids_medication_order') }} AS recorded
+        ON orders.medication_order_id = recorded.id
     -- Inclusive boundary retained for the published cohort pending interface approval.
     WHERE
         order_date >= DATEADD(month, -6, CURRENT_DATE())
@@ -55,7 +58,11 @@ valproate_latest AS (
         vo.*,
         vc.recent_order_count,
         ROW_NUMBER()
-            OVER (PARTITION BY vo.person_id ORDER BY vo.order_date DESC, vo.medication_order_id DESC)
+            -- Orders have equal clinical priority. Prefer the latest EMIS save on the same day.
+            OVER (PARTITION BY vo.person_id ORDER BY
+                vo.order_date DESC,
+                vo.date_recorded DESC NULLS LAST,
+                vo.medication_order_id DESC)
             AS rn
     FROM valproate_6m_orders AS vo
     INNER JOIN valproate_6m_counts AS vc ON vo.person_id = vc.person_id
