@@ -57,8 +57,8 @@ WITH palliative_care_diagnoses AS (
         END) AS latest_no_longer_indicated_date,
 
         -- Episode counts
-        COUNT(DISTINCT IFF(is_palliative_care_code AND clinical_effective_date::DATE >= DATE '2008-04-01', {{ observation_reading_key() }}, NULL)) AS total_palliative_care_episodes,
-        COUNT(DISTINCT IFF(is_palliative_care_not_indicated_code, {{ observation_reading_key() }}, NULL)) AS total_no_longer_indicated_episodes,
+        COUNT(DISTINCT IFF(is_palliative_care_code AND clinical_effective_date::DATE >= DATE '2008-04-01', {{ observation_reading_key(observation_id='observation_id') }}, NULL)) AS total_palliative_care_episodes,
+        COUNT(DISTINCT IFF(is_palliative_care_not_indicated_code, {{ observation_reading_key(observation_id='observation_id') }}, NULL)) AS total_no_longer_indicated_episodes,
 
         -- Concept code arrays for traceability
         ARRAY_AGG(

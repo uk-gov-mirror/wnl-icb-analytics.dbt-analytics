@@ -427,12 +427,12 @@ unit_tests:
   given:
   - input: ref('int_palliative_care_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: palliative_reentered_observation_readings
   expect:
     rows:
     - person_id: -145441
       total_palliative_care_episodes: 5
-      total_no_longer_indicated_episodes: 0
+      total_no_longer_indicated_episodes: 4
     - person_id: -145442
       total_palliative_care_episodes: 1
       total_no_longer_indicated_episodes: 0

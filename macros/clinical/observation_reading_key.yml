@@ -8,8 +8,8 @@ macros:
       the 1900-01-01 and 1899-12-31 placeholders retain separate observation ids.
       Use the corrected clinical date supplied by the observation model. Serial
       history in int_observation_events_long extends reading identity with
-      standardised value, unit and source-record context. HbA1c trajectories in
-      biomarker_trajectories_input_features use standardised IFCC value and unit,
+      observation type, standardised value, unit, source patient record and publisher.
+      HbA1c trajectories in biomarker_trajectories_input_features use standardised IFCC value and unit,
       with IFCC scale preference within each calendar day.
     arguments:
       - name: alias
@@ -20,3 +20,5 @@ macros:
         description: Original result column; pass none for value-free events with no populated result column.
       - name: record_context
         description: Optional source-record context column. NDH counts use the source patient record to preserve cross-practice entries.
+      - name: observation_id
+        description: Source observation identifier column, retained separately when the clinical day is unknown.
