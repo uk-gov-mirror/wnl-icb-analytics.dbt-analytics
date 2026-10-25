@@ -10,6 +10,15 @@ models:
       meta:
         owner:
           name: Eddie Davison
+    data_tests:
+      - cluster_ids_exist:
+          arguments:
+            cluster_ids: >-
+              DM_DIET_REVIEW_COD, NUTRIASS_COD,
+              NHSD_PRIMARY_CARE_DOMAIN_REFSETS/DIETITIAN_COD,
+              SMI_LONGER_LIVES_MEDICINES_REVIEW, SMI_LONGER_LIVES_WEIGHT_MANAGEMENT,
+              EXERCISEINT_COD, WTMGINT_COD, WTMGINTDEC_COD,
+              SMI_LONGER_LIVES_DENTAL, ORALHEALTHREV_COD, ORALHEALTHINT_COD, ECOG_COD
     columns:
       - name: snomed_code
         description: SNOMED CT concept identifier, including historical codes.
