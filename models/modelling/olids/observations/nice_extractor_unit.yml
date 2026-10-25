@@ -179,22 +179,31 @@ unit_tests:
   expect:
     rows:
     - source_key: SYN_PLACEHOLDER
+      person_id: -18003
       event_date: '2024-09-01'
     - source_key: SYN_0
+      person_id: -98020
       event_date: '2024-09-01'
     - source_key: SYN_1
+      person_id: -98021
       event_date: '2024-09-01'
     - source_key: SYN_4
+      person_id: -98024
       event_date: '2024-09-01'
     - source_key: SYN_7
+      person_id: -98027
       event_date: '2024-09-01'
     - source_key: SYN_10
+      person_id: -98030
       event_date: '{{ run_started_at.strftime(''%Y-%m-%d'') }}'
     - source_key: SYN_M1
+      person_id: -98040
       event_date: '2024-09-01'
     - source_key: SYN_M4
+      person_id: -98043
       event_date: '{{ run_started_at.strftime(''%Y-%m-%d'') }}'
     - source_key: SYN_M5
+      person_id: -98044
       event_date: '2024-09-01'
 - name: nice_port_childhood_dtp_formulations_active_drugs_and_explicit_booster
   model: int_nice_childhood_immunisation_all
