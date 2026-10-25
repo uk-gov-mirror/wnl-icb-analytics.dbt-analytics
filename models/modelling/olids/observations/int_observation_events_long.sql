@@ -160,6 +160,7 @@ events AS (
         clinical_effective_date, waist_circumference_value::FLOAT, 'cm', NULL::VARCHAR
     FROM {{ ref('int_waist_circumference_all') }}
     WHERE waist_circumference_value IS NOT NULL
+        AND is_valid_waist_circumference
 
     UNION ALL
     SELECT person_id, id, 'Waist-to-height Ratio', 'Metabolic',

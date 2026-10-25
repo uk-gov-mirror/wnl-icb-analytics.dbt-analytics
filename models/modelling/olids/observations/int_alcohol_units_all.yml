@@ -8,7 +8,10 @@ models:
       reading, then the lowest observation id. Weekly-unit variants use U/week;
       explicit daily readings convert to weekly units before banding. The daily
       concept 1082631000000102 converts only with blank, alcohol-unit or daily-unit
-      text. Container, volume, mass and unknown text stay unconverted and Unclear.
+      text. Weekly concept 1082641000000106 uses U/week with blank or bare
+      alcohol-unit text. Container, volume, mass and unknown text stay unconverted
+      and Unclear. Recognised weekly labels include explicit units of alcohol,
+      wine, beer or spirits per week.
       Daily and weekly concepts with the opposite explicit time basis stay
       unconverted, flagged and Unclear, except zero remains Non-Drinker evidence.
       Other numeric alcohol-unit concepts convert only with an explicit daily unit
@@ -38,7 +41,7 @@ models:
       - name: is_converted_from_daily
         description: Source value was multiplied by seven because the concept or unit explicitly states per day.
       - name: is_daily_unit_conflict
-        description: Non-zero daily or weekly concept contradicts the explicit unit time basis. Value is unconverted and risk is Unclear.
+        description: Daily or weekly concept contradicts the explicit unit time basis, including a missing value but excluding zero. Value is unconverted and risk is Unclear.
       - name: conversion_reason
         description: Daily concept multiplied by 7, Explicit daily unit multiplied by 7, Daily concept with weekly unit; not converted, Weekly concept with daily unit; not converted, or No daily conversion.
 

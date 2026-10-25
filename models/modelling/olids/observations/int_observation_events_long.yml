@@ -9,6 +9,9 @@ models:
       bilirubin, haemoglobin, platelets, eosinophils, eFI/eFI2, and Rockwood
       frailty assessments.
 
+      Waist Circumference includes only valid readings in the local 30 to 250 cm
+      range; out-of-range readings remain in int_waist_circumference_all.
+
       Backs sem_olids_observations_history. Supports serial / latest-N /
       trajectory questions via window functions over (person_id,
       observation_type) ordered by clinical_effective_date.
@@ -123,9 +126,11 @@ unit_tests:
     rows: |-
       SELECT -19800::NUMBER AS person_id, id::VARCHAR AS id, '2024-03-01'::DATE AS clinical_effective_date,
           waist::FLOAT AS waist_circumference_value, ratio::FLOAT AS waist_to_height_ratio,
-          band::VARCHAR AS waist_to_height_ratio_category
-      FROM (VALUES ('SYN_W_RATIO',100,0.5,'Increased central adiposity'),
-          ('SYN_W_NOHEIGHT',90,NULL,NULL)) v(id,waist,ratio,band)
+          band::VARCHAR AS waist_to_height_ratio_category, valid::BOOLEAN AS is_valid_waist_circumference
+      FROM (VALUES ('SYN_W_RATIO',100,0.5,'Increased central adiposity',TRUE),
+          ('SYN_W_NOHEIGHT',90,NULL,NULL,TRUE),
+          ('SYN_W_TOO_SMALL',29,NULL,NULL,FALSE),
+          ('SYN_W_TOO_LARGE',251,NULL,NULL,FALSE)) v(id,waist,ratio,band,valid)
   - input: ref('int_egfr_all')
     format: sql
     rows: |-

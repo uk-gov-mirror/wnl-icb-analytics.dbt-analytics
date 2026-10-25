@@ -77,7 +77,11 @@ unit_tests:
         ('SYN_W_30',-19530,'WAIST_COD',0,100,'cm',18,'2024-03-01 12:00:00'),
         ('SYN_H_MM',-19530,'HEIGHT',0,2000,'mm',18,null),
         ('SYN_W_31',-19531,'WAIST_COD',0,100,'cm',18,'2024-03-01 12:00:00'),
-        ('SYN_H_31',-19531,'HEIGHT',0,200,'cm',18,'2024-03-01 12:00:00')
+        ('SYN_H_31',-19531,'HEIGHT',0,200,'cm',18,'2024-03-01 12:00:00'),
+        ('SYN_W_METRE_06',-19532,'WAIST_COD',0,1.005,'m',18,'2024-03-01 12:00:00'),
+        ('SYN_H_METRE_06',-19532,'HEIGHT',0,1.675,'m',18,'2024-03-01 12:00:00'),
+        ('SYN_W_CM_06',-19533,'WAIST_COD',0,100.5,'cm',18,'2024-03-01 12:00:00'),
+        ('SYN_H_CM_06',-19533,'HEIGHT',0,167.5,'cm',18,'2024-03-01 12:00:00')
         ) v(id,person,cluster,day_offset,value,unit,age,saved)
       get_empty_subquery_sql: select null::varchar id,null::float waist_to_height_ratio,null::float height_cm,null::varchar
         waist_to_height_ratio_category where false
@@ -92,6 +96,8 @@ unit_tests:
        dateadd(day,days,'2024-03-01'::date)::timestamp_ntz clinical_effective_date,
        '2024-03-02'::timestamp_ntz date_recorded,value::float bmi_value,valid::boolean is_valid_bmi,source::varchar bmi_source
       from (values
+      (-19532,25,0,true,'recorded'),
+      (-19533,25,0,true,'recorded'),
       (-19501,25,0,true,'recorded'),
       (-19502,25,0,true,'recorded'),
       (-19503,25,0,true,'recorded'),
@@ -250,6 +256,14 @@ unit_tests:
       waist_to_height_ratio: 0.5
       height_cm: 200
       waist_to_height_ratio_category: Increased central adiposity
+    - id: SYN_W_METRE_06
+      waist_to_height_ratio: 0.6
+      height_cm: 167.5
+      waist_to_height_ratio_category: High central adiposity
+    - id: SYN_W_CM_06
+      waist_to_height_ratio: 0.6
+      height_cm: 167.5
+      waist_to_height_ratio_category: High central adiposity
 - name: waist_latest_keeps_missing_ratio_and_resolves_same_day
   model: int_waist_circumference_latest
   overrides:

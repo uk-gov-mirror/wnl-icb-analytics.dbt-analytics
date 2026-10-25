@@ -19,7 +19,7 @@ measurements AS (
         LOWER(REPLACE(COALESCE(NULLIF(TRIM(obs.result_unit_code), ''),
             original_result_unit_display), ' ', '')) AS unit_label,
         -- Only explicit length units can supply a ratio; do not infer centimetres from magnitude.
-        TRY_TO_DOUBLE(obs.result_value::VARCHAR) * CASE
+        TRY_TO_DECIMAL(obs.result_value::VARCHAR, 28, 9) * CASE
             WHEN unit_label IN ('cm', 'centimetre', 'centimetres', 'centimeter', 'centimeters') THEN 1
             WHEN unit_label IN ('m', 'metre', 'metres', 'meter', 'meters') THEN 100
             WHEN unit_label IN ('mm', 'millimetre', 'millimetres', 'millimeter', 'millimeters') THEN 0.1
@@ -30,7 +30,7 @@ measurements AS (
         ON obs.result_units_source_concept_id = units.concept_id
     WHERE obs.clinical_effective_date_raw IS NOT NULL
         AND obs.clinical_effective_date::DATE <= CURRENT_DATE()
-        AND TRY_TO_DOUBLE(obs.result_value::VARCHAR) IS NOT NULL
+        AND TRY_TO_DECIMAL(obs.result_value::VARCHAR, 28, 9) IS NOT NULL
 ),
 
 waist_people AS (
@@ -121,15 +121,16 @@ SELECT
     original_result_value,
     original_result_unit_display,
     COALESCE(value_cm BETWEEN 30 AND 250, FALSE) AS is_valid_waist_circumference,
-    height_cm,
+    height_cm::FLOAT AS height_cm,
     height_measurement_date,
     bmi_value_at_waist,
     bmi_measurement_date,
-    waist_to_height_ratio,
+    waist_to_height_ratio::FLOAT AS waist_to_height_ratio,
     -- NG246 1.9.14 applies below BMI 35 and gives no healthy band below ratio 0.4.
     CASE WHEN bmi_value_at_waist < 35 THEN CASE
-        WHEN waist_to_height_ratio >= 0.6 THEN 'High central adiposity'
-        WHEN waist_to_height_ratio >= 0.5 THEN 'Increased central adiposity'
-        WHEN waist_to_height_ratio >= 0.4 THEN 'Healthy central adiposity'
+        -- Compare fixed-point lengths so equivalent units agree at exact thresholds.
+        WHEN value_cm >= paired.height_cm * 0.6 THEN 'High central adiposity'
+        WHEN value_cm >= paired.height_cm * 0.5 THEN 'Increased central adiposity'
+        WHEN value_cm >= paired.height_cm * 0.4 THEN 'Healthy central adiposity'
     END END AS waist_to_height_ratio_category
 FROM paired

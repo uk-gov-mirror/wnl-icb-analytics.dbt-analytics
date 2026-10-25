@@ -274,7 +274,7 @@ unit_tests:
       source_result_unit_display: bottles/week
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
-      is_daily_unit_conflict: true
+      is_daily_unit_conflict: false
     - person_id: -19723
       concept_code: '160573003'
       result_value: 2
@@ -337,7 +337,7 @@ unit_tests:
       original_result_value: 0
       source_result_unit_display: units/day
       alcohol_risk_category: Non-Drinker
-      is_converted_from_daily: true
+      is_converted_from_daily: false
       is_daily_unit_conflict: false
     - person_id: -19731
       concept_code: '1082641000000106'
