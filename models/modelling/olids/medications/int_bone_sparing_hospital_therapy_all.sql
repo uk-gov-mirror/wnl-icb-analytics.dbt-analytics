@@ -1,6 +1,25 @@
 {{ config(materialized='table', cluster_by=['person_id', 'therapy_date']) }}
 
-WITH observations AS (
+WITH medication_orders AS (
+    SELECT * FROM {{ ref('int_bone_sparing_medications_all') }}
+), medication_statements AS (
+    {{ get_medication_statements(cluster_id='NHS_DRUG_REFSETS/BSADRUG_COD', source='OPENCODELISTS') }}
+), bone_products AS (
+    SELECT DISTINCT codes.product_code, codes.bnf_code, product.unit_dose_strength_mg,
+        CASE
+            WHEN product.vtm_id IN ('777988006', '134600006') OR codes.bnf_code LIKE '0606020V0%'
+                THEN 'ZOLEDRONIC_ACID'
+            WHEN product.vtm_id = '775477008' OR codes.bnf_code LIKE '0606020Z0%'
+                THEN 'DENOSUMAB'
+        END AS therapy_type
+    FROM (
+        SELECT mapped_concept_code AS product_code, bnf_code FROM medication_orders
+        UNION
+        SELECT mapped_concept_code, bnf_code FROM medication_statements
+    ) AS codes
+    LEFT JOIN {{ ref('dmd_product') }} AS product ON codes.product_code = product.product_code
+    WHERE therapy_type IS NOT NULL
+), observations AS (
     SELECT person_id, id::VARCHAR AS record_id, clinical_effective_date::DATE AS therapy_date,
         date_recorded, 'PCD_OBSERVATION' AS therapy_source, mapped_concept_code, mapped_concept_display,
         CASE
@@ -18,39 +37,31 @@ WITH observations AS (
     SELECT orders.person_id, orders.medication_order_id::VARCHAR AS record_id,
         orders.order_date::DATE AS therapy_date, orders.date_recorded,
         'MEDICATION_ORDER' AS therapy_source, orders.mapped_concept_code, orders.mapped_concept_display,
-        CASE WHEN product.vtm_id IN ('777988006', '134600006') OR orders.bnf_code LIKE '0606020V0%'
-            THEN 'ZOLEDRONIC_ACID' ELSE 'DENOSUMAB' END AS therapy_type,
+        product.therapy_type,
         'PRESCRIPTION' AS evidence_type, FALSE AS is_authorisation_only,
         FALSE AS has_administration_evidence,
         source_order.issue_method_description ILIKE 'Outside%' AS is_outside_prescription,
         product.unit_dose_strength_mg
-    FROM {{ ref('int_bone_sparing_medications_all') }} AS orders
+    FROM medication_orders AS orders
     LEFT JOIN {{ ref('stg_olids_medication_order') }} AS source_order
         ON orders.medication_order_id = source_order.id
-    LEFT JOIN {{ ref('dmd_product') }} AS product ON orders.mapped_concept_code = product.product_code
-    WHERE product.vtm_id IN ('777988006', '134600006', '775477008')
-        OR orders.bnf_code LIKE '0606020V0%' OR orders.bnf_code LIKE '0606020Z0%'
+    INNER JOIN bone_products AS product ON EQUAL_NULL(orders.mapped_concept_code, product.product_code)
+        AND EQUAL_NULL(orders.bnf_code, product.bnf_code)
 ), authorisations AS (
-    SELECT statement.person_id, statement.id::VARCHAR AS record_id,
-        statement.clinical_effective_date::DATE AS therapy_date, statement.date_recorded,
+    SELECT statement.person_id, statement.medication_statement_id::VARCHAR AS record_id,
+        statement.statement_date::DATE AS therapy_date, statement.date_recorded,
         'MEDICATION_STATEMENT' AS therapy_source, statement.mapped_concept_code, statement.mapped_concept_display,
-        CASE WHEN product.vtm_id IN ('777988006', '134600006') OR statement.bnf_code LIKE '0606020V0%'
-            THEN 'ZOLEDRONIC_ACID' ELSE 'DENOSUMAB' END AS therapy_type,
+        product.therapy_type,
         'AUTHORISATION_ONLY' AS evidence_type, TRUE AS is_authorisation_only,
         FALSE AS has_administration_evidence, NULL::BOOLEAN AS is_outside_prescription,
         product.unit_dose_strength_mg
-    FROM {{ ref('stg_olids_medication_statement') }} AS statement
-    LEFT JOIN {{ ref('dmd_product') }} AS product ON statement.mapped_concept_code = product.product_code
-    WHERE statement.clinical_effective_date IS NOT NULL AND statement.cancellation_date IS NULL
-        AND (product.vtm_id IN ('777988006', '134600006', '775477008')
-            OR statement.bnf_code LIKE '0606020V0%' OR statement.bnf_code LIKE '0606020Z0%')
-        AND statement.mapped_concept_code IN (
-            SELECT code FROM {{ ref('stg_reference_combined_codesets') }}
-            WHERE cluster_id = 'NHS_DRUG_REFSETS/BSADRUG_COD' AND source = 'OPENCODELISTS'
-        )
+    FROM medication_statements AS statement
+    INNER JOIN bone_products AS product ON EQUAL_NULL(statement.mapped_concept_code, product.product_code)
+        AND EQUAL_NULL(statement.bnf_code, product.bnf_code)
+    WHERE statement.cancellation_date IS NULL
         AND NOT EXISTS (
             SELECT 1 FROM {{ ref('stg_olids_medication_order') }} AS linked_order
-            WHERE linked_order.medication_statement_id = statement.id
+            WHERE linked_order.medication_statement_id = statement.medication_statement_id
                 AND linked_order.clinical_effective_date IS NOT NULL
         )
 ), therapy AS (

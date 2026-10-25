@@ -8,8 +8,9 @@ unit_tests:
       cluster'::VARCHAR AS cluster_description, 'Synthetic therapy'::VARCHAR AS code_description FROM VALUES ('SYN_BSA_ZOL',
       'BSA_COD', 'PCD'), ('SYN_BSA_IV', 'BSA_COD', 'PCD'), ('SYN_BSA_DEN', 'BSA_COD', 'PCD'), ('SYN_BSA_IBAN', 'BSA_COD',
       'PCD'), ('SYN_BSA_OTHER', 'BSA_COD', 'PCD'), ('SYN_OTHER_SOURCE', 'BSA_COD', 'ECL_CACHE'), ('SYN_ZOL_BRAND',
-      'NHS_DRUG_REFSETS/BSADRUG_COD', 'OPENCODELISTS'), ('SYN_DEN_BRAND', 'NHS_DRUG_REFSETS/BSADRUG_COD', 'OPENCODELISTS'),
-      ('SYN_ORAL', 'NHS_DRUG_REFSETS/BSADRUG_COD', 'OPENCODELISTS')
+      'NHS_DRUG_REFSETS/BSADRUG_COD', 'OPENCODELISTS'), ('SYN_DEN_BRAND', 'nhs_drug_refsets/bsadrug_cod', 'OPENCODELISTS'),
+      ('SYN_ORAL', 'NHS_DRUG_REFSETS/BSADRUG_COD', 'OPENCODELISTS'),
+      ('SYN_STAT_OTHER_SOURCE', 'NHS_DRUG_REFSETS/BSADRUG_COD', 'ECL_CACHE')
   - input: ref('stg_olids_observation')
     format: sql
     rows: SELECT column1::NUMBER AS id, column2::VARCHAR AS patient_id, column3::NUMBER AS person_id, column4::DATE
@@ -41,7 +42,8 @@ unit_tests:
           ('SYN_D60', '775477008', 60),
           ('SYN_D120', '775477008', 120),
           ('SYN_D119', '775477008', 119),
-          ('SYN_UNKNOWN', '777988006', NULL)
+          ('SYN_UNKNOWN', '777988006', NULL),
+          ('SYN_Z2', '134600006', 5)
   - input: ref('int_bone_sparing_medications_all')
     format: sql
     rows: |-
@@ -53,7 +55,9 @@ unit_tests:
           (-9915, -9915, '2026-01-01', '2026-01-02', 'SYN_D119', 'Synthetic misleading name 999mg', NULL),
           (-9916, -9916, '2026-01-01', '2026-01-02', 'SYN_UNKNOWN', 'Synthetic misleading name 999mg', NULL),
           (-9917, -9917, '2026-01-01', '2026-01-02', 'SYN_ORAL', 'Synthetic misleading name 999mg', NULL),
-          (-9918, -9918, '2027-01-01', '2026-01-02', 'SYN_Z5', 'Synthetic misleading name 999mg', NULL)
+          (-9918, -9918, '2027-01-01', '2026-01-02', 'SYN_Z5', 'Synthetic misleading name 999mg', NULL),
+          (-9919, -9919, '2026-01-01', '2026-01-02', NULL, 'Synthetic BNF fallback', '0606020V0SYN'),
+          (-9920, -9920, '2026-01-01', '2026-01-02', 'SYN_Z2', 'Synthetic second zoledronic moiety', '0606020Z0SYN')
   - input: ref('stg_olids_medication_order')
     format: sql
     rows: |-
@@ -65,18 +69,29 @@ unit_tests:
           (-9915, NULL, '2026-01-01', 'Electronic'),
           (-9916, NULL, '2026-01-01', 'Electronic'),
           (-9917, NULL, '2026-01-01', 'Electronic'),
-          (-9918, NULL, '2026-01-01', NULL)
+          (-9918, NULL, '2026-01-01', NULL),
+          (-9919, NULL, '2026-01-01', 'Electronic'),
+          (-9920, NULL, '2026-01-01', 'Electronic')
+  - input: ref('stg_olids_patient')
+    format: sql
+    rows: SELECT NULL::VARCHAR AS id, NULL::NUMBER AS sk_patient_id WHERE FALSE
   - input: ref('stg_olids_medication_statement')
     format: sql
     rows: |-
-      SELECT column1::NUMBER AS id, column2::NUMBER AS person_id, column3::DATE AS clinical_effective_date, column4::TIMESTAMP_NTZ AS date_recorded, column5::DATE AS cancellation_date, column6::VARCHAR AS mapped_concept_code, column7::VARCHAR AS mapped_concept_display, column8::VARCHAR AS bnf_code
+      SELECT NULL::VARCHAR AS patient_id, NULL::VARCHAR AS medication_name, NULL::VARCHAR AS dose,
+          NULL::FLOAT AS quantity_value, NULL::VARCHAR AS quantity_unit, NULL::VARCHAR AS authorisation_type_code,
+          NULL::VARCHAR AS authorisation_type_display, NULL::VARCHAR AS issue_method, NULL::BOOLEAN AS is_active,
+          NULL::DATE AS expiry_date, NULL::NUMBER AS age_at_event, NULL::VARCHAR AS bnf_chapter,
+          NULL::VARCHAR AS bnf_section, NULL::VARCHAR AS bnf_name,
+          column1::NUMBER AS id, column2::NUMBER AS person_id, column3::DATE AS clinical_effective_date, column4::TIMESTAMP_NTZ AS date_recorded, column5::DATE AS cancellation_date, column6::VARCHAR AS mapped_concept_code, column7::VARCHAR AS mapped_concept_display, column8::VARCHAR AS bnf_code
       FROM VALUES (-9921, -9921, '2026-01-01', '2026-01-02', NULL, 'SYN_ZOL_BRAND', 'Synthetic authorisation', '0606020V0SYN'),
           (-9922, -9922, '2026-01-01', '2026-01-02', '2025-12-31', 'SYN_ZOL_BRAND', 'Synthetic authorisation', '0606020V0SYN'),
           (-9923, -9923, '2026-01-01', '2026-01-02', '2026-02-01', 'SYN_ZOL_BRAND', 'Synthetic authorisation', '0606020V0SYN'),
           (-9924, -9911, '2026-01-01', '2026-01-02', '2026-02-01', 'SYN_ZOL_BRAND', 'Synthetic authorisation', '0606020V0SYN'),
           (-9925, -9925, NULL, '2026-01-02', NULL, 'SYN_ZOL_BRAND', 'Synthetic authorisation', '0606020V0SYN'),
           (-9926, -9926, '2026-01-01', '2026-01-02', NULL, 'SYN_NOT_IN_LIST', 'Synthetic authorisation', '0606020V0SYN'),
-          (-9927, -9927, '2026-01-01', '2026-01-02', NULL, 'SYN_DEN_BRAND', 'Synthetic authorisation', '0606020Z0SYN')
+          (-9927, -9927, '2026-01-01', '2026-01-02', NULL, 'SYN_DEN_BRAND', 'Synthetic authorisation', '0606020Z0SYN'),
+          (-9928, -9928, '2026-01-01', '2026-01-02', NULL, 'SYN_STAT_OTHER_SOURCE', 'Synthetic wrong source', '0606020Z0SYN')
   expect:
     rows:
     - record_id: '-9891'
@@ -191,3 +206,19 @@ unit_tests:
       has_administration_evidence: false
       is_oncology_regimen: null
       is_outside_prescription: null
+    - record_id: '-9919'
+      therapy_source: MEDICATION_ORDER
+      therapy_type: ZOLEDRONIC_ACID
+      coverage_months: 6
+      is_authorisation_only: false
+      has_administration_evidence: false
+      is_oncology_regimen: null
+      is_outside_prescription: false
+    - record_id: '-9920'
+      therapy_source: MEDICATION_ORDER
+      therapy_type: ZOLEDRONIC_ACID
+      coverage_months: 12
+      is_authorisation_only: false
+      has_administration_evidence: false
+      is_oncology_regimen: false
+      is_outside_prescription: false

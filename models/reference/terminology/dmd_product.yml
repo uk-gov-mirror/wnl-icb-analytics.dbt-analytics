@@ -33,7 +33,9 @@ models:
         description: dm+d VMP dose form description; null when not supplied.
       - name: unit_dose_strength_mg
         description: >-
-          Milligrams of the sole ingredient in one unit-dose form. Liquid concentration is multiplied
+          Milligrams of the sole ingredient's strength basis in one unit-dose form, as recorded in dm+d.
+          For example, zoledronic acid is expressed as the anhydrous acid, not the salt mass.
+          Liquid concentration is multiplied
           by the unit-dose size using matching denominator units. Null for combinations, missing
           attributes or unsupported units. dm+d rounding can differ from the labelled amount,
           for example 70 mg/ml in a 1.7 ml denosumab vial gives 119 mg for a labelled 120 mg dose.
