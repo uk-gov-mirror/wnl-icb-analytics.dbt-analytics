@@ -4,7 +4,7 @@
 {% set actual_249 = actual_249 | replace(nice_reference_population('by_month'), 'SELECT * FROM synthetic_population') %}
 {% set actual_249 = actual_249 | replace(nice_register('DM', 'by_month'), 'SELECT * FROM synthetic_dm') %}
 {% set actual_249 = actual_249 | replace(nice_register('FRAIL', 'by_month'), 'SELECT * FROM synthetic_frail') %}
-{% set actual_249 = actual_249 | replace(nice_ref('int_blood_pressure_control_latest_by_context', 'by_month') | string, '(SELECT * FROM synthetic_bp_context)') %}
+{% set actual_249 = actual_249 | replace(nice_ref('int_nice_blood_pressure_control_latest_by_context', 'by_month') | string, '(SELECT * FROM synthetic_bp_context)') %}
 
 WITH synthetic_keys AS (
     SELECT

@@ -11,7 +11,8 @@
 {% endset %}
 
 WITH control_bp AS (
-    SELECT *, COALESCE({{ bp_achieves }}, FALSE) AS meets_bp_target
+    SELECT *, IFF(is_valid_bp, systolic_value < {{ bp_systolic_target }}
+        AND diastolic_value < {{ bp_diastolic_target }}, NULL) AS meets_bp_target
     FROM ({{ blood_pressure_control_latest_contexts() }})
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY person_id
@@ -58,7 +59,7 @@ SELECT
     COALESCE(hba.meets_qof_target, FALSE) AS hba1c_in_target_range,
 
     -- Local BP target for this measure: systolic <130 and diastolic <80 mmHg.
-    COALESCE(control.meets_bp_target, FALSE) AS bp_in_target_range,
+    control.meets_bp_target AS bp_in_target_range,
 
     (chol.cholesterol_value IS NOT NULL AND chol.cholesterol_value < 5)
         AS cholesterol_in_target_range,
@@ -94,9 +95,9 @@ SELECT
     ) AS hba1c_recent_but_out_of_range,
 
     (
-        bp.clinical_effective_date IS NOT NULL
-        AND bp.clinical_effective_date >= t.twelve_months_ago
-        AND NOT COALESCE(control.meets_bp_target, FALSE)
+        control.reading_date IS NOT NULL
+        AND control.reading_date >= t.twelve_months_ago
+        AND COALESCE(control.meets_bp_target = FALSE, FALSE)
     ) AS bp_recent_but_out_of_range,
 
     (
@@ -108,7 +109,8 @@ SELECT
     ) AS cholesterol_recent_but_out_of_range,
 
     control.reading_date AS control_evidence_date,
-    control.bp_context_group AS control_evidence_context
+    control.bp_context_group AS control_evidence_context,
+    COALESCE(control.is_valid_bp, FALSE) AS is_control_evidence_valid
 
 FROM diabetes_register AS dr
 CROSS JOIN twelve_months_ago AS t

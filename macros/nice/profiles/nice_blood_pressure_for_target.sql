@@ -15,7 +15,7 @@ SELECT
     is_home_bp_event,
     is_abpm_bp_event,
     applied_measurement_context
-FROM {{ nice_ref('int_blood_pressure_control_latest_by_context', reference) }}
+FROM {{ nice_ref('int_nice_blood_pressure_control_latest_by_context', reference) }}
 -- Achievement cannot make an older context replace the latest clinical date.
 QUALIFY ROW_NUMBER() OVER (
     PARTITION BY person_id, reporting_date

@@ -251,13 +251,13 @@ SELECT
     (ws.is_on_dm_register AND ws.diabetes_type = 'Type 2') AS has_t2dm,
 
     -- Control evidence may differ from the latest valid reading shown above.
-    COALESCE(control.is_valid_bp
-        AND control.systolic_value < control.systolic_threshold, FALSE) AS is_systolic_controlled,
-    COALESCE(control.is_valid_bp
-        AND control.diastolic_value < control.diastolic_threshold, FALSE) AS is_diastolic_controlled,
-    COALESCE(control.is_valid_bp
-        AND control.systolic_value < control.systolic_threshold
-        AND control.diastolic_value < control.diastolic_threshold, FALSE) AS is_overall_bp_controlled,
+    IFF(control.is_valid_bp,
+        control.systolic_value < control.systolic_threshold, NULL) AS is_systolic_controlled,
+    IFF(control.is_valid_bp,
+        control.diastolic_value < control.diastolic_threshold, NULL) AS is_diastolic_controlled,
+    IFF(control.is_valid_bp,
+        control.systolic_value < control.systolic_threshold
+        AND control.diastolic_value < control.diastolic_threshold, NULL) AS is_overall_bp_controlled,
 
     -- Hypertension staging (NICE NG136 diagnostic thresholds)
     -- Uses highest stage between systolic and diastolic
@@ -310,7 +310,8 @@ SELECT
     END AS is_latest_bp_within_recommended_interval,
 
     control.reading_date AS control_evidence_date,
-    control.bp_context_group AS control_evidence_context
+    control.bp_context_group AS control_evidence_context,
+    COALESCE(control.is_valid_bp, FALSE) AS is_control_evidence_valid
 
 FROM with_monitoring_interval AS ws
 LEFT JOIN control_bp AS control ON ws.person_id = control.person_id

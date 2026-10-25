@@ -6,7 +6,7 @@
     {% set calculation = context['nice_ind' ~ indicator]('by_month') %}
     {% set calculation = calculation | replace(nice_register(condition, 'by_month') | string, 'SELECT person_id, reporting_date FROM synthetic_population') %}
     {% set calculation = calculation | replace(nice_reference_population('by_month') | string, 'SELECT * FROM synthetic_population') %}
-    {% set calculation = calculation | replace(nice_ref('int_blood_pressure_control_latest_by_context', 'by_month') | string, '(SELECT * FROM synthetic_bp_context)') %}
+    {% set calculation = calculation | replace(nice_ref('int_nice_blood_pressure_control_latest_by_context', 'by_month') | string, '(SELECT * FROM synthetic_bp_context)') %}
     {% do queries.append(calculation) %}
 {% endfor %}
 

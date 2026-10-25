@@ -133,6 +133,8 @@ models:
         description: "Whether the latest valid general BP reading has home evidence."
       - name: is_abpm_bp_event
         description: "Whether the latest valid general BP reading has ambulatory evidence."
+      - name: is_control_evidence_valid
+        description: TRUE when the selected control evidence is plausible. FALSE when absent or invalid; control flags are then NULL.
       - name: control_evidence_date
         description: Clinical date of the latest control-eligible evidence; null when none is available. Invalid-only dates remain.
       - name: control_evidence_context
@@ -182,13 +184,13 @@ models:
         description: "Whether the person is on the diabetes register with type 2 diabetes."
         
       - name: is_systolic_controlled
-        description: "Whether valid control evidence has systolic strictly below its context-specific patient target."
+        description: "Whether valid control evidence has systolic strictly below its context-specific patient target. NULL when control evidence is absent or invalid."
 
       - name: is_diastolic_controlled
-        description: "Whether valid control evidence has diastolic strictly below its context-specific patient target."
+        description: "Whether valid control evidence has diastolic strictly below its context-specific patient target. NULL when control evidence is absent or invalid."
 
       - name: is_overall_bp_controlled
-        description: "Whether both components of valid control evidence are strictly below their context-specific patient targets."
+        description: "Whether both components of valid control evidence are strictly below their context-specific patient targets. NULL when control evidence is absent or invalid."
 
       - name: hypertension_stage_number
         description: "Blood pressure category based on the higher component: 0 for Normal, 1 for Stage 1, 2 for Stage 2 or 3 for Stage 3 (Severe)."
@@ -324,7 +326,10 @@ unit_tests:
       hypertension_stage: Stage 1
       is_case_finding_candidate: true
     - person_id: -14445
-      is_overall_bp_controlled: false
+      is_overall_bp_controlled: null
+      is_control_evidence_valid: false
+      is_systolic_controlled: null
+      is_diastolic_controlled: null
       applied_patient_group: AGE_LT_80
       applied_measurement_context: HBPM_ABPM
       hypertension_stage_number: 0
@@ -335,7 +340,10 @@ unit_tests:
       control_evidence_context: CLINIC
       control_evidence_date: '2026-08-01'
     - person_id: -14446
-      is_overall_bp_controlled: false
+      is_overall_bp_controlled: null
+      is_control_evidence_valid: false
+      is_systolic_controlled: null
+      is_diastolic_controlled: null
       applied_patient_group: AGE_LT_80
       applied_measurement_context: HBPM_ABPM
       hypertension_stage_number: 2

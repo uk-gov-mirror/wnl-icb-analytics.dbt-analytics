@@ -6,8 +6,7 @@ models:
     IND246. Each indicator has its own denominator, measurement window and exclusions. Supporting
     evidence accompanies the achievement status. No personalised care adjustments are applied.
     Recalculated for each of the last 60 month-ends with current rules, code lists and records, so
-    later corrections can change past months. {{ doc('bp_control_evidence_rule') }} Daily components use independent minima
-    within each context on the latest eligible date; either context can meet its own target.
+    later corrections can change past months. {{ doc('bp_control_evidence_rule') }}
   config:
     meta:
       owner:

@@ -33,11 +33,11 @@ complete_readings AS (
         is_home_average,
         monitoring_priority,
         CASE WHEN STARTSWITH(reading_id, 'NOPARENT:') THEN COALESCE(
-            MIN(IFF(is_systolic_row AND result_value BETWEEN 40 AND 350, result_value, NULL)),
+            MIN(IFF(is_systolic_row AND {{ bp_systolic_is_plausible('result_value') }}, result_value, NULL)),
             MAX(IFF(is_systolic_row, result_value, NULL)))
         ELSE MAX(IFF(is_systolic_row, result_value, NULL)) END AS systolic_value,
         CASE WHEN STARTSWITH(reading_id, 'NOPARENT:') THEN COALESCE(
-            MIN(IFF(is_diastolic_row AND result_value BETWEEN 20 AND 200, result_value, NULL)),
+            MIN(IFF(is_diastolic_row AND {{ bp_diastolic_is_plausible('result_value') }}, result_value, NULL)),
             MAX(IFF(is_diastolic_row, result_value, NULL)))
         ELSE MAX(IFF(is_diastolic_row, result_value, NULL)) END AS diastolic_value,
         MAX(date_recorded) AS date_recorded,
@@ -59,9 +59,7 @@ preferred_home_readings AS (
 
 assessed AS (
     SELECT *,
-        systolic_value BETWEEN 40 AND 350
-            AND diastolic_value BETWEEN 20 AND 200
-            AND systolic_value > diastolic_value AS is_valid_bp
+        {{ bp_pair_is_plausible('systolic_value', 'diastolic_value') }} AS is_valid_bp
     FROM preferred_home_readings
 ),
 

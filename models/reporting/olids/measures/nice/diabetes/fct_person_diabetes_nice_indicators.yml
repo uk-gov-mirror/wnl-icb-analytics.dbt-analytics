@@ -191,8 +191,7 @@ models:
       unassessable, with no older reading substituted. No personalised care adjustments are applied.
       Based on NICE NG17. Code lists: BP_COD, SYSBP_COD, DIASBP_COD, HOMEAMBBP_COD, HOMEBP_COD,
       ABPM_COD (PCD). At the latest eligible date, any clinic, home or ambulatory context can meet
-      its own strict NICE target. Daily components use independent minima within each context.
-      {{ doc('bp_control_evidence_rule') }}
+      its own strict NICE target. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:

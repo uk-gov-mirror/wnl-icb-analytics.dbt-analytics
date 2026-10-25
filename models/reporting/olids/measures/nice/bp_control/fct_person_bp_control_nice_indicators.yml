@@ -10,8 +10,7 @@ models:
       described under latest_systolic_value and latest_diastolic_value. No personalised care
       adjustments are applied. Based on NICE NG136. Code lists: BP_COD, SYSBP_COD, DIASBP_COD,
       HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; HYP_COD, HYPRES_COD (PCD). At the latest eligible date,
-      any clinic, home or ambulatory context can meet its own strict NICE target. Daily components
-      use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
+      any clinic, home or ambulatory context can meet its own strict NICE target. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -108,8 +107,7 @@ models:
       described under latest_systolic_value and latest_diastolic_value. No personalised care
       adjustments are applied. Based on NICE NG136. Code lists: BP_COD, SYSBP_COD, DIASBP_COD,
       HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; HYP_COD, HYPRES_COD (PCD). At the latest eligible date,
-      any clinic, home or ambulatory context can meet its own strict NICE target. Daily components
-      use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
+      any clinic, home or ambulatory context can meet its own strict NICE target. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -151,8 +149,7 @@ models:
       selection rules are described under latest_systolic_value and latest_diastolic_value. No
       personalised care adjustments are applied. Based on NICE NG136. Code lists: BP_COD, SYSBP_COD,
       DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; CHD_COD (PCD). At the latest eligible date,
-      any clinic, home or ambulatory context can meet its own strict NICE target. Daily components
-      use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
+      any clinic, home or ambulatory context can meet its own strict NICE target. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -194,8 +191,7 @@ models:
       rules are described under latest_systolic_value and latest_diastolic_value. No personalised
       care adjustments are applied. Based on NICE NG136. Code lists: BP_COD, SYSBP_COD, DIASBP_COD,
       HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; CHD_COD (PCD). At the latest eligible date, any clinic,
-      home or ambulatory context can meet its own strict NICE target. Daily components use
-      independent minima within each context. {{ doc('bp_control_evidence_rule') }}
+      home or ambulatory context can meet its own strict NICE target. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -238,8 +234,7 @@ models:
       and latest_diastolic_value. No personalised care adjustments are applied. Based on NICE NG136.
       Code lists: BP_COD, SYSBP_COD, DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; STRK_COD,
       TIA_COD (PCD). At the latest eligible date, any clinic, home or ambulatory context can meet
-      its own strict NICE target. Daily components use independent minima within each context.
-      {{ doc('bp_control_evidence_rule') }}
+      its own strict NICE target. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -282,8 +277,7 @@ models:
       latest_diastolic_value. No personalised care adjustments are applied. Based on NICE NG136.
       Code lists: BP_COD, SYSBP_COD, DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; STRK_COD,
       TIA_COD (PCD). At the latest eligible date, any clinic, home or ambulatory context can meet
-      its own strict NICE target. Daily components use independent minima within each context.
-      {{ doc('bp_control_evidence_rule') }}
+      its own strict NICE target. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -326,7 +320,7 @@ models:
       No personalised care adjustments are applied. Based on NICE NG136. Code lists: BP_COD,
       SYSBP_COD, DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; PAD_COD (PCD). At the latest
       eligible date, any clinic, home or ambulatory context can meet its own strict NICE target.
-      Daily components use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
+      {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -369,7 +363,7 @@ models:
       No personalised care adjustments are applied. Based on NICE NG136. Code lists: BP_COD,
       SYSBP_COD, DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; PAD_COD (PCD). At the latest
       eligible date, any clinic, home or ambulatory context can meet its own strict NICE target.
-      Daily components use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
+      {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -406,8 +400,7 @@ models:
       build date. Includes NICE IND239, NICE IND240, NICE IND241, NICE IND242, NICE IND243, NICE
       IND244, NICE IND245, NICE IND246. Each indicator has its own denominator, measurement window
       and exclusions. Supporting evidence accompanies the achievement status. No personalised care
-      adjustments are applied. {{ doc('bp_control_evidence_rule') }} Daily components use independent minima within
-      each context on the latest eligible date; either context can meet its own target.
+      adjustments are applied. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
