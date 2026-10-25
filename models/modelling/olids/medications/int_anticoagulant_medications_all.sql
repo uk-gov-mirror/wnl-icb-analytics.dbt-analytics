@@ -13,14 +13,14 @@ Includes ALL persons (active, inactive, deceased) following intermediate layer p
 WITH retained_chemicals AS (
     SELECT bnf_chemical, anticoagulant_type
     FROM (VALUES
-        ('0208020Z0', 'DOAC'),
-        ('0208020X0', 'DOAC'),
-        ('0208020Y0', 'DOAC'),
-        ('0208020AA', 'DOAC'),
-        ('0208020V0', 'VKA'),
-        ('0208020H0', 'VKA'),
-        ('0208020N0', 'VKA'),
-        ('0208020S0', 'VKA')
+        ('0208020Z0', 'DOAC'),  -- Apixaban
+        ('0208020X0', 'DOAC'),  -- Dabigatran
+        ('0208020Y0', 'DOAC'),  -- Rivaroxaban
+        ('0208020AA', 'DOAC'),  -- Edoxaban
+        ('0208020V0', 'VKA'),  -- Warfarin
+        ('0208020H0', 'VKA'),  -- Acenocoumarol
+        ('0208020N0', 'VKA'),  -- Phenindione
+        ('0208020S0', 'VKA')  -- Phenprocoumon
     ) AS chemicals(bnf_chemical, anticoagulant_type)
 ),
 

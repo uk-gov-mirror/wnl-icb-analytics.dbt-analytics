@@ -45,7 +45,7 @@ SELECT
 
     -- Order recency flags (important for steroid monitoring)
     {{ medication_date_flags('base_orders.order_date', months=[1, 3, 6]) }},
-    -- Keeps the published column width from the retired OTHER_* label.
+    -- Keeps the existing 17-character width; corticosteroid_type is wider because of the retired OTHER_CORTICOSTEROID label.
     corticosteroid_type::varchar(17) AS corticosteroid_type_dmd
 
 FROM classified_orders base_orders
