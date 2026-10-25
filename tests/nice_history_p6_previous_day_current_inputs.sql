@@ -9,7 +9,7 @@
 {% set actual_249 = actual_249 | replace(nice_reference_population('current'), 'SELECT * FROM synthetic_population') %}
 {% set actual_249 = actual_249 | replace(nice_register('DM', 'current'), 'SELECT * FROM synthetic_dm') %}
 {% set actual_249 = actual_249 | replace(nice_register('FRAIL', 'current'), 'SELECT * FROM synthetic_frail') %}
-{% set actual_249 = actual_249 | replace(ref('int_nice_blood_pressure_latest') | string, 'synthetic_bp') %}
+{% set actual_249 = actual_249 | replace(nice_blood_pressure_for_target('current', 140, 90, 135, 85), 'SELECT * REPLACE (CURRENT_DATE()::DATE AS reporting_date) FROM synthetic_bp') %}
 
 WITH synthetic_keys AS (SELECT 616::NUMBER AS person_id, CURRENT_DATE()::DATE AS reporting_date, 40::NUMBER AS age),
 

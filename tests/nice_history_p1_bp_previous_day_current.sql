@@ -6,7 +6,8 @@
     {% set calculation = context['nice_ind' ~ indicator]('current') %}
     {% set calculation = calculation | replace(nice_register(condition, 'current') | string, 'SELECT person_id, reporting_date FROM synthetic_population') %}
     {% set calculation = calculation | replace(nice_reference_population('current') | string, 'SELECT * FROM synthetic_population') %}
-    {% set calculation = calculation | replace(ref('int_nice_blood_pressure_latest') | string, 'stored_bp') %}
+    {% set systolic = 150 if indicator in [240, 242, 244, 246] else 140 %}
+    {% set calculation = calculation | replace(nice_blood_pressure_for_target('current', systolic, 90, systolic - 5, 85), 'SELECT * REPLACE (CURRENT_DATE()::DATE AS reporting_date) FROM stored_bp') %}
     {% do queries.append(calculation) %}
 {% endfor %}
 

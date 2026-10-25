@@ -194,6 +194,9 @@ models:
       invalid latest readings are unassessable, with no older reading substituted. No
       personalised care adjustments are applied. Based on NICE NG17. Code lists: BP_COD,
       SYSBP_COD, DIASBP_COD, HOMEAMBBP_COD, HOMEBP_COD, ABPM_COD (PCD).
+      At the latest eligible date, any clinic, home or ambulatory context can meet
+      its own strict NICE target. Daily components use independent minima within each
+      context. Night-time and minimum ABPM codes are excluded. This is a local rule.
     config:
       meta:
         owner:
@@ -248,21 +251,21 @@ models:
       - name: latest_frailty_severity
         description: "Latest coded frailty severity by the reporting date; null when none is recorded."
       - name: latest_bp_date
-        description: "Date of the latest complete blood pressure reading by the reporting date; it may be outside the measurement period. Null when none is recorded."
+        description: "Latest clinical date with eligible complete numeric control evidence. Night-time and minimum ABPM codes are excluded. May precede the measurement window; null when absent."
       - name: latest_record_date
         description: "Date of the selected complete blood pressure reading in the 12-month measurement period; null when none is recorded in that period."
       - name: is_valid_bp
-        description: "Whether the selected complete reading has systolic 40 to 350 mmHg and diastolic 20 to 200 mmHg, inclusive; null when no complete reading exists."
+        description: "Selected daily values have systolic 40 to 350 mmHg and diastolic 20 to 200 mmHg, inclusive, with systolic above diastolic. Null when no complete evidence exists."
       - name: latest_systolic_value
-        description: "Systolic blood pressure of the selected complete pair, in mmHg; valid range 40 to 350, inclusive. Null when no pair is recorded. An invalid latest pair is unassessable; an older pair is not substituted."
+        description: "Independent minimum valid systolic in mmHg within the selected date and context, using the local NDA-consistent rule. May come from a different reading to diastolic. Invalid-only dates retain the latest complete reading. Null when absent."
       - name: latest_diastolic_value
-        description: "Diastolic blood pressure of the selected complete pair, in mmHg; valid range 20 to 200, inclusive. Null when no pair is recorded. An invalid latest pair is unassessable; an older pair is not substituted."
+        description: "Independent minimum valid diastolic in mmHg within the selected date and context, using the local NDA-consistent rule. May come from a different reading to systolic. Invalid-only dates retain the latest complete reading. Null when absent."
       - name: is_home_bp_event
         description: "Whether the selected complete blood pressure reading was recorded as home monitoring; null when no complete reading exists."
       - name: is_abpm_bp_event
         description: "Whether the selected complete blood pressure reading was recorded as ambulatory monitoring; null when no complete reading exists."
       - name: applied_measurement_context
-        description: "CLINIC for the clinic target or HBPM_ABPM for the home or ambulatory target; null when no complete reading exists."
+        description: "CLINIC or HBPM_ABPM for the selected context. On the latest date a context meeting this indicator target takes priority. Otherwise prefer valid clinic, home, then ambulatory evidence."
       - name: indicator_systolic_threshold
         description: "Systolic blood pressure threshold in mmHg; the value must be strictly below this threshold. Null when no complete reading exists."
       - name: indicator_diastolic_threshold

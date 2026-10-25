@@ -49,7 +49,7 @@ assessed AS (
             ELSE 90
         END AS indicator_diastolic_threshold
     FROM indicator_population AS population
-    LEFT JOIN {{ nice_ref('int_nice_blood_pressure_latest', reference) }} AS bp
+    LEFT JOIN ({{ nice_blood_pressure_for_target(reference, 150, 90, 145, 85) }}) AS bp
         ON population.person_id = bp.person_id
         AND population.reporting_date = bp.reporting_date
 ),

@@ -3,11 +3,11 @@
 {% set calculation_235 = nice_ind235('by_month') %}
 {% set calculation_235 = calculation_235 | replace(ref('int_nice_reference_population_by_month') | string, 'synthetic_population') %}
 {% set calculation_235 = calculation_235 | replace(ref('int_ckd_profile_by_month') | string, 'synthetic_profile') %}
-{% set calculation_235 = calculation_235 | replace(ref('int_nice_blood_pressure_latest_by_month') | string, 'synthetic_bp') %}
+{% set calculation_235 = calculation_235 | replace(nice_blood_pressure_for_target('by_month', 140, 90, 135, 85), 'SELECT * FROM synthetic_bp') %}
 {% set calculation_264 = nice_ind264('by_month') %}
 {% set calculation_264 = calculation_264 | replace(ref('int_nice_reference_population_by_month') | string, 'synthetic_population') %}
 {% set calculation_264 = calculation_264 | replace(ref('int_ckd_profile_by_month') | string, 'synthetic_profile') %}
-{% set calculation_264 = calculation_264 | replace(ref('int_nice_blood_pressure_latest_by_month') | string, 'synthetic_bp') %}
+{% set calculation_264 = calculation_264 | replace(nice_blood_pressure_for_target('by_month', 130, 80, 125, 75), 'SELECT * FROM synthetic_bp') %}
 
 WITH synthetic_keys AS (
     SELECT column1::NUMBER AS person_id, column2::DATE AS reporting_date

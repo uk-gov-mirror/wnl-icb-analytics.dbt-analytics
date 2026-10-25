@@ -5,7 +5,7 @@
     Returns: the IND235 detail columns, one person per reporting_date.
 -#}
 -- NICE IND235: https://www.nice.org.uk/indicators/ind235
--- Shared BP selection prefers valid pairs on the latest complete date, then lowest systolic/diastolic; unlinked components use daily maxima.
+-- Latest-date context minima use strict NICE targets; either setting can achieve.
 -- Last BP in 12 months below 140/90 clinic or 135/85 home for people on the CKD register with a latest ACR below 70 mg/mmol, without moderate or severe frailty.
 WITH indicator_population AS (
     SELECT
@@ -52,7 +52,7 @@ assessed AS (
             ELSE 90
         END AS indicator_diastolic_threshold
     FROM indicator_population AS population
-    LEFT JOIN {{ nice_ref('int_nice_blood_pressure_latest', reference) }} AS bp
+    LEFT JOIN ({{ nice_blood_pressure_for_target(reference, 140, 90, 135, 85) }}) AS bp
         ON population.person_id = bp.person_id
         AND population.reporting_date = bp.reporting_date
 ),
