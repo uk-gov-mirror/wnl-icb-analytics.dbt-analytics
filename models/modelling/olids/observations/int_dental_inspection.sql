@@ -5,7 +5,7 @@ select obs.person_id, obs.clinical_effective_date,
     obs.mapped_concept_display as concept_display,
     datediff(day, obs.clinical_effective_date, current_date()) <= 365 as dental_last_12m,
     obs.id, obs.date_recorded
-from ({{ get_observations("'SMI_LONGER_LIVES_DENTAL','ORALHEALTHREV_COD','ORALHEALTHINT_COD'") }}) as obs
+from ({{ get_observations(observation_evidence_cluster_ids('dental_inspection')) }}) as obs
 inner join {{ ref('snomed_evidence_type') }} as classification
     on obs.mapped_concept_code = classification.snomed_code
 where obs.clinical_effective_date is not null

@@ -178,6 +178,11 @@ unit_tests:
       destination_id: -999
       active: true
       characteristic_type_id: 900000000000011006
+  - input: ref('snomed_evidence_type_override')
+    rows: select column1::varchar as snomed_code, column2::varchar as evidence_type, column3::varchar as basis from
+      values ('-990011', 'completed', 'Synthetic reviewed tagless completion'), ('-990009', 'advised', 'Synthetic
+      override of a non-null rule')
+    format: sql
   expect:
     rows:
     - snomed_code: '-990000'
@@ -208,7 +213,7 @@ unit_tests:
       evidence_type: finding
       is_offer: false
     - snomed_code: '-990009'
-      evidence_type: finding
+      evidence_type: advised
       is_offer: false
     - snomed_code: '-990010'
       evidence_type: completed
@@ -252,3 +257,7 @@ unit_tests:
     - snomed_code: '-991003'
       evidence_type: null
       is_offer: false
+  overrides:
+    macros:
+      get_empty_subquery_sql: select null::varchar as snomed_code, null::varchar as evidence_type, null::boolean
+        as is_offer where false

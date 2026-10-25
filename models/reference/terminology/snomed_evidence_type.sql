@@ -1,13 +1,9 @@
+{{ config(tags=['daily']) }}
+
 with codes as (
     select code as snomed_code, min(code_description) as code_description
     from {{ ref('stg_reference_combined_codesets') }}
-    where upper(cluster_id) in (
-        'DM_DIET_REVIEW_COD', 'NUTRIASS_COD',
-        'NHSD_PRIMARY_CARE_DOMAIN_REFSETS/DIETITIAN_COD',
-        'SMI_LONGER_LIVES_MEDICINES_REVIEW', 'SMI_LONGER_LIVES_WEIGHT_MANAGEMENT',
-        'EXERCISEINT_COD', 'WTMGINT_COD', 'WTMGINTDEC_COD',
-        'SMI_LONGER_LIVES_DENTAL', 'ORALHEALTHREV_COD', 'ORALHEALTHINT_COD', 'ECOG_COD'
-    )
+    where upper(cluster_id) in ({{ observation_evidence_cluster_ids() }})
     group by code
 ), context as (
     select r.source_id::varchar as snomed_code,
@@ -43,22 +39,24 @@ with codes as (
                 or procedure_context in ('385644000', '397943006') then 'requested_or_referred'
             when regexp_like(wording, '.*(advi[cs]|education|educated|counsel|recommendation|discuss|leaflet|written information|signpost|health promotion).*') then 'advised'
             when procedure_context in ('385658003', '385652002') then 'completed'
-            when regexp_like(wording, '.*(seen by|seen in|has seen|completed| done|commenced| started).*') then 'completed'
+            when regexp_like(wording, '.*(seen by|seen in|completed| done|commenced| started).*') then 'completed'
             when semantic_tag in ('procedure', 'regime/therapy') then 'completed'
             when semantic_tag in ('finding', 'observable entity', 'disorder') then 'finding'
-            -- Historical UK descriptions can omit the semantic tag.
-            when semantic_tag is null and wording like '%diabetic dietary review%' then 'completed'
-        end as evidence_type
+        end as rule_evidence_type
     from terms
 )
-select snomed_code, concept_name, semantic_tag, evidence_type, is_offer,
+select classified.snomed_code, concept_name, semantic_tag,
+    coalesce(reviewed.evidence_type, rule_evidence_type) as evidence_type, is_offer,
     case
-        when evidence_type is null then 'Requires review: missing, conflicting or unsupported context'
+        when reviewed.evidence_type is not null then reviewed.basis
+        when rule_evidence_type is null then 'Requires review: missing, conflicting or unsupported context'
         when procedure_context = '443390004' then 'SNOMED procedure context: declined'
-        when evidence_type in ('administrative', 'requested_or_referred', 'advised') then 'SNOMED context and activity wording'
-        when evidence_type = 'finding' then 'SNOMED semantic tag: finding or observable'
+        when rule_evidence_type in ('administrative', 'requested_or_referred', 'advised') then 'SNOMED context and activity wording'
+        when rule_evidence_type = 'finding' then 'SNOMED semantic tag: finding or observable'
         when procedure_context in ('385658003', '385652002') then 'SNOMED procedure context: done or started'
         when semantic_tag in ('procedure', 'regime/therapy') then 'SNOMED default procedure context: completed'
         else 'Explicit attendance or completion wording'
     end as classification_basis
 from classified
+left join {{ ref('snomed_evidence_type_override') }} as reviewed
+    on classified.snomed_code = reviewed.snomed_code

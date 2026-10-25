@@ -23,15 +23,15 @@ models:
         cluster_ids: SMI_LONGER_LIVES_DENTAL, ORALHEALTHREV_COD, ORALHEALTHINT_COD
   columns:
   - name: person_id
-    tests:
+    data_tests:
     - not_null
   - name: concept_code
-    tests:
+    data_tests:
     - not_null
   - name: clinical_effective_date
-    tests:
+    data_tests:
     - not_null
   - name: id
     description: Retained observation identifier, used after save time to break ties.
   - name: date_recorded
-    description: Real source save time, used after clinical date and clinical priority to break ties.
+    description: Real source save time, used after clinical date to break ties.

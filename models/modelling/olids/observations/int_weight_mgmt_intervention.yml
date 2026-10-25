@@ -3,7 +3,8 @@ models:
   description: Weight-management and exercise activity in OLIDS GP records. One row per person, concept
     and clinical timestamp up to the build date, including inactive and deceased people. Classifies completed
     activity, advice, actual referrals and declines in the existing four lists; offers alone have no positive
-    outcome. Diet and exercise fields require wording about that subject. Generic weight-management activity
+    outcome. EXERCISEINT_COD membership assigns the exercise subject. Other retained lists use diet or exercise wording;
+    none is a diet-only list. Generic weight-management activity
     has an overall outcome without asserting diet or exercise.
   config:
     meta:
@@ -24,7 +25,7 @@ models:
         - clinical_effective_date
   columns:
   - name: person_id
-    tests:
+    data_tests:
     - not_null
   - name: id
     description: Retained observation identifier, used after save time to break ties.
@@ -33,6 +34,6 @@ models:
   - name: intervention_outcome
     description: Yes for completed activity, advice or actual referral; Declined for refusal. Null for
       offers or unsupported activity. Generic weight-management records have this overall outcome even
-      without diet or exercise wording.
+      without a diet or exercise subject.
   - name: evidence_type
     description: Shared SNOMED activity evidence type.
