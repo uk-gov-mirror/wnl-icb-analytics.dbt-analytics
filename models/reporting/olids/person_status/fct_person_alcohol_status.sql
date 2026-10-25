@@ -137,7 +137,9 @@ SELECT
     
     -- Intervention flag
     CASE
-        WHEN brief_intervention_indicated = TRUE OR has_active_disorder = TRUE THEN TRUE
+        WHEN brief_intervention_indicated = TRUE
+          OR audit_requires_intervention = TRUE
+          OR has_active_disorder = TRUE THEN TRUE
         ELSE FALSE
     END AS requires_intervention,
     

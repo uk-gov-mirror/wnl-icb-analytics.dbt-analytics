@@ -134,12 +134,12 @@ SELECT
             END
     END AS simplified_risk_level,
 
-    -- Existing thresholds apply only to valid scores.
+    -- GOV.UK screening guidance separates brief advice from specialist assessment.
     is_valid_score AND source_cluster_id = 'AUDITC_COD' AND audit_score >= 5 AS auditc_positive_screen,
-    is_valid_score AND ((source_cluster_id = 'AUDITC_COD' AND audit_score >= 8)
-        OR (source_cluster_id = 'AUDIT_COD' AND audit_score >= 16)) AS requires_specialist_intervention,
-    is_valid_score AND ((source_cluster_id = 'AUDITC_COD' AND audit_score >= 5)
-        OR (source_cluster_id = 'AUDIT_COD' AND audit_score >= 8)) AS brief_intervention_indicated
+    is_valid_score AND ((source_cluster_id = 'AUDITC_COD' AND audit_score >= 11)
+        OR (source_cluster_id = 'AUDIT_COD' AND audit_score >= 20)) AS requires_specialist_intervention,
+    is_valid_score AND ((source_cluster_id = 'AUDITC_COD' AND audit_score BETWEEN 5 AND 10)
+        OR (source_cluster_id = 'AUDIT_COD' AND audit_score BETWEEN 8 AND 19)) AS brief_intervention_indicated
 
 FROM scored
 
