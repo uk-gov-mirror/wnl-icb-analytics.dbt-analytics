@@ -14,6 +14,7 @@ WITH base_observations AS (
         obs.id,
         obs.person_id,
         obs.clinical_effective_date,
+        obs.date_recorded,
         -- result_value is FLOAT and carries occasional junk magnitudes
         -- (e.g. 8.6e14); out-of-range values become null and fall into the
         -- invalid classification below
@@ -65,7 +66,8 @@ SELECT
     CASE
         WHEN egfr_value < 60 AND egfr_value >= 1 THEN TRUE
         ELSE FALSE
-    END AS is_ckd_indicator
+    END AS is_ckd_indicator,
+    date_recorded
 
 FROM base_observations
 

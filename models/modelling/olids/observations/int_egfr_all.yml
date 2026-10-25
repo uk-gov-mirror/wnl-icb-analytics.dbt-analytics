@@ -8,13 +8,17 @@ models:
       meta:
         owner:
           name: EddieDavison92
-    tests:
+    data_tests:
       - cluster_ids_exist:
           arguments:
             cluster_ids: EGFR_COD
     columns:
       - name: id
         description: Unique identifier for each eGFR observation
-        tests:
+        data_tests:
           - unique
           - not_null
+      - name: date_recorded
+        description: >-
+          Time the observation was saved in the source system. Null when unknown.
+          Used to order results on the same clinical calendar day.

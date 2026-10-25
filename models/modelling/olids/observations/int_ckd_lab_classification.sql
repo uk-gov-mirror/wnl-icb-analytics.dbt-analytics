@@ -4,44 +4,35 @@
         cluster_by=['person_id'])
 }}
 
-WITH eligible_egfr AS (
+WITH previous_egfr AS (
     SELECT
         e.person_id,
-        e.id,
         e.clinical_effective_date,
-        e.egfr_value,
-        e.ckd_stage,
-        o.date_recorded
+        e.egfr_value
     FROM {{ ref('int_egfr_all') }} AS e
-    -- The shared eGFR model does not expose the EMIS save time.
-    LEFT JOIN {{ ref('stg_olids_observation') }} AS o ON e.id = o.id
+    INNER JOIN {{ ref('int_egfr_latest') }} AS le
+        ON e.person_id = le.person_id
+        AND e.clinical_effective_date::DATE < le.clinical_effective_date::DATE
     WHERE e.is_valid_egfr = TRUE
-        AND e.clinical_effective_date::DATE <= CURRENT_DATE()
         AND e.clinical_effective_date::DATE != '1900-01-01'::DATE
+    -- Same-day results are one occasion for persistence.
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY e.person_id
+        ORDER BY e.clinical_effective_date::DATE DESC,
+            e.date_recorded DESC NULLS LAST, e.id DESC
+    ) = 1
 ),
 
 latest_egfr_pair AS (
     SELECT
-        person_id,
-        egfr_value AS latest_egfr_value,
-        clinical_effective_date AS latest_egfr_date,
-        ckd_stage AS latest_egfr_stage,
-        LEAD(egfr_value) OVER (
-            PARTITION BY person_id
-            ORDER BY clinical_effective_date::DATE DESC,
-                date_recorded DESC NULLS LAST, id DESC
-        ) AS previous_egfr_value,
-        LEAD(clinical_effective_date) OVER (
-            PARTITION BY person_id
-            ORDER BY clinical_effective_date::DATE DESC,
-                date_recorded DESC NULLS LAST, id DESC
-        ) AS previous_egfr_date
-    FROM eligible_egfr
-    QUALIFY ROW_NUMBER() OVER (
-        PARTITION BY person_id
-        ORDER BY clinical_effective_date::DATE DESC,
-            date_recorded DESC NULLS LAST, id DESC
-    ) = 1
+        le.person_id,
+        le.egfr_value AS latest_egfr_value,
+        le.clinical_effective_date AS latest_egfr_date,
+        le.ckd_stage AS latest_egfr_stage,
+        pe.egfr_value AS previous_egfr_value,
+        pe.clinical_effective_date AS previous_egfr_date
+    FROM {{ ref('int_egfr_latest') }} AS le
+    LEFT JOIN previous_egfr AS pe ON le.person_id = pe.person_id
 ),
 
 latest_egfr AS (
@@ -67,44 +58,23 @@ latest_acr AS (
     FROM {{ ref('int_urine_acr_latest') }}
 ),
 
-acr_all AS (
-    SELECT
-        person_id,
-        clinical_effective_date,
-        acr_value
-    FROM {{ ref('int_urine_acr_all') }}
-    WHERE acr_value IS NOT NULL
-),
-
 high_acr_events AS (
     SELECT
-        *,
-        LAG(clinical_effective_date)
-            OVER (PARTITION BY person_id ORDER BY clinical_effective_date)
-            AS prev_high_acr_date
-    FROM acr_all
+        person_id,
+        -- Check the full date window, not just the preceding high result.
+        COUNT(clinical_effective_date) OVER (
+            PARTITION BY person_id
+            ORDER BY clinical_effective_date::DATE
+            RANGE BETWEEN 730 PRECEDING AND 90 PRECEDING
+        ) > 0 AS has_prior_high_acr
+    FROM {{ ref('int_urine_acr_all') }}
     WHERE acr_value >= 3
 ),
 
 acr_confirmation AS (
     SELECT
         person_id,
-        MAX(
-            CASE
-                WHEN
-                    prev_high_acr_date IS NOT NULL
-                    AND DATEDIFF(
-                        'day', prev_high_acr_date, clinical_effective_date
-                    )
-                    >= 90
-                    AND DATEDIFF(
-                        'day', prev_high_acr_date, clinical_effective_date
-                    )
-                    <= 730
-                    THEN 1
-                ELSE 0
-            END
-        ) AS has_confirmed_high_acr
+        BOOLOR_AGG(has_prior_high_acr) AS has_confirmed_high_acr
     FROM high_acr_events
     GROUP BY person_id
 ),
@@ -119,7 +89,7 @@ ckd_lab_classification AS (
         la.latest_acr_stage,
         COALESCE(le.has_confirmed_low_egfr, FALSE)
             AS has_confirmed_low_egfr,
-        COALESCE(ac.has_confirmed_high_acr, 0)::BOOLEAN
+        COALESCE(ac.has_confirmed_high_acr, FALSE)
             AS has_confirmed_high_acr,
         COALESCE(le.person_id, la.person_id) AS person_id,
         CASE
@@ -139,7 +109,7 @@ ckd_lab_classification AS (
         END AS latest_labs_meet_ckd_criteria,
         (
             COALESCE(le.has_confirmed_low_egfr, FALSE)
-            OR COALESCE(ac.has_confirmed_high_acr, 0) = 1
+            OR COALESCE(ac.has_confirmed_high_acr, FALSE)
         ) AS has_confirmed_ckd_by_labs,
         -- The retained 730-day cap is local, not part of CVDPREVENT.
         COALESCE(
