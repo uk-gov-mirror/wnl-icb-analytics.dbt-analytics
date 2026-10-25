@@ -80,12 +80,12 @@ SELECT
     original_result_value,
     gender,
 
-    -- Determine AUDIT type
+    -- Keep the existing instrument text width for downstream models.
     CASE 
         WHEN screening_tool = 'AUDIT' THEN 'Full AUDIT'
         WHEN screening_tool IN ('AUDIT-C', 'AUDIT-PC') THEN screening_tool
         ELSE 'Unknown'
-    END AS audit_type,
+    END::VARCHAR(10) AS audit_type,
 
     is_valid_score,
 
