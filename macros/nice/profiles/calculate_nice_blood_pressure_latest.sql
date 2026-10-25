@@ -1,37 +1,12 @@
 {% macro calculate_nice_blood_pressure_latest(reference='current') %}
 {#-
-    Select latest complete NICE BP evidence for the six BP control registers.
+    Select latest complete recording evidence for the six BP registers.
     Args: reference is current or by_month.
     Returns: the eight existing BP fields plus reporting_date, one person/date
              with complete evidence among active, living, non-test register members.
 -#}
--- NICE control evidence: latest complete pair through the reference date.
-WITH bp_registers AS (
-    {% for condition in ['HTN', 'CHD', 'STIA', 'PAD', 'CKD', 'DM'] %}
-    SELECT
-        person_id,
-        reporting_date
-    FROM ({{ nice_register(condition, reference) }})
-    {% if not loop.last %}UNION ALL{% endif %}
-    {% endfor %}
-),
-
-bp_people AS (
-    SELECT DISTINCT
-        person_id,
-        reporting_date
-    FROM bp_registers
-),
-
-candidates AS (
-    SELECT
-        people.person_id,
-        people.reporting_date
-    FROM bp_people AS people
-    INNER JOIN ({{ nice_reference_population(reference) }}) AS population
-        ON people.person_id = population.person_id
-        AND people.reporting_date = population.reporting_date
-)
+-- Recording evidence retains its existing complete-pair selection.
+WITH candidates AS ({{ nice_blood_pressure_register_population(reference) }})
 
 SELECT
     candidate.person_id,

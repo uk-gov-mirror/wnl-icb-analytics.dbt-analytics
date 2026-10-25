@@ -46,10 +46,10 @@ models:
 unit_tests:
 - name: nice_bp_monthly_latest_day_contexts
   model: int_nice_blood_pressure_latest_by_context_by_month
+  overrides:
+    macros:
+      nice_blood_pressure_register_population: SELECT -14431::NUMBER AS person_id, column1::DATE AS reporting_date FROM VALUES ('2026-08-31'),('2026-09-30')
   given:
-  - input: ref('int_nice_blood_pressure_latest_by_month')
-    format: sql
-    rows: SELECT -14431::NUMBER AS person_id, column1::DATE AS reporting_date FROM VALUES ('2026-08-31'),('2026-09-30')
   - input: ref('int_nice_blood_pressure_daily_by_context')
     format: sql
     rows: |-

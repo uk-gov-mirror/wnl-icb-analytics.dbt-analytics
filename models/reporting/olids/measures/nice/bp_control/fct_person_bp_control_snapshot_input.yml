@@ -21,8 +21,8 @@ models:
       - name: is_overall_bp_controlled
         description: "Whether both latest blood pressure values are strictly below their applied targets."
       - name: latest_systolic_value
-        description: "Systolic blood pressure of the selected complete pair, in mmHg; null when no pair is recorded."
+        description: "Independent systolic minimum in mmHg within the selected latest-day context. May come from a different reading to diastolic. Invalid-only dates retain the latest complete reading. Null when absent."
       - name: latest_diastolic_value
-        description: "Diastolic blood pressure of the selected complete pair, in mmHg; null when no pair is recorded."
+        description: "Independent diastolic minimum in mmHg within the selected latest-day context. May come from a different reading to systolic. Invalid-only dates retain the latest complete reading. Null when absent."
       - name: latest_bp_date
-        description: "Date of the latest complete blood pressure pair through the reporting date; may precede the measurement window. Null when absent."
+        description: "Latest eligible control date through the reporting date; may precede the measurement window. Null when absent."

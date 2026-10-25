@@ -1,4 +1,8 @@
 {% macro nice_ind235(reference='current') %}
+{% set clinic_systolic = 140 %}
+{% set clinic_diastolic = 90 %}
+{% set home_systolic = 135 %}
+{% set home_diastolic = 85 %}
 {#-
     Calculate NICE IND235 for eligible CKD members at each reference date.
     Args: reference is current or by_month.
@@ -43,16 +47,16 @@ assessed AS (
                 AND population.reporting_date, FALSE) AS is_bp_recorded_in_last_12m,
         CASE
             WHEN bp.person_id IS NULL THEN NULL
-            WHEN bp.applied_measurement_context = 'HBPM_ABPM' THEN 135
-            ELSE 140
+            WHEN bp.applied_measurement_context = 'HBPM_ABPM' THEN {{ home_systolic }}
+            ELSE {{ clinic_systolic }}
         END AS indicator_systolic_threshold,
         CASE
             WHEN bp.person_id IS NULL THEN NULL
-            WHEN bp.applied_measurement_context = 'HBPM_ABPM' THEN 85
-            ELSE 90
+            WHEN bp.applied_measurement_context = 'HBPM_ABPM' THEN {{ home_diastolic }}
+            ELSE {{ clinic_diastolic }}
         END AS indicator_diastolic_threshold
     FROM indicator_population AS population
-    LEFT JOIN ({{ nice_blood_pressure_for_target(reference, 140, 90, 135, 85) }}) AS bp
+    LEFT JOIN ({{ nice_blood_pressure_for_target(reference, clinic_systolic, clinic_diastolic, home_systolic, home_diastolic) }}) AS bp
         ON population.person_id = bp.person_id
         AND population.reporting_date = bp.reporting_date
 ),

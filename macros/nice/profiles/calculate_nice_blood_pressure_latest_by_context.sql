@@ -2,7 +2,7 @@
 {# Latest eligible clinical day across contexts, one person/date/context. #}
 WITH candidates AS (
     SELECT population.person_id, population.reporting_date, context.column1 AS bp_context_group
-    FROM {{ nice_ref('int_nice_blood_pressure_latest', reference) }} AS population
+    FROM ({{ nice_blood_pressure_register_population(reference) }}) AS population
     CROSS JOIN (VALUES ('CLINIC'), ('HOME'), ('ABPM')) AS context
 ),
 

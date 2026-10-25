@@ -22,14 +22,17 @@ not a QOF same-day rule. On the latest eligible date, any context can achieve ag
 its own indicator target. NICE targets remain strict, while QOF and the CVDPREVENT
 comparison use inclusive targets.
 
-Control evidence excludes night-time and minimum ABPM codes. It prefers daytime
-averages to unspecified and then 24-hour evidence, following the waking-hours basis
+Control evidence includes clinic readings, daytime or waking ABPM averages and home
+averages only. Other monitoring codes are excluded before pairing and daily minima,
+following the waking-hours basis
 in [NICE NG136](https://www.nice.org.uk/guidance/ng136/chapter/Recommendations).
 The original figures below predate this selection update. Revalidation uses the same
 March NCL geography and period, with published practice membership. Applying inclusive
 targets brings the comparable CVDPREVENT measures within the project's benchmark
 tolerance. Register populations and retrospective records still differ between extracts.
-Recording-only indicators, general BP events and LTC LCS keep their existing rules.
+The general BP control and diabetes triple-target flags use the same eligible context
+evidence, retaining their existing populations and targets. Recording-only indicators,
+general BP events and LTC LCS keep their existing rules.
 
 ## How to read this
 

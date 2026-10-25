@@ -4,7 +4,10 @@ models:
       Diabetes care targets for current OLIDS diabetes-register members, one row per
       person. Targets are HbA1c at or below 58 mmol/mol, blood pressure below 130/80
       mmHg using the local target, and total cholesterol below 5 mmol/L. Uses the
-      latest valid measurements, with separate 12-month recency flags. Target
+      latest HbA1c and cholesterol measurements, with separate 12-month recency flags. BP uses
+      independent context minima on the latest eligible day, including invalid-only days.
+      Clinic readings, daytime or waking ABPM averages and home averages qualify. The local
+      BP target remains below 130/80 mmHg in every context. Target
       achievement does not require recency, and missing values do not meet the target.
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
@@ -81,7 +84,7 @@ models:
     columns:
       - name: person_id
         description: Unique person identifier
-        tests:
+        data_tests:
           - unique
           - not_null
 
@@ -101,13 +104,13 @@ models:
         description: Clinical category for HbA1c level
 
       - name: latest_bp_date
-        description: Date of most recent blood pressure measurement
+        description: Latest eligible control date; null when absent
 
       - name: latest_systolic
-        description: Most recent systolic blood pressure (mmHg)
+        description: Independent systolic minimum in mmHg within the selected latest-day context; null when absent
 
       - name: latest_diastolic
-        description: Most recent diastolic blood pressure (mmHg)
+        description: Independent diastolic minimum in mmHg within the selected latest-day context; null when absent
 
       - name: latest_chol_date
         description: Date of most recent cholesterol measurement
@@ -129,3 +132,69 @@ models:
 
       - name: all_three_targets_met
         description: Whether all three targets are achieved
+unit_tests:
+- name: diabetes_triple_target_eligible_bp_contexts
+  model: fct_person_diabetes_triple_target
+  given:
+  - input: ref('fct_person_diabetes_register')
+    format: sql
+    rows: SELECT person_id,'Type 2'::VARCHAR AS diabetes_type,TRUE AS is_on_register FROM (SELECT column1::NUMBER AS person_id
+      FROM VALUES (-14441),(-14442),(-14443),(-14444),(-14445),(-14446),(-14447),(-14448))
+  - input: ref('int_nice_blood_pressure_daily_by_context')
+    format: sql
+    rows: 'SELECT column1::NUMBER AS person_id,column2::DATE AS reading_date,column3::VARCHAR AS bp_context_group,
+
+      column4::FLOAT AS systolic_value,column5::FLOAT AS diastolic_value,column6::BOOLEAN AS is_valid_bp,
+
+      bp_context_group=''HOME'' AS is_home_bp_event,bp_context_group=''ABPM'' AS is_abpm_bp_event,
+
+      IFF(bp_context_group=''CLINIC'',''CLINIC'',''HBPM_ABPM'') AS applied_measurement_context,
+
+      ''2026-08-03''::TIMESTAMP_NTZ AS date_recorded,''SYN''::VARCHAR AS observation_id
+
+      FROM VALUES (-14441,''2026-08-01'',''CLINIC'',150,95,TRUE),
+
+      (-14442,''2026-08-01'',''CLINIC'',139,89,TRUE),(-14442,''2026-08-01'',''HOME'',136,84,TRUE),
+
+      (-14443,''2026-08-01'',''CLINIC'',135,85,TRUE),(-14443,''2026-08-01'',''HOME'',124,74,TRUE),
+
+      (-14444,''2026-08-01'',''CLINIC'',145,85,TRUE),
+
+      (-14445,''2026-07-01'',''HOME'',120,70,TRUE),(-14445,''2026-08-01'',''CLINIC'',400,250,FALSE),
+
+      (-14447,''2026-08-01'',''HOME'',130,95,TRUE),(-14448,''2026-08-01'',''CLINIC'',129,79,TRUE)'
+  - input: ref('int_hba1c_latest')
+    format: sql
+    rows: SELECT person_id,'2026-08-01'::DATE AS clinical_effective_date,50::FLOAT AS hba1c_original_value,'mmol/mol'::VARCHAR
+      AS result_unit_display,'SYNTHETIC'::VARCHAR AS hba1c_category,TRUE AS is_ifcc,FALSE AS is_dcct,TRUE AS meets_qof_target
+      FROM (SELECT column1::NUMBER AS person_id FROM VALUES (-14441),(-14442),(-14443),(-14444),(-14445),(-14446),(-14447),(-14448))
+  - input: ref('int_cholesterol_latest')
+    format: sql
+    rows: SELECT person_id,'2026-08-01'::DATE AS clinical_effective_date,4::FLOAT AS cholesterol_value FROM (SELECT column1::NUMBER
+      AS person_id FROM VALUES (-14441),(-14442),(-14443),(-14444),(-14445),(-14446),(-14447),(-14448))
+  expect:
+    rows:
+    - person_id: -14441
+      bp_in_target_range: false
+      all_three_targets_met: false
+    - person_id: -14442
+      bp_in_target_range: false
+      all_three_targets_met: false
+    - person_id: -14443
+      bp_in_target_range: true
+      all_three_targets_met: true
+    - person_id: -14444
+      bp_in_target_range: false
+      all_three_targets_met: false
+    - person_id: -14445
+      bp_in_target_range: false
+      all_three_targets_met: false
+    - person_id: -14446
+      bp_in_target_range: false
+      all_three_targets_met: false
+    - person_id: -14447
+      bp_in_target_range: false
+      all_three_targets_met: false
+    - person_id: -14448
+      bp_in_target_range: true
+      all_three_targets_met: true

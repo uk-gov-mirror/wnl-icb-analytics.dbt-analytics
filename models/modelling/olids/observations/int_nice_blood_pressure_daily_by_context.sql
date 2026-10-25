@@ -12,16 +12,11 @@ WITH reading_rows AS (
         date_recorded,
         result_value,
         is_systolic_row,
-        is_diastolic_row,
-        CASE bp_context
-            WHEN 'ABPM_DAY' THEN 1
-            WHEN 'ABPM_24H' THEN 3
-            ELSE 2
-        END AS monitoring_priority
+        is_diastolic_row
     FROM {{ ref('int_blood_pressure_observations_base') }}
     WHERE effective_date::DATE <= CURRENT_DATE()
         -- NG136 monitoring uses waking-hours averages, not interval extremes.
-        AND bp_context NOT IN ('ABPM_NIGHT', 'ABPM_MIN_MAX')
+        AND (bp_context_group = 'CLINIC' OR bp_context IN ('ABPM_DAY', 'HOME_AVERAGE'))
 ),
 
 complete_readings AS (
@@ -30,7 +25,6 @@ complete_readings AS (
         reading_date,
         bp_context_group,
         reading_id,
-        monitoring_priority,
         CASE WHEN STARTSWITH(reading_id, 'NOPARENT:') THEN COALESCE(
             MIN(IFF(is_systolic_row AND result_value BETWEEN 40 AND 350, result_value, NULL)),
             MAX(IFF(is_systolic_row, result_value, NULL)))
@@ -42,7 +36,7 @@ complete_readings AS (
         MAX(date_recorded) AS date_recorded,
         MAX(observation_id) AS observation_id
     FROM reading_rows
-    GROUP BY person_id, reading_date, bp_context_group, reading_id, monitoring_priority
+    GROUP BY person_id, reading_date, bp_context_group, reading_id
     HAVING systolic_value IS NOT NULL AND diastolic_value IS NOT NULL
 ),
 
@@ -54,12 +48,12 @@ assessed AS (
     FROM complete_readings
 ),
 
-preferred_monitoring AS (
+preferred_readings AS (
     SELECT *
     FROM assessed
     QUALIFY DENSE_RANK() OVER (
         PARTITION BY person_id, reading_date, bp_context_group
-        ORDER BY is_valid_bp DESC, monitoring_priority
+        ORDER BY is_valid_bp DESC
     ) = 1
 ),
 
@@ -71,7 +65,7 @@ daily_minima AS (
         MIN(diastolic_value) OVER (
             PARTITION BY person_id, reading_date, bp_context_group
         ) AS daily_min_diastolic
-    FROM preferred_monitoring
+    FROM preferred_readings
 )
 
 SELECT
