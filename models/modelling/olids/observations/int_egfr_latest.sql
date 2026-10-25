@@ -18,9 +18,8 @@ SELECT
 
 FROM {{ ref('int_egfr_all') }}
 
-WHERE is_valid_egfr = TRUE
-    AND clinical_effective_date::DATE <= CURRENT_DATE()
-    AND clinical_effective_date::DATE != '1900-01-01'::DATE
+WHERE is_eligible_egfr = TRUE
+-- Ordering must match previous_egfr in int_ckd_lab_classification.
 QUALIFY ROW_NUMBER() OVER (
     PARTITION BY person_id
     ORDER BY clinical_effective_date::DATE DESC,

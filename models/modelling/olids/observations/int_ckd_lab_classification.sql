@@ -13,9 +13,8 @@ WITH previous_egfr AS (
     INNER JOIN {{ ref('int_egfr_latest') }} AS le
         ON e.person_id = le.person_id
         AND e.clinical_effective_date::DATE < le.clinical_effective_date::DATE
-    WHERE e.is_valid_egfr = TRUE
-        AND e.clinical_effective_date::DATE != '1900-01-01'::DATE
-    -- Same-day results are one occasion for persistence.
+    WHERE e.is_eligible_egfr = TRUE
+    -- Same-day results are one occasion; ordering must match int_egfr_latest.
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY e.person_id
         ORDER BY e.clinical_effective_date::DATE DESC,

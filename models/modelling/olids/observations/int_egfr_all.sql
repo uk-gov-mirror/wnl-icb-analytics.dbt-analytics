@@ -67,7 +67,12 @@ SELECT
         WHEN egfr_value < 60 AND egfr_value >= 1 THEN TRUE
         ELSE FALSE
     END AS is_ckd_indicator,
-    date_recorded
+    date_recorded,
+    (
+        is_valid_egfr
+        AND clinical_effective_date::DATE != '1900-01-01'::DATE
+        AND clinical_effective_date::DATE <= CURRENT_DATE()
+    ) AS is_eligible_egfr
 
 FROM base_observations
 
