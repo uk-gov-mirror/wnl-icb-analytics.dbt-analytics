@@ -1,7 +1,8 @@
 {#
     append_new_columns adds observation_id and date_recorded on incremental deploy.
-    Months stored before this change keep nulls in both columns until the history
-    full refresh backfills them. Recent months are rebuilt by the incremental window.
+    Both columns are populated only for BMI rows and remain null for other deficits.
+    Months stored before the columns were added keep nulls until the history full
+    refresh backfills BMI rows. Recent months are rebuilt by the incremental window.
 #}
 {{
     config(
@@ -40,10 +41,10 @@ codelist AS (
 relevant_observations AS (
     -- Match the current cohort's evidence grain before month expansion.
     -- The hash replaces the wider codelist grain fields across month-ends.
-    -- Observation ID and save time are retained for the BMI selection tie-break.
+    -- Only BMI rows retain observation ID and save time for the selection tie-break.
     SELECT
-        obs.id AS observation_id,
-        obs.date_recorded,
+        CASE WHEN cd.deficit = 'BMI' THEN obs.id END AS observation_id,
+        CASE WHEN cd.deficit = 'BMI' THEN obs.date_recorded END AS date_recorded,
         HASH(
             obs.person_id::VARCHAR,
             cd.snomed_code,

@@ -45,7 +45,7 @@ unit_tests:
   overrides:
     macros:
       is_incremental: false
-      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS observation_id, NULL::DATE AS end_date
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS observation_id, NULL::TIMESTAMP_NTZ AS date_recorded, NULL::DATE AS end_date
         WHERE FALSE
   given:
   - input: ref('int_efi2_patient_list_history')
@@ -61,6 +61,8 @@ unit_tests:
       SELECT 'BMI'::VARCHAR AS deficit, NULL::VARCHAR AS other_instructions,
               'SYN_BMI'::VARCHAR AS snomedct_conceptid, 'Synthetic BMI'::VARCHAR AS code_description,
               NULL::NUMBER AS time_constraint_years, NULL::NUMBER AS age_limit
+      UNION ALL
+      SELECT 'Activity limitation', NULL, 'SYN_ACTIVITY', 'Synthetic activity', NULL, NULL
   - input: ref('stg_olids_observation')
     format: sql
     rows: |-
@@ -70,17 +72,30 @@ unit_tests:
               column3::TIMESTAMP_NTZ AS date_recorded, 'SYN_BMI'::VARCHAR AS mapped_concept_code
               FROM VALUES ('SYN_Z', -144551, '2024-03-02'), ('SYN_A', -144551, '2024-03-03'),
                   ('SYN_A', -144552, '2024-03-02'), ('SYN_Z', -144552, '2024-03-02')
+      UNION ALL
+      SELECT 'SYN_ACTIVITY', -144552, NULL, NULL, '2024-03-01'::TIMESTAMP_NTZ,
+              '2024-03-03'::TIMESTAMP_NTZ, 'SYN_ACTIVITY'
   - input: ref('stg_common_efi2_weights')
     format: sql
-    rows: SELECT 'BMI'::VARCHAR AS deficit, 1::FLOAT AS weight
+    rows: |-
+      SELECT 'BMI'::VARCHAR AS deficit, 1::FLOAT AS weight
+      UNION ALL
+      SELECT 'Activity limitation', 1::FLOAT
   expect:
     rows:
     - person_id: -144551
       observation_id: SYN_A
+      date_recorded: '2024-03-03 00:00:00'
       end_date: '2024-03-31'
     - person_id: -144551
       observation_id: SYN_A
+      date_recorded: '2024-03-03 00:00:00'
       end_date: '2024-04-30'
     - person_id: -144552
       observation_id: SYN_Z
+      date_recorded: '2024-03-02 00:00:00'
+      end_date: '2024-03-31'
+    - person_id: -144552
+      observation_id: null
+      date_recorded: null
       end_date: '2024-03-31'

@@ -24,12 +24,14 @@ models:
     columns:
       - name: observation_id
         description: >-
-          Source observation selected within the existing evidence grain. Months stored
-          before this change have nulls until the history full refresh backfills them.
+          Source observation selected within the existing evidence grain, populated only
+          for BMI rows. Null for other deficits and months stored before the column was
+          added, until the history full refresh backfills BMI rows.
       - name: date_recorded
         description: >-
-          EMIS save time of that observation; null when unavailable. Months stored
-          before this change have nulls until the history full refresh backfills them.
+          EMIS save time of the selected BMI observation. Populated only for BMI rows;
+          null for other deficits, unavailable save times and months stored before the
+          column was added, until the history full refresh backfills BMI rows.
       - name: evidence_id
         description: Identifier derived from the current eFI2 evidence grain.
         data_tests:
