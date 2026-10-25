@@ -89,6 +89,8 @@ unit_tests:
           (-14403, '2026-08-01', 'SYN_INV', 'SYN_INVD', '2026-08-02', 100, FALSE, TRUE, 'CLINIC', 'CLINIC_UNSPECIFIED'),
           (-14403, '2026-08-01', 'SYN_INV_LATE', 'SYN_INV_LATES', '2026-08-03', 120, TRUE, FALSE, 'CLINIC', 'CLINIC_UNSPECIFIED'),
           (-14403, '2026-08-01', 'SYN_INV_LATE', 'SYN_INV_LATED', '2026-08-03', 130, FALSE, TRUE, 'CLINIC', 'CLINIC_UNSPECIFIED'),
+          (-14403, '2026-08-01', 'SYN_ZZZ', 'SYN_ZZZS', '2026-08-03', 400, TRUE, FALSE, 'CLINIC', 'CLINIC_UNSPECIFIED'),
+          (-14403, '2026-08-01', 'SYN_ZZZ', 'SYN_ZZZD', '2026-08-03', 250, FALSE, TRUE, 'CLINIC', 'CLINIC_UNSPECIFIED'),
           (-14404, '2026-08-01', 'SYN_LOW', 'SYN_LOWS', '2026-08-02', 40, TRUE, FALSE, 'CLINIC', 'CLINIC_UNSPECIFIED'),
           (-14404, '2026-08-01', 'SYN_LOW', 'SYN_LOWD', '2026-08-02', 20, FALSE, TRUE, 'CLINIC', 'CLINIC_UNSPECIFIED'),
           (-14405, '2026-08-01', 'SYN_HIGH', 'SYN_HIGHS', '2026-08-02', 350, TRUE, FALSE, 'CLINIC', 'CLINIC_UNSPECIFIED'),
@@ -148,8 +150,8 @@ unit_tests:
     - person_id: -14403
       reading_date: '2026-08-01'
       bp_context_group: CLINIC
-      systolic_value: 120
-      diastolic_value: 130
+      systolic_value: 400
+      diastolic_value: 250
       is_valid_bp: false
       is_home_bp_event: false
       is_abpm_bp_event: false
