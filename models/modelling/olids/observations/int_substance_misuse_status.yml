@@ -83,6 +83,9 @@ models:
 unit_tests:
 - name: substance_history_counts_distinct_readings
   model: int_substance_misuse_status
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS qualifying_record_count, NULL::NUMBER AS resolving_record_count, NULL::NUMBER AS total_record_count, NULL::BOOLEAN AS has_substance_misuse WHERE FALSE
   given:
   - input: ref('int_substance_misuse_all')
     format: sql

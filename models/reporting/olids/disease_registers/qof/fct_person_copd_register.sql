@@ -137,6 +137,7 @@ qof_field_calculations_extended AS (
 spirometry_tests AS (
     -- All spirometry tests with proper QOF field mapping
     SELECT
+        id,
         person_id,
         clinical_effective_date AS spirometry_date,
         concept_code,

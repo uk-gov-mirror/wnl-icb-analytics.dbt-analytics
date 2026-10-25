@@ -53,7 +53,7 @@ WITH stroke_tia_diagnoses AS (
                     THEN clinical_effective_date
             END
         ) AS latest_diagnosis_date,
-        COUNT(DISTINCT IFF((is_stroke_diagnosis_code OR is_tia_diagnosis_code), {{ observation_reading_key() }}, NULL)) AS total_stroke_tia_episodes,  -- No resolution codes for stroke/TIA
+        COUNT(DISTINCT IFF((is_stroke_diagnosis_code OR is_tia_diagnosis_code), {{ observation_reading_key(value=none) }}, NULL)) AS total_stroke_tia_episodes,  -- No resolution codes for stroke/TIA
 
         -- Concept code arrays for traceability
         ARRAY_AGG(

@@ -52,7 +52,7 @@ WITH mnd_diagnoses AS (
         FALSE) AS has_active_mnd_diagnosis,
 
         -- Count of MND diagnoses
-        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key() }}, NULL))
+        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key(value=none) }}, NULL))
             AS total_mnd_diagnoses,
 
         -- Traceability arrays

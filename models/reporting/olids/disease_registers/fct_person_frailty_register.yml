@@ -13,7 +13,7 @@ models:
 
       Observation counts include each person, concept, clinical calendar date and recorded
       value once, including value-free entries. Register membership and first/last dates use
-      the full evidence history.
+      the full evidence history. Missing clinical days keep separate observation ids.
     tests:
       - dbt_utils.at_least_one:
           column_name: person_id
@@ -76,13 +76,13 @@ models:
       - name: latest_diagnosis_date
         description: Latest coded frailty severity date.
       - name: mild_frailty_count
-        description: Count of mild frailty codes ever recorded.
+        description: Distinct mild frailty readings by concept, clinical calendar date and recorded value, including null results.
       - name: moderate_frailty_count
-        description: Count of moderate frailty codes ever recorded.
+        description: Distinct moderate frailty readings by concept, clinical calendar date and recorded value, including null results.
       - name: severe_frailty_count
-        description: Count of severe frailty codes ever recorded.
+        description: Distinct severe frailty readings by concept, clinical calendar date and recorded value, including null results.
       - name: total_frailty_diagnoses
-        description: Count of coded frailty severity observations ever recorded.
+        description: Distinct coded frailty readings by concept, clinical calendar date and recorded value, including null results.
       - name: all_frailty_concept_codes
         description: Distinct SNOMED codes recorded, for traceability.
       - name: all_frailty_concept_displays

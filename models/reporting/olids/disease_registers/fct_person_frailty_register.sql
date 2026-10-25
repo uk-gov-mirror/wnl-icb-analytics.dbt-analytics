@@ -65,13 +65,13 @@ frailty_diagnoses AS (
         FALSE) AS has_active_frailty_diagnosis,
 
         -- Count of frailty diagnoses (may indicate progression or reassessment)
-        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key() }}, NULL))
+        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key(value=none) }}, NULL))
             AS total_frailty_diagnoses,
 
         -- Severity-specific counts
-        COUNT(DISTINCT IFF(frailty_severity = 'Mild', {{ observation_reading_key() }}, NULL)) AS mild_frailty_count,
-        COUNT(DISTINCT IFF(frailty_severity = 'Moderate', {{ observation_reading_key() }}, NULL)) AS moderate_frailty_count,
-        COUNT(DISTINCT IFF(frailty_severity = 'Severe', {{ observation_reading_key() }}, NULL)) AS severe_frailty_count,
+        COUNT(DISTINCT IFF(frailty_severity = 'Mild', {{ observation_reading_key(value=none) }}, NULL)) AS mild_frailty_count,
+        COUNT(DISTINCT IFF(frailty_severity = 'Moderate', {{ observation_reading_key(value=none) }}, NULL)) AS moderate_frailty_count,
+        COUNT(DISTINCT IFF(frailty_severity = 'Severe', {{ observation_reading_key(value=none) }}, NULL)) AS severe_frailty_count,
 
         -- Traceability arrays
         ARRAY_AGG(

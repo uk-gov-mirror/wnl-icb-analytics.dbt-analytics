@@ -10,7 +10,8 @@ models:
 
       Observation counts include each person, concept, clinical calendar date and recorded
       value once, including value-free entries. Register membership and first/last dates use
-      the full evidence history.
+      the full evidence history. NDH counts keep different source patient
+      records separate. Missing clinical days retain separate observation ids.
     config:
       meta:
         indicator:

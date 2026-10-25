@@ -4,12 +4,19 @@ macros:
   - name: observation_reading_key
     description: >
       Person, mapped concept, clinical calendar date and recorded value for
-      distinct observation counts. Null values and dates remain part of the key.
-      Use the corrected clinical date supplied by the observation model.
+      distinct observation counts. Null results remain countable. Missing dates and
+      the 1900-01-01 and 1899-12-31 placeholders retain separate observation ids.
+      Use the corrected clinical date supplied by the observation model. Serial
+      history in int_observation_events_long extends reading identity with
+      standardised value, unit and source-record context. HbA1c trajectories in
+      biomarker_trajectories_input_features use standardised IFCC value and unit,
+      with IFCC scale preference within each calendar day.
     arguments:
       - name: alias
         description: Optional table alias for the reading columns.
       - name: clinical_date
         description: Corrected clinical date column, compared as a calendar date.
       - name: value
-        description: Original result column, including null for value-free events.
+        description: Original result column; pass none for value-free events with no populated result column.
+      - name: record_context
+        description: Optional source-record context column. NDH counts use the source patient record to preserve cross-practice entries.

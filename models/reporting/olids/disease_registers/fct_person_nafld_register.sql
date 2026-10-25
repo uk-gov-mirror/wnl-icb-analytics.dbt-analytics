@@ -35,7 +35,7 @@ WITH nafld_diagnoses AS (
         ) AS latest_diagnosis_date,
 
         -- Episode counts
-        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key() }}, NULL))
+        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key(value=none) }}, NULL))
             AS total_nafld_episodes,
 
         -- Concept code arrays for traceability

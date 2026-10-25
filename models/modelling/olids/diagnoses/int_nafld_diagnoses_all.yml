@@ -17,8 +17,6 @@ models:
       - dbt_utils.at_least_one:
           column_name: id
     columns:
-      - name: result_value
-        description: Original numeric result; null for a value-free event. Used to distinguish repeated readings.
       - name: id
         description: 'Unique identifier for the clinical observation'
         tests:

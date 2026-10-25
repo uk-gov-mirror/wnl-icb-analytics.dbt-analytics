@@ -19,8 +19,6 @@ models:
             cluster_ids: MILDFRAIL_COD, MODFRAIL_COD, SEVFRAIL_COD
             source: PCD
     columns:
-      - name: result_value
-        description: Original numeric result; null for a value-free event. Used to distinguish repeated readings.
       - name: id
         description: Observation identifier.
         tests:

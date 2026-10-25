@@ -21,11 +21,14 @@ models:
       - name: has_undated_record
         description: Whether any record has no original date.
       - name: record_count
-        description: Distinct qualifying readings by concept, corrected clinical calendar date and recorded value, including null results.
+        description: Distinct qualifying readings by concept, corrected clinical calendar date and recorded value, including null results. Unknown clinical days keep separate observation ids.
 
 unit_tests:
 - name: stroke_history_counts_distinct_readings
   model: int_haemorrhagic_stroke_history
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS record_count, NULL::BOOLEAN AS has_undated_record, NULL::DATE AS earliest_recorded_date WHERE FALSE
   given:
   - input: ref('int_haemorrhagic_stroke_diagnoses_all')
     format: sql
@@ -47,7 +50,7 @@ unit_tests:
   expect:
     rows:
     - person_id: -145401
-      record_count: 5
+      record_count: 3
       has_undated_record: false
       earliest_recorded_date: '2024-01-01'
     - person_id: -145402
@@ -55,6 +58,6 @@ unit_tests:
       has_undated_record: false
       earliest_recorded_date: '2024-01-01'
     - person_id: -145403
-      record_count: 1
+      record_count: 2
       has_undated_record: true
       earliest_recorded_date: null

@@ -52,7 +52,7 @@ WITH autism_diagnoses AS (
         FALSE) AS has_active_autism_diagnosis,
 
         -- Count of autism diagnoses
-        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key() }}, NULL))
+        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key(value=none) }}, NULL))
             AS total_autism_diagnoses,
 
         -- Traceability arrays

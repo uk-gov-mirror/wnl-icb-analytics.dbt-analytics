@@ -52,7 +52,7 @@ WITH ms_diagnoses AS (
         FALSE) AS has_active_ms_diagnosis,
 
         -- Count of MS diagnoses
-        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key() }}, NULL))
+        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key(value=none) }}, NULL))
             AS total_ms_diagnoses,
 
         -- Traceability arrays

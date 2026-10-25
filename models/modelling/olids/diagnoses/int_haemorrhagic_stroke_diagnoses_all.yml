@@ -29,8 +29,6 @@ models:
         description: Original clinical date, null when not supplied.
       - name: date_recorded
         description: Source recording date.
-      - name: result_value
-        description: Original numeric result; null for a value-free event. Used to distinguish repeated readings.
       - name: concept_code
         description: Recorded mapped clinical code matched to HSTRK_COD.
       - name: concept_display

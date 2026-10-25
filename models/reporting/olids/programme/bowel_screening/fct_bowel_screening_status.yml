@@ -54,12 +54,11 @@ models:
       # - name: latest_is_non_response
       #   description: 'Flag indicating if latest observation is non-response to invitations'
       - name: total_completed_screenings
-        description: 'Total count of completed screening observations'
+        description: Distinct completed screening readings by concept, clinical calendar date and recorded value, including null results.
       # - name: total_unsuitable_records
       #   description: 'Total count of unsuitable status records'
       - name: total_declined_records
-        description: >-
-          Number of screening decline records in COLCANSCRDEC_COD.
+        description: Distinct screening decline readings by concept, clinical calendar date and recorded value, including null results.
       # - name: total_non_response_records
       #   description: 'Total count of non-response to invitation records'
 
@@ -67,6 +66,9 @@ models:
 unit_tests:
 - name: bowel_screening_counts_distinct_readings
   model: fct_bowel_screening_status
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_completed_screenings, NULL::NUMBER AS total_declined_records WHERE FALSE
   given:
   - input: ref('int_bowel_screening_all')
     format: sql

@@ -15,8 +15,9 @@ models:
       IFCC results are kept. Repeated identical values on one calendar date are kept once,
       including entries with different times. The latest clinical timestamp, recorded
       timestamp and observation id select among results on the same scale.
-      The model applies the HbA1c rules used for C-LTCS in cltcs_measurements to
-      this wider population.
+      The rules derive from cltcs_measurements and apply to this wider population.
+      Calendar-day deduplication with latest-timestamp tie-breaks means the series
+      can differ from C-LTCS for same-day entries saved at different times.
 
       No opt-out filter applies; secondary-use consumers must apply
       dim_person_secondary_use_allowed.

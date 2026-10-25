@@ -230,6 +230,44 @@ events AS (
         clinical_effective_date, rockwood_score::FLOAT, 'score', frailty_category::VARCHAR
     FROM {{ ref('int_rockwood_all') }}
     WHERE rockwood_score IS NOT NULL
+),
+
+non_bp_events AS (
+    SELECT *
+    FROM events
+    WHERE observation_type NOT IN ('Systolic BP', 'Diastolic BP')
+        AND clinical_effective_date <= CURRENT_DATE
+),
+
+distinct_non_bp_events AS (
+    SELECT events.*
+    FROM non_bp_events AS events
+    LEFT JOIN {{ ref('stg_olids_observation') }} AS source_observation
+        ON events.source_observation_id = source_observation.id
+    -- Retain different standardised values and units for the same source reading.
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY events.person_id, events.observation_type,
+            COALESCE(source_observation.mapped_concept_code, events.source_observation_id::VARCHAR),
+            events.clinical_effective_date::DATE, source_observation.result_value,
+            events.value, events.unit,
+            source_observation.patient_id, source_observation.publisher_organisation_code,
+            IFF(events.clinical_effective_date::DATE IN ('1900-01-01'::DATE, '1899-12-31'::DATE),
+                events.source_observation_id::VARCHAR, NULL)
+        ORDER BY events.clinical_effective_date DESC,
+            source_observation.date_recorded DESC NULLS LAST,
+            events.source_observation_id DESC
+    ) = 1
+),
+
+retained_events AS (
+    SELECT * FROM distinct_non_bp_events
+
+    UNION ALL
+
+    -- BP retains its established grain without a staging lookup or deduplication.
+    SELECT * FROM events
+    WHERE observation_type IN ('Systolic BP', 'Diastolic BP')
+        AND clinical_effective_date <= CURRENT_DATE
 )
 
 SELECT
@@ -246,24 +284,6 @@ SELECT
     events.category,
     blood_pressure_stages.hypertension_stage,
     events.source_observation_id
-FROM events
-LEFT JOIN {{ ref('stg_olids_observation') }} AS source_observation
-    ON events.source_observation_id = source_observation.id
+FROM retained_events AS events
 LEFT JOIN blood_pressure_stages
     ON events.source_observation_id = blood_pressure_stages.source_observation_id
--- Date sanity: a reading cannot post-date today. Legacy pre-1990 dates are
--- kept (transferred records) — window filters should state their range.
-WHERE events.clinical_effective_date <= CURRENT_DATE
-
--- BP keeps its established measurement grain. Other series count each concept,
--- calendar date and recorded value once, including cross-cluster copies.
-QUALIFY events.observation_type IN ('Systolic BP', 'Diastolic BP')
-    OR ROW_NUMBER() OVER (
-        PARTITION BY events.person_id, events.observation_type,
-            COALESCE(source_observation.mapped_concept_code, events.source_observation_id::VARCHAR),
-            events.clinical_effective_date::DATE, source_observation.result_value,
-            events.value, events.unit
-        ORDER BY events.clinical_effective_date DESC,
-            source_observation.date_recorded DESC NULLS LAST,
-            events.source_observation_id DESC
-    ) = 1

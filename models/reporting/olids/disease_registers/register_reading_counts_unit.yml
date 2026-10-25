@@ -1,6 +1,9 @@
 unit_tests:
 - name: autism_register_counts_distinct_readings
   model: fct_person_autism_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_autism_diagnoses WHERE FALSE
   given:
   - input: ref('int_autism_diagnoses_all')
     format: sql
@@ -16,11 +19,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_autism_diagnoses: 5
+      total_autism_diagnoses: 3
     - person_id: -145442
       total_autism_diagnoses: 1
 - name: cerebral_palsy_register_counts_distinct_readings
   model: fct_person_cerebral_palsy_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_cerebral_palsy_diagnoses WHERE FALSE
   given:
   - input: ref('int_cerebral_palsy_diagnoses_all')
     format: sql
@@ -36,11 +42,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_cerebral_palsy_diagnoses: 5
+      total_cerebral_palsy_diagnoses: 3
     - person_id: -145442
       total_cerebral_palsy_diagnoses: 1
 - name: chronic_liver_disease_register_counts_distinct_readings
   model: fct_person_chronic_liver_disease_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_cld_diagnoses WHERE FALSE
   given:
   - input: ref('int_chronic_liver_disease_diagnoses_all')
     format: sql
@@ -56,11 +65,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_cld_diagnoses: 5
+      total_cld_diagnoses: 3
     - person_id: -145442
       total_cld_diagnoses: 1
 - name: copd_register_counts_distinct_readings
   model: fct_person_copd_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS copd_diagnosis_count, NULL::NUMBER AS copd_disorder_code_count, NULL::NUMBER AS copd_admin_code_count, NULL::NUMBER AS total_spirometry_tests, NULL::NUMBER AS total_unable_spirometry_records WHERE FALSE
   given:
   - input: ref('int_copd_diagnoses_all')
     format: sql
@@ -130,6 +142,9 @@ unit_tests:
       total_unable_spirometry_records: 1
 - name: familial_hypercholesterolaemia_register_counts_distinct_readings
   model: fct_person_familial_hypercholesterolaemia_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_fh_episodes WHERE FALSE
   given:
   - input: ref('int_familial_hypercholesterolaemia_diagnoses_all')
     format: sql
@@ -150,6 +165,9 @@ unit_tests:
       total_fh_episodes: 1
 - name: frailty_register_counts_distinct_readings
   model: fct_person_frailty_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_frailty_diagnoses, NULL::NUMBER AS mild_frailty_count, NULL::NUMBER AS moderate_frailty_count, NULL::NUMBER AS severe_frailty_count WHERE FALSE
   given:
   - input: ref('int_frailty_diagnoses_all')
     format: sql
@@ -165,8 +183,8 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_frailty_diagnoses: 5
-      mild_frailty_count: 5
+      total_frailty_diagnoses: 3
+      mild_frailty_count: 3
       moderate_frailty_count: 0
       severe_frailty_count: 0
     - person_id: -145442
@@ -176,6 +194,9 @@ unit_tests:
       severe_frailty_count: 0
 - name: gestational_diabetes_register_counts_distinct_readings
   model: fct_person_gestational_diabetes_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_gestational_diabetes_episodes WHERE FALSE
   given:
   - input: ref('int_gestational_diabetes_diagnoses_all')
     format: sql
@@ -187,11 +208,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_gestational_diabetes_episodes: 5
+      total_gestational_diabetes_episodes: 3
     - person_id: -145442
       total_gestational_diabetes_episodes: 1
 - name: hypothyroidism_register_counts_distinct_readings
   model: fct_person_hypothyroidism_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_hypothyroidism_diagnoses WHERE FALSE
   given:
   - input: ref('int_hypothyroidism_diagnoses_all')
     format: sql
@@ -212,6 +236,9 @@ unit_tests:
       total_hypothyroidism_diagnoses: 1
 - name: mnd_register_counts_distinct_readings
   model: fct_person_mnd_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_mnd_diagnoses WHERE FALSE
   given:
   - input: ref('int_mnd_diagnoses_all')
     format: sql
@@ -227,11 +254,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_mnd_diagnoses: 5
+      total_mnd_diagnoses: 3
     - person_id: -145442
       total_mnd_diagnoses: 1
 - name: ms_register_counts_distinct_readings
   model: fct_person_ms_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_ms_diagnoses WHERE FALSE
   given:
   - input: ref('int_ms_diagnoses_all')
     format: sql
@@ -247,11 +277,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_ms_diagnoses: 5
+      total_ms_diagnoses: 3
     - person_id: -145442
       total_ms_diagnoses: 1
 - name: nafld_register_counts_distinct_readings
   model: fct_person_nafld_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_nafld_episodes WHERE FALSE
   given:
   - input: ref('int_nafld_diagnoses_all')
     format: sql
@@ -263,15 +296,18 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_nafld_episodes: 5
+      total_nafld_episodes: 3
     - person_id: -145442
       total_nafld_episodes: 1
 - name: ndh_register_counts_distinct_readings
   model: fct_person_ndh_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_ndh_episodes, NULL::NUMBER AS total_igt_episodes, NULL::NUMBER AS total_prd_episodes WHERE FALSE
   given:
   - input: ref('int_ndh_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: ndh_reentered_observation_readings
   - input: ref('int_diabetes_diagnoses_all')
     format: sql
     rows: |-
@@ -298,7 +334,7 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_ndh_episodes: 5
+      total_ndh_episodes: 10
       total_igt_episodes: 0
       total_prd_episodes: 0
     - person_id: -145442
@@ -307,6 +343,9 @@ unit_tests:
       total_prd_episodes: 0
 - name: osteoarthritis_register_counts_distinct_readings
   model: fct_person_osteoarthritis_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_osteoarthritis_diagnoses WHERE FALSE
   given:
   - input: ref('int_osteoarthritis_diagnoses_all')
     format: sql
@@ -322,11 +361,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_osteoarthritis_diagnoses: 5
+      total_osteoarthritis_diagnoses: 3
     - person_id: -145442
       total_osteoarthritis_diagnoses: 1
 - name: osteoporosis_register_counts_distinct_readings
   model: fct_person_osteoporosis_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_osteoporosis_episodes WHERE FALSE
   given:
   - input: ref('int_osteoporosis_diagnoses_all')
     format: sql
@@ -364,6 +406,9 @@ unit_tests:
       total_osteoporosis_episodes: 1
 - name: pad_register_counts_distinct_readings
   model: fct_person_pad_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_pad_episodes WHERE FALSE
   given:
   - input: ref('int_pad_diagnoses_all')
     format: sql
@@ -371,11 +416,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_pad_episodes: 5
+      total_pad_episodes: 3
     - person_id: -145442
       total_pad_episodes: 1
 - name: palliative_care_register_counts_distinct_readings
   model: fct_person_palliative_care_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_palliative_care_episodes, NULL::NUMBER AS total_no_longer_indicated_episodes WHERE FALSE
   given:
   - input: ref('int_palliative_care_diagnoses_all')
     format: sql
@@ -390,6 +438,9 @@ unit_tests:
       total_no_longer_indicated_episodes: 0
 - name: parkinsons_register_counts_distinct_readings
   model: fct_person_parkinsons_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_parkinsons_diagnoses WHERE FALSE
   given:
   - input: ref('int_parkinsons_diagnoses_all')
     format: sql
@@ -405,15 +456,18 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_parkinsons_diagnoses: 5
+      total_parkinsons_diagnoses: 3
     - person_id: -145442
       total_parkinsons_diagnoses: 1
 - name: qof_ndh_gdm_register_counts_distinct_readings
   model: fct_person_qof_ndh_gdm_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_ndh_episodes, NULL::NUMBER AS total_igt_episodes, NULL::NUMBER AS total_prd_episodes, NULL::NUMBER AS total_gestational_diabetes_episodes WHERE FALSE
   given:
   - input: ref('int_ndh_diagnoses_all')
     format: sql
-    fixture: reentered_observation_readings
+    fixture: ndh_reentered_observation_readings
   - input: ref('int_gestational_diabetes_diagnoses_all')
     format: sql
     rows: |-
@@ -454,7 +508,7 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_ndh_episodes: 5
+      total_ndh_episodes: 10
       total_igt_episodes: 0
       total_prd_episodes: 0
       total_gestational_diabetes_episodes: 0
@@ -465,6 +519,9 @@ unit_tests:
       total_gestational_diabetes_episodes: 0
 - name: rheumatoid_arthritis_register_counts_distinct_readings
   model: fct_person_rheumatoid_arthritis_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_ra_episodes WHERE FALSE
   given:
   - input: ref('int_rheumatoid_arthritis_diagnoses_all')
     format: sql
@@ -481,6 +538,9 @@ unit_tests:
       total_ra_episodes: 1
 - name: sickle_cell_register_counts_distinct_readings
   model: fct_person_sickle_cell_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_diagnoses WHERE FALSE
   given:
   - input: ref('int_sickle_cell_diagnoses_all')
     format: sql
@@ -496,11 +556,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_diagnoses: 5
+      total_diagnoses: 3
     - person_id: -145442
       total_diagnoses: 1
 - name: stroke_tia_register_counts_distinct_readings
   model: fct_person_stroke_tia_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_stroke_tia_episodes WHERE FALSE
   given:
   - input: ref('int_stroke_tia_diagnoses_all')
     format: sql
@@ -508,11 +571,14 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_stroke_tia_episodes: 5
+      total_stroke_tia_episodes: 3
     - person_id: -145442
       total_stroke_tia_episodes: 1
 - name: thalassaemia_register_counts_distinct_readings
   model: fct_person_thalassaemia_register
+  overrides:
+    macros:
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::NUMBER AS total_diagnoses WHERE FALSE
   given:
   - input: ref('int_thalassaemia_diagnoses_all')
     format: sql
@@ -528,6 +594,6 @@ unit_tests:
   expect:
     rows:
     - person_id: -145441
-      total_diagnoses: 5
+      total_diagnoses: 3
     - person_id: -145442
       total_diagnoses: 1

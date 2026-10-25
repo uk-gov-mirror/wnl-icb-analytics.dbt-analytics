@@ -52,7 +52,7 @@ WITH cerebral_palsy_diagnoses AS (
         FALSE) AS has_active_cerebral_palsy_diagnosis,
 
         -- Count of cerebral palsy diagnoses
-        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key() }}, NULL))
+        COUNT(DISTINCT IFF(is_diagnosis_code, {{ observation_reading_key(value=none) }}, NULL))
             AS total_cerebral_palsy_diagnoses,
 
         -- Traceability arrays

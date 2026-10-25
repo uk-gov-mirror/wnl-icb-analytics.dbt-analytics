@@ -11,15 +11,16 @@
     trajectory readouts back to this schema.
 
     Grain
-      One row per person, clinical effective date and IFCC value.
+      One row per person, clinical calendar date and IFCC value.
 
     Population and time
       Currently registered, living people, excluding test patient records
       (dim_person_active_patients), with a valid HbA1c in the last 5 years up to
       the build date.
 
-    Rules carried over from cltcs_measurements, so the series match the C-LTCS
-    measurements the job read before
+    Rules derived from cltcs_measurements, with calendar-day deduplication and
+    latest-timestamp tie-breaks. Same-day entries saved at different times can
+    therefore differ from the C-LTCS export
       - Valid results only (is_valid_hba1c), in IFCC mmol/mol. DCCT percent
         results are converted upstream in int_hba1c_all.
       - Where a person has both IFCC and DCCT results on one date, only the

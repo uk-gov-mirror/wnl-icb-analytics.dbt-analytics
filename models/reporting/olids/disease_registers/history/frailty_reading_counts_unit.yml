@@ -17,5 +17,5 @@ unit_tests:
           FROM VALUES (-145441), (-145442)
     expect:
       rows:
-        - {person_id: -145441, month_end_date: '2022-01-31', mild_frailty_count: 5, moderate_frailty_count: 0, severe_frailty_count: 0}
+        - {person_id: -145441, month_end_date: '2022-01-31', mild_frailty_count: 3, moderate_frailty_count: 0, severe_frailty_count: 0}
         - {person_id: -145442, month_end_date: '2022-01-31', mild_frailty_count: 1, moderate_frailty_count: 0, severe_frailty_count: 0}
