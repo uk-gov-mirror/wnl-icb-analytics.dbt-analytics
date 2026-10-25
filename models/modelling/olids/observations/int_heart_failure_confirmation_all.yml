@@ -4,7 +4,9 @@ models:
     Heart-failure confirmation-list evidence, one row per ECOG_COD observation for all people.
     Retains requests, awaited imaging and referrals for the QOF-aligned headline. The completed
     flag selects imaging procedures and results only. The list has no completed specialist
-    attendance codes; that route awaits a separate maintained cluster. NT-proBNP is not
+    attendance codes. A specialist route needs a local clinical decision; heart failure clinic
+    attendance alone (<<416717003) is the narrow option if wanted. Attendance does not
+    establish completed diagnostic assessment. NT-proBNP is not
     confirmation. Consumers apply diagnosis-relative windows.
   config:
     meta:
@@ -27,4 +29,4 @@ models:
       True for completed imaging or a recorded imaging result within ECOG_COD. A result
       establishes investigation completion, not that heart failure is confirmed clinically.
       False does not prove that an assessment never took place. Specialist attendance is
-      not yet supplied by this model.
+      excluded. A local clinical decision is needed before adding an attendance route.

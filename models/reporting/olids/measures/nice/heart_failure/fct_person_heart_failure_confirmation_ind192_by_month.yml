@@ -10,7 +10,8 @@ models:
     must also be recorded by that date. A diagnosis on the resolution date remains unresolved.
     The headline counts all national ECOG_COD evidence, including requests and referrals,
     within 3 months before or after diagnosis. Completed imaging is reported separately;
-    specialist attendance awaits a maintained cluster. QOF uses a different window. No personalised care adjustments are applied. Recalculated for each of the last
+    a specialist route needs a local clinical decision. Heart failure clinic attendance alone
+    (<<416717003) is the narrow option if wanted; attendance does not establish diagnostic assessment. QOF uses a different window. No personalised care adjustments are applied. Recalculated for each of the last
     60 month-ends with current rules, code lists and records, so later corrections can change
     past months. Based on NICE NG106. Code lists: HF_COD, HFRES_COD, ECOG_COD (PCD).
   config:
