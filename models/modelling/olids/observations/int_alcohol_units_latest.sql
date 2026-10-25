@@ -20,7 +20,7 @@ person_id
 ,result_unit_display
 ,alcohol_risk_category
 ,original_result_value
-,original_result_unit_display
+,source_result_unit_display
 ,is_converted_from_daily
 ,is_daily_unit_conflict
 ,conversion_reason

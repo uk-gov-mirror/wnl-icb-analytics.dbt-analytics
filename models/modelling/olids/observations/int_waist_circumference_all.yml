@@ -8,8 +8,11 @@ models:
       a ratio. Waist validity is 30 to 250 cm. Both waist and height must be measured
       at age 18 or over. The nearest valid adult height within 365 days pairs in either
       direction. At equal distance prefer the later date, then recorded timestamp
-      with nulls last, then greatest ID. Height validity is 50 to 250 cm, matching
-      the existing adult BMI model. The nearest valid BMI within 90 days determines
+      with nulls last, then greatest ID. Height validity is 50 to 250 cm.
+      Only the numeric range matches
+      int_bmi_all: waist standardises explicit length units and prefers the latest
+      recorded timestamp before ID; BMI uses raw heights and ID alone.
+      The nearest valid BMI within 90 days determines
       band applicability; recorded BMI wins same-day ties over calculated BMI.
       These pairing windows are local rules. NG246 bands require BMI below 35.
       Ratio below 0.4, missing BMI or BMI at least 35 gives no band. Missing height,

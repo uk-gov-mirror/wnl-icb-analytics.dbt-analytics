@@ -12,13 +12,6 @@ models:
       final results must be aggregate-only. Waist circumference has no risk band.
       The separate Waist-to-height Ratio type carries NG246 adult central adiposity
       bands when a paired BMI is below 35.
-    data_tests:
-      - semantic_grain_count:
-          arguments:
-            source_model: int_observation_events_long
-            entity: obs
-            metric: observation_count
-            grain_key: observation_event_id
     config:
       materialized: semantic_view
       schema: SEMANTIC

@@ -6,7 +6,7 @@ unit_tests:
       get_observations: |-
         select id::varchar id,person::number person_id,'2024-03-01'::timestamp_ntz clinical_effective_date,
          code::varchar mapped_concept_code,'Synthetic alcohol'::varchar mapped_concept_display,
-         value::number(10,2) result_value,unit::varchar result_unit_display,null::varchar result_units_source_concept_id
+         value::number(10,2) result_value,unit::varchar result_unit_display,case when id='SYN_D_MAPPED_UNKNOWN' then 'SYN_UNKNOWN_UNIT' end::varchar result_units_source_concept_id
         from (values
         ('SYN_D_BLANK',-19701,'1082631000000102',2,null),
         ('SYN_D_PERDAY',-19702,'1082631000000102',5,'per day'),
@@ -35,16 +35,40 @@ unit_tests:
         ('SYN_OTHER_A_DAY',-19724,'160573003',2,'a/day'),
         ('SYN_OTHER_NUMBER_DAY',-19725,'160573003',2,'10 per day'),
         ('SYN_OTHER_GENERAL_DAY',-19726,'160573003',2,'3 units per day.'),
-        ('SYN_OTHER_NON_ALCOHOL_UNIT',-19727,'160573003',2,'international units/day')
+        ('SYN_OTHER_NON_ALCOHOL_UNIT',-19727,'160573003',2,'international units/day'),
+        ('SYN_D_BOTTLE_DAY',-19728,'1082631000000102',2,'bottles/day'),
+        ('SYN_D_ZERO_WEEK',-19729,'1082631000000102',0,'U/week'),
+        ('SYN_W_ZERO_DAY',-19730,'1082641000000106',0,'units/day'),
+        ('SYN_W_UW',-19731,'1082641000000106',14,'U/W'),
+        ('SYN_W_UWK',-19732,'1082641000000106',20,'u/wk'),
+        ('SYN_W_UPERWEEK',-19733,'1082641000000106',51,'uperweek'),
+        ('SYN_W_BOTTLE_WEEK',-19734,'1082641000000106',2,'bottles/week'),
+        ('SYN_D_UNITS',-19735,'1082631000000102',2,'units'),
+        ('SYN_D_ML',-19736,'1082631000000102',2,'ml'),
+        ('SYN_D_G',-19737,'1082631000000102',2,'g'),
+        ('SYN_D_MAPPED_UNKNOWN',-19738,'1082631000000102',2,'U/week'),
+        ('SYN_D_NULL_WEEK',-19739,'1082631000000102',null,'U/week')
         ) v(id,person,code,value,unit)
   given:
   - input: ref('stg_olids_concept')
     format: sql
-    rows: select null::varchar concept_id,null::varchar display where false
+    rows: select 'SYN_UNKNOWN_UNIT'::varchar concept_id,'unknown'::varchar display
   - input: ref('dim_person_demographics')
     format: sql
     rows: |-
       select person::number person_id,gender::varchar gender from (values
+      (-19739,'Male'),
+      (-19738,'Male'),
+      (-19737,'Male'),
+      (-19736,'Male'),
+      (-19735,'Male'),
+      (-19734,'Male'),
+      (-19733,'Male'),
+      (-19732,'Male'),
+      (-19731,'Male'),
+      (-19730,'Male'),
+      (-19729,'Male'),
+      (-19728,'Male'),
       (-19727,'Male'),
       (-19726,'Male'),
       (-19725,'Male'),
@@ -79,7 +103,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 14
       original_result_value: 2
-      original_result_unit_display: null
+      source_result_unit_display: null
       alcohol_risk_category: Low Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -87,7 +111,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 35
       original_result_value: 5
-      original_result_unit_display: per day
+      source_result_unit_display: per day
       alcohol_risk_category: Increasing Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -95,7 +119,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 35.7
       original_result_value: 5.1
-      original_result_unit_display: U/day
+      source_result_unit_display: U/day
       alcohol_risk_category: Higher Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -103,23 +127,23 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 50.4
       original_result_value: 7.2
-      original_result_unit_display: units/day
+      source_result_unit_display: units/day
       alcohol_risk_category: Higher Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
     - person_id: -19705
       concept_code: '1082631000000102'
-      result_value: 14
+      result_value: 2
       original_result_value: 2
-      original_result_unit_display: unknown
-      alcohol_risk_category: Low Risk
-      is_converted_from_daily: true
+      source_result_unit_display: unknown
+      alcohol_risk_category: Unclear
+      is_converted_from_daily: false
       is_daily_unit_conflict: false
     - person_id: -19706
       concept_code: '1082631000000102'
       result_value: 2
       original_result_value: 2
-      original_result_unit_display: U/week
+      source_result_unit_display: U/week
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
       is_daily_unit_conflict: true
@@ -127,7 +151,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 2
       original_result_value: 2
-      original_result_unit_display: ' UnItS / WeEk '
+      source_result_unit_display: ' UnItS / WeEk '
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
       is_daily_unit_conflict: true
@@ -135,23 +159,23 @@ unit_tests:
       concept_code: '160573003'
       result_value: 14
       original_result_value: 2
-      original_result_unit_display: ' PeR DaY '
+      source_result_unit_display: ' PeR DaY '
       alcohol_risk_category: Low Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
     - person_id: -19709
       concept_code: '1082641000000106'
-      result_value: 14.7
+      result_value: 2.1
       original_result_value: 2.1
-      original_result_unit_display: UNITS/DAY
-      alcohol_risk_category: Increasing Risk
-      is_converted_from_daily: true
-      is_daily_unit_conflict: false
+      source_result_unit_display: UNITS/DAY
+      alcohol_risk_category: Unclear
+      is_converted_from_daily: false
+      is_daily_unit_conflict: true
     - person_id: -19710
       concept_code: '1082641000000106'
       result_value: 14
       original_result_value: 14
-      original_result_unit_display: U/week
+      source_result_unit_display: U/week
       alcohol_risk_category: Low Risk
       is_converted_from_daily: false
       is_daily_unit_conflict: false
@@ -159,7 +183,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 2
       original_result_value: 2
-      original_result_unit_display: null
+      source_result_unit_display: null
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
       is_daily_unit_conflict: false
@@ -167,7 +191,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: -7
       original_result_value: -1
-      original_result_unit_display: per day
+      source_result_unit_display: per day
       alcohol_risk_category: Unclear
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -175,7 +199,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 0
       original_result_value: 0
-      original_result_unit_display: per day
+      source_result_unit_display: per day
       alcohol_risk_category: Non-Drinker
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -183,7 +207,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 35.7
       original_result_value: 5.1
-      original_result_unit_display: per day
+      source_result_unit_display: per day
       alcohol_risk_category: Higher Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -191,7 +215,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 2
       original_result_value: 2
-      original_result_unit_display: g/day
+      source_result_unit_display: g/day
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
       is_daily_unit_conflict: false
@@ -199,7 +223,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 14
       original_result_value: 2
-      original_result_unit_display: U/daily
+      source_result_unit_display: U/daily
       alcohol_risk_category: Low Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -207,7 +231,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 14
       original_result_value: 2
-      original_result_unit_display: per/day
+      source_result_unit_display: per/day
       alcohol_risk_category: Low Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -215,7 +239,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 14
       original_result_value: 2
-      original_result_unit_display: 2 units per day.
+      source_result_unit_display: 2 units per day.
       alcohol_risk_category: Low Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -223,7 +247,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 14
       original_result_value: 2
-      original_result_unit_display: U/day on typical day
+      source_result_unit_display: U/day on typical day
       alcohol_risk_category: Low Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -231,7 +255,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 2
       original_result_value: 2
-      original_result_unit_display: /week
+      source_result_unit_display: /week
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
       is_daily_unit_conflict: true
@@ -239,7 +263,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 2
       original_result_value: 2
-      original_result_unit_display: week
+      source_result_unit_display: week
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
       is_daily_unit_conflict: true
@@ -247,7 +271,7 @@ unit_tests:
       concept_code: '1082631000000102'
       result_value: 2
       original_result_value: 2
-      original_result_unit_display: bottles/week
+      source_result_unit_display: bottles/week
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
       is_daily_unit_conflict: true
@@ -255,7 +279,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 2
       original_result_value: 2
-      original_result_unit_display: bottles/day
+      source_result_unit_display: bottles/day
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
       is_daily_unit_conflict: false
@@ -263,7 +287,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 14
       original_result_value: 2
-      original_result_unit_display: a/day
+      source_result_unit_display: a/day
       alcohol_risk_category: Low Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -271,7 +295,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 14
       original_result_value: 2
-      original_result_unit_display: 10 per day
+      source_result_unit_display: 10 per day
       alcohol_risk_category: Low Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -279,7 +303,7 @@ unit_tests:
       concept_code: '160573003'
       result_value: 14
       original_result_value: 2
-      original_result_unit_display: 3 units per day.
+      source_result_unit_display: 3 units per day.
       alcohol_risk_category: Low Risk
       is_converted_from_daily: true
       is_daily_unit_conflict: false
@@ -287,7 +311,103 @@ unit_tests:
       concept_code: '160573003'
       result_value: 2
       original_result_value: 2
-      original_result_unit_display: international units/day
+      source_result_unit_display: international units/day
       alcohol_risk_category: Unclear
       is_converted_from_daily: false
       is_daily_unit_conflict: false
+    - person_id: -19728
+      concept_code: '1082631000000102'
+      result_value: 2
+      original_result_value: 2
+      source_result_unit_display: bottles/day
+      alcohol_risk_category: Unclear
+      is_converted_from_daily: false
+      is_daily_unit_conflict: false
+    - person_id: -19729
+      concept_code: '1082631000000102'
+      result_value: 0
+      original_result_value: 0
+      source_result_unit_display: U/week
+      alcohol_risk_category: Non-Drinker
+      is_converted_from_daily: false
+      is_daily_unit_conflict: false
+    - person_id: -19730
+      concept_code: '1082641000000106'
+      result_value: 0
+      original_result_value: 0
+      source_result_unit_display: units/day
+      alcohol_risk_category: Non-Drinker
+      is_converted_from_daily: true
+      is_daily_unit_conflict: false
+    - person_id: -19731
+      concept_code: '1082641000000106'
+      result_value: 14
+      original_result_value: 14
+      source_result_unit_display: U/W
+      alcohol_risk_category: Low Risk
+      is_converted_from_daily: false
+      is_daily_unit_conflict: false
+    - person_id: -19732
+      concept_code: '1082641000000106'
+      result_value: 20
+      original_result_value: 20
+      source_result_unit_display: u/wk
+      alcohol_risk_category: Increasing Risk
+      is_converted_from_daily: false
+      is_daily_unit_conflict: false
+    - person_id: -19733
+      concept_code: '1082641000000106'
+      result_value: 51
+      original_result_value: 51
+      source_result_unit_display: uperweek
+      alcohol_risk_category: Higher Risk
+      is_converted_from_daily: false
+      is_daily_unit_conflict: false
+    - person_id: -19734
+      concept_code: '1082641000000106'
+      result_value: 2
+      original_result_value: 2
+      source_result_unit_display: bottles/week
+      alcohol_risk_category: Unclear
+      is_converted_from_daily: false
+      is_daily_unit_conflict: false
+    - person_id: -19735
+      concept_code: '1082631000000102'
+      result_value: 14
+      original_result_value: 2
+      source_result_unit_display: units
+      alcohol_risk_category: Low Risk
+      is_converted_from_daily: true
+      is_daily_unit_conflict: false
+    - person_id: -19736
+      concept_code: '1082631000000102'
+      result_value: 2
+      original_result_value: 2
+      source_result_unit_display: ml
+      alcohol_risk_category: Unclear
+      is_converted_from_daily: false
+      is_daily_unit_conflict: false
+    - person_id: -19737
+      concept_code: '1082631000000102'
+      result_value: 2
+      original_result_value: 2
+      source_result_unit_display: g
+      alcohol_risk_category: Unclear
+      is_converted_from_daily: false
+      is_daily_unit_conflict: false
+    - person_id: -19738
+      concept_code: '1082631000000102'
+      result_value: 2
+      original_result_value: 2
+      source_result_unit_display: unknown
+      alcohol_risk_category: Unclear
+      is_converted_from_daily: false
+      is_daily_unit_conflict: false
+    - person_id: -19739
+      concept_code: '1082631000000102'
+      result_value: null
+      original_result_value: null
+      source_result_unit_display: U/week
+      alcohol_risk_category: Unclear
+      is_converted_from_daily: false
+      is_daily_unit_conflict: true

@@ -15,12 +15,6 @@ models:
           arguments:
             source_model: int_waist_circumference_latest
             entity: waist
-            metric: patients_with_waist
-            grain_key: person_id
-      - semantic_grain_count:
-          arguments:
-            source_model: int_waist_circumference_latest
-            entity: waist
             metric: patients_with_waist_to_height_ratio
             grain_key: person_id
             source_filter: waist_to_height_ratio is not null

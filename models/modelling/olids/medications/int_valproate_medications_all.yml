@@ -30,6 +30,9 @@ models:
       - name: order_date
         description: 'Date when valproate medication was ordered'
 
+      - name: date_recorded
+        description: EMIS save timestamp used to resolve same-day orders; null when not supplied.
+
       - name: order_medication_name
         description: 'Name of the valproate medication as ordered'
 

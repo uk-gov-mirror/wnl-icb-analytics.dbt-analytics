@@ -22,7 +22,7 @@ WITH valproate_6m_orders AS (
         orders.statement_medication_name,
         orders.mapped_concept_code,
         orders.mapped_concept_display,
-        recorded.date_recorded,
+        orders.date_recorded,
 
         -- Valproate product classification
         CASE
@@ -37,9 +37,7 @@ WITH valproate_6m_orders AS (
         END AS valproate_product_term
 
     FROM {{ ref('int_valproate_medications_all') }} AS orders
-    LEFT JOIN {{ ref('stg_olids_medication_order') }} AS recorded
-        ON orders.medication_order_id = recorded.id
-    -- Inclusive boundary retained for the published cohort pending interface approval.
+    -- The inclusive lower boundary is a deliberate exception that retains the published cohort.
     WHERE
         order_date >= DATEADD(month, -6, CURRENT_DATE())
         AND order_date <= CURRENT_DATE()

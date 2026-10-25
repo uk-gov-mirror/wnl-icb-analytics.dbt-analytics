@@ -33,10 +33,17 @@ measurements AS (
         AND TRY_TO_DOUBLE(obs.result_value::VARCHAR) IS NOT NULL
 ),
 
+waist_people AS (
+    SELECT DISTINCT person_id
+    FROM measurements
+    WHERE source_cluster_id = 'WAIST_COD'
+),
+
 heights AS (
     SELECT id, person_id, clinical_effective_date, date_recorded, value_cm AS height_cm
     FROM measurements
     WHERE source_cluster_id = 'HEIGHT'
+        AND person_id IN (SELECT person_id FROM waist_people)
         AND age_at_event >= 18
         AND value_cm BETWEEN 50 AND 250
     QUALIFY ROW_NUMBER() OVER (
@@ -72,6 +79,7 @@ valid_bmi AS (
     SELECT person_id, id, clinical_effective_date, date_recorded, bmi_value
     FROM {{ ref('int_bmi_all') }}
     WHERE is_valid_bmi
+        AND person_id IN (SELECT person_id FROM waist_people)
         AND clinical_effective_date::DATE <= CURRENT_DATE()
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY person_id, clinical_effective_date::DATE

@@ -20,7 +20,7 @@ SELECT
     -- UCUM display where OLIDS maps the unit, else the recorded unit text. OLIDS leaves
     -- alcohol units per week unmapped (UCUM has no alcohol unit).
     COALESCE(obs.result_unit_display, NULLIF(TRIM(units.display), '')) AS recorded_unit_display,
-    COALESCE(NULLIF(units.display, ''), obs.result_unit_display) AS original_result_unit_display
+    COALESCE(NULLIF(TRIM(units.display), ''), obs.result_unit_display) AS source_result_unit_display
     FROM ({{ get_observations("'ALC_COD'") }}) obs
     LEFT JOIN {{ ref('stg_olids_concept') }} units
         ON obs.result_units_source_concept_id = units.concept_id
@@ -29,11 +29,13 @@ AND obs.clinical_effective_date <= CURRENT_DATE() -- No future dates
 ),
 unit_labels AS (
     SELECT *,
-        LOWER(REPLACE(TRIM(original_result_unit_display), ' ', '')) AS unit_label,
+        LOWER(REPLACE(TRIM(source_result_unit_display), ' ', '')) AS unit_label,
         COALESCE(unit_label IN ('{units}/d', '{units}/day', '[arb''u]/d', 'a/day', 'u/day]')
             OR REGEXP_LIKE(unit_label,
                 '([~]?[0-9.]*((arbitrary)?units?|u)?(/per|per/|/|per)(d|days?|daily)|(u|units?)?daily)([.]|ontypicalday|typicalday)?'),
             FALSE) AS has_daily_unit,
+        COALESCE(REGEXP_LIKE(unit_label, '.*(bottle|pint|glass|can|ml|litre|liter|gram|ounce|oz|beer|wine|drink|international).*')
+            OR REGEXP_LIKE(unit_label, '(g|kg)(/.*|per.*)?'), FALSE) AS has_non_alcohol_unit,
         COALESCE(unit_label IN ('perweek', 'perwk', 'u/week', 'u/wk', 'u/w', 'units/week', 'unit/week',
             'units/wk', 'unit/wk', 'units/w', 'uperweek', 'unitperweek', 'unitsperweek', 'unitsperwk',
             'unitspw', 'upw', '{units}/wk', 'u(nits)/we', 'unt/wk', 'u/wkly', 'u/wee0',
@@ -51,28 +53,30 @@ observations_with_demographics AS (
         bo.concept_code,
         bo.concept_display,
         bo.original_result_value,
-        bo.original_result_unit_display,
-        COALESCE(bo.concept_code = '1082631000000102' AND bo.has_weekly_unit, FALSE) AS is_daily_unit_conflict,
+        bo.source_result_unit_display,
+        COALESCE(bo.original_result_value IS DISTINCT FROM 0 AND (
+            (bo.concept_code = '1082631000000102' AND bo.has_weekly_unit)
+            OR (bo.concept_code = '1082641000000106' AND bo.has_daily_unit)), FALSE) AS is_daily_unit_conflict,
         bo.original_result_value IS NOT NULL AND NOT is_daily_unit_conflict
-            AND (bo.concept_code = '1082631000000102'
+            AND ((bo.concept_code = '1082631000000102' AND (
+                    COALESCE(bo.unit_label, '') = ''
+                    OR bo.unit_label IN ('u', 'unit', 'units', '{units}', 'arbitraryunit', 'arbitraryunits',
+                        '[arb''u]', 'alcoholunit', 'alcoholunits', 'unitsofalcohol', 'ukunits', 'ukalcoholunits')))
                 OR (bo.is_numeric_units_concept AND bo.has_daily_unit)) AS is_converted_from_daily,
         IFF(is_converted_from_daily, bo.original_result_value * 7, bo.original_result_value) AS result_value,
-        CASE WHEN is_daily_unit_conflict THEN 'Daily concept with weekly unit; not converted'
+        CASE WHEN is_daily_unit_conflict AND bo.concept_code = '1082631000000102' THEN 'Daily concept with weekly unit; not converted'
+            WHEN is_daily_unit_conflict THEN 'Weekly concept with daily unit; not converted'
             WHEN is_converted_from_daily AND bo.concept_code = '1082631000000102' THEN 'Daily concept multiplied by 7'
             WHEN is_converted_from_daily THEN 'Explicit daily unit multiplied by 7'
             ELSE 'No daily conversion' END AS conversion_reason,
         bo.is_numeric_units_concept,
         CASE
+WHEN bo.has_non_alcohol_unit THEN bo.source_result_unit_display
 WHEN is_converted_from_daily THEN 'U/week'
-WHEN LOWER(TRIM(bo.recorded_unit_display)) IN ('{units}/wk','units/w','upw','unit/wk','u/ week','u(nits)/we','units/week',
-     'units pw','units per wk','units/wk','unt/wk','u/wkly','u/wee0') THEN 'U/week'
-when bo.recorded_unit_display ILIKE '%/uweek' THEN 'U/week'
-when bo.recorded_unit_display ILIKE ('%U/week') THEN 'U/week'
-WHEN bo.recorded_unit_display ILIKE ('U/week%') THEN 'U/week'
-WHEN bo.recorded_unit_display ILIKE ('%unit%per%week%') THEN 'U/week'
-WHEN bo.recorded_unit_display ILIKE ('%unit%week%') THEN 'U/week'
--- The concept fixes the unit as units per week.
-WHEN bo.concept_code = '1082641000000106' AND LOWER(TRIM(bo.recorded_unit_display)) = 'per week' THEN 'U/week'
+WHEN bo.has_weekly_unit THEN 'U/week'
+-- Zero is unchanged by the time basis, even when the concept and unit disagree.
+WHEN bo.original_result_value = 0 AND bo.is_numeric_units_concept AND bo.has_daily_unit THEN 'U/week'
+WHEN bo.concept_code = '1082631000000102' THEN bo.source_result_unit_display
 ELSE bo.recorded_unit_display END AS result_unit_display
     FROM unit_labels bo
     LEFT JOIN {{ ref('dim_person_demographics') }} pd
@@ -87,7 +91,7 @@ concept_display,
 result_value,
 result_unit_display,
 original_result_value,
-original_result_unit_display,
+source_result_unit_display,
 is_converted_from_daily,
 is_daily_unit_conflict,
 conversion_reason,
