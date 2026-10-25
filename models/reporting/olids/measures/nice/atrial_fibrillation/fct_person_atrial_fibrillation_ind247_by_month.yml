@@ -15,7 +15,8 @@ models:
     NICE NG196. Recalculated for each of the last 60 month-ends with current rules, code
     lists and records, so later corrections can change past months. Code lists: AFIB_COD,
     AFIBRES_COD, CHADVASC_COD, DOACCON_COD, DOACDEC_COD, DOACNI_COD, ANTIPHOSYND_COD,
-    TTR_COD (PCD); AF_VALVULAR_OBS (ECL cache); 020802 (BNF).
+    TTR_COD (PCD); AF_VALVULAR_OBS (ECL cache); DIRECTORANTICOAGDRUG_COD,
+    VITKANTAGDRUG_COD (NHS drug refsets); retained 0208020 DOAC/VKA chemicals (BNF).
   config:
     meta:
       owner:

@@ -15,7 +15,8 @@ models:
     NG196. Recalculated for each of the last 60 month-ends with current rules, code lists
     and records, so later corrections can change past months. Code
     lists: AFIB_COD, AFIBRES_COD, CHADVASC_COD, CHAD_COD (PCD); ORANTICOAGADVERS_COD,
-    XORANTICOAGGENCON_COD, TXORANTICOAGGENCON_COD (PCD); 020802 (BNF).
+    XORANTICOAGGENCON_COD, TXORANTICOAGGENCON_COD (PCD); DIRECTORANTICOAGDRUG_COD,
+    VITKANTAGDRUG_COD (NHS drug refsets); retained 0208020 DOAC/VKA chemicals (BNF).
   config:
     meta:
       owner:

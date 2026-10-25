@@ -13,8 +13,9 @@ models:
       months. An invalid latest score cannot be replaced with an older valid score. Resolved
       atrial fibrillation is excluded. No personalised care adjustments are applied. Based
       on NICE NG196. Code lists: AFIB_COD, AFIBRES_COD, CHADVASC_COD, CHAD_COD (PCD);
-      ORANTICOAGADVERS_COD, XORANTICOAGGENCON_COD, TXORANTICOAGGENCON_COD (PCD); 020802
-      (BNF).
+      ORANTICOAGADVERS_COD, XORANTICOAGGENCON_COD, TXORANTICOAGGENCON_COD (PCD);
+      DIRECTORANTICOAGDRUG_COD, VITKANTAGDRUG_COD (NHS drug refsets); retained 0208020
+      DOAC/VKA chemicals (BNF).
     config:
       meta:
         owner:
@@ -37,7 +38,9 @@ models:
             with an older valid score. Resolved atrial fibrillation is excluded. No
             personalised care adjustments are applied. Based on NICE NG196. Code lists:
             AFIB_COD, AFIBRES_COD, CHADVASC_COD, CHAD_COD (PCD); ORANTICOAGADVERS_COD,
-            XORANTICOAGGENCON_COD, TXORANTICOAGGENCON_COD (PCD); 020802 (BNF).
+            XORANTICOAGGENCON_COD, TXORANTICOAGGENCON_COD (PCD); DIRECTORANTICOAGDRUG_COD,
+            VITKANTAGDRUG_COD (NHS drug refsets); retained 0208020 DOAC/VKA chemicals
+            (BNF).
           is_qof: false
           source_column: "is_in_numerator"
           usage_contexts:
@@ -109,7 +112,8 @@ models:
       therapeutic range at least 65% in the last 6 months. No personalised care
       adjustments are applied. Based on NICE NG196. Code lists: AFIB_COD, AFIBRES_COD,
       CHADVASC_COD, DOACCON_COD, DOACDEC_COD, DOACNI_COD, ANTIPHOSYND_COD, TTR_COD
-      (PCD); AF_VALVULAR_OBS (ECL cache); 020802 (BNF).
+      (PCD); AF_VALVULAR_OBS (ECL cache); DIRECTORANTICOAGDRUG_COD, VITKANTAGDRUG_COD (NHS
+      drug refsets); retained 0208020 DOAC/VKA chemicals (BNF).
     config:
       meta:
         owner:
@@ -134,7 +138,8 @@ models:
             personalised care adjustments are applied. Based on NICE NG196. Code
             lists: AFIB_COD, AFIBRES_COD, CHADVASC_COD, DOACCON_COD, DOACDEC_COD,
             DOACNI_COD, ANTIPHOSYND_COD, TTR_COD (PCD); AF_VALVULAR_OBS (ECL
-            cache); 020802 (BNF).
+            cache); DIRECTORANTICOAGDRUG_COD, VITKANTAGDRUG_COD (NHS drug refsets);
+            retained 0208020 DOAC/VKA chemicals (BNF).
           is_qof: false
           source_column: "is_in_numerator"
           usage_contexts:
@@ -196,7 +201,8 @@ models:
       in the last 12 months. Neither review code proves completion of all NICE review
       elements. Resolved atrial fibrillation is excluded. No personalised care adjustments
       are applied. Based on NICE NG196. Code lists: AFIB_COD, AFIBRES_COD,
-      ORANTICOAGREVW_COD, AFMON_COD (PCD); 020802 (BNF).
+      ORANTICOAGREVW_COD, AFMON_COD (PCD); DIRECTORANTICOAGDRUG_COD, VITKANTAGDRUG_COD
+      (NHS drug refsets); retained 0208020 DOAC/VKA chemicals (BNF).
     config:
       meta:
         owner:
@@ -216,8 +222,9 @@ models:
             fibrillation annual review in the last 12 months. Neither review code proves
             completion of all NICE review elements. Resolved atrial fibrillation is
             excluded. No personalised care adjustments are applied. Based on NICE NG196.
-            Code lists: AFIB_COD, AFIBRES_COD, ORANTICOAGREVW_COD, AFMON_COD (PCD); 020802
-            (BNF).
+            Code lists: AFIB_COD, AFIBRES_COD, ORANTICOAGREVW_COD, AFMON_COD (PCD);
+            DIRECTORANTICOAGDRUG_COD, VITKANTAGDRUG_COD (NHS drug refsets); retained
+            0208020 DOAC/VKA chemicals (BNF).
           is_qof: false
           source_column: "is_in_numerator"
           usage_contexts:

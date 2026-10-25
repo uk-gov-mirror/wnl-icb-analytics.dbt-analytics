@@ -34,6 +34,7 @@ SELECT
     base_orders.bnf_code,
     base_orders.bnf_name,
 
+    -- Keeps the published column width from the retired OTHER_* label.
     CASE WHEN is_mineralocorticoid THEN 'MINERALOCORTICOID'
          WHEN NOT is_mineralocorticoid THEN 'GLUCOCORTICOID'
          ELSE 'UNKNOWN' END::varchar(20) AS corticosteroid_type,
@@ -44,6 +45,7 @@ SELECT
 
     -- Order recency flags (important for steroid monitoring)
     {{ medication_date_flags('base_orders.order_date', months=[1, 3, 6]) }},
+    -- Keeps the published column width from the retired OTHER_* label.
     corticosteroid_type::varchar(17) AS corticosteroid_type_dmd
 
 FROM classified_orders base_orders

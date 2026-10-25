@@ -15,7 +15,9 @@ models:
     temporary contraindications count for 12 months. No personalised care adjustments are
     applied. Based on NICE NG128. Recalculated for each of the last 60 month-ends with
     current rules, code lists and records, so later corrections can change past months.
-    Code lists: OSAL_COD, CLO_COD, ORANTICOAG_COD (PCD); 0209, 020802 (BNF); XSAL_COD,
+    Code lists: OSAL_COD, CLO_COD, ORANTICOAG_COD (PCD); 0209 (BNF);
+    DIRECTORANTICOAGDRUG_COD, VITKANTAGDRUG_COD (NHS drug refsets); retained 0208020
+    DOAC/VKA chemicals (BNF); XSAL_COD,
     TXSAL_COD, XCLO_COD, TXCLO_COD, XORANTICOAG_COD, TXORANTICOAG_COD,
     XORANTICOAGGENCON_COD, TXORANTICOAGGENCON_COD (PCD); XDIPY_COD, TXDIPY_COD, STRK_COD,
     TIA_COD, OSTR_COD (PCD).
