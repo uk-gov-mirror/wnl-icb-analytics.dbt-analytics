@@ -35,7 +35,6 @@ END AS alcohol_advice_services
 from ALC
 QUALIFY ROW_NUMBER() OVER (
     PARTITION BY person_id, concept_code, DATE(clinical_effective_date)
-    ORDER BY clinical_effective_date DESC,
-        CASE alcohol_advice_services WHEN 'Yes' THEN 1 WHEN 'Declined' THEN 2 ELSE 3 END,
+    ORDER BY CASE alcohol_advice_services WHEN 'Yes' THEN 1 WHEN 'Declined' THEN 2 ELSE 3 END,
         date_recorded DESC NULLS LAST, id DESC, cluster_id DESC
 ) = 1

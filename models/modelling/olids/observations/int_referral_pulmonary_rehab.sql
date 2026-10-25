@@ -32,6 +32,7 @@ select id AS observation_id
 ,date_recorded
 ,person_id
 ,DATE(clinical_effective_date) AS clinical_effective_date
+,PR.clinical_effective_date AS clinical_effective_at
 ,concept_code
 ,concept_display
 ,CASE 
@@ -43,5 +44,5 @@ END AS pr_obs_type
 from PR 
 QUALIFY ROW_NUMBER() OVER (
     PARTITION BY PR.person_id, PR.concept_code, DATE(PR.clinical_effective_date)
-    ORDER BY PR.clinical_effective_date DESC, PR.date_recorded DESC NULLS LAST, PR.id DESC, PR.source_cluster_id DESC
+    ORDER BY PR.date_recorded DESC NULLS LAST, PR.id DESC, PR.source_cluster_id DESC
 ) = 1

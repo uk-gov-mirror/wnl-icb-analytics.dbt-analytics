@@ -20,8 +20,8 @@ unit_tests:
           NULL::BOOLEAN AS is_declined_screening,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144581, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144581, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144581, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144581, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144582, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144582, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144583, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -52,8 +52,8 @@ unit_tests:
           column4::TIMESTAMP_NTZ AS date_recorded,
           'LSMOK_COD'::VARCHAR AS source_cluster_id
       FROM VALUES
-          ('SYN_Z', -144581, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144581, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144581, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144581, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144582, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144582, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144583, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -87,8 +87,8 @@ unit_tests:
           NULL::BOOLEAN AS is_declined_screening,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144581, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144581, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144581, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144581, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144582, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144582, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144583, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -119,8 +119,8 @@ unit_tests:
           column4::TIMESTAMP_NTZ AS date_recorded,
           'LSMOK_COD'::VARCHAR AS source_cluster_id
       FROM VALUES
-          ('SYN_Z', -144581, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144581, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144581, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144581, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144582, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144582, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144583, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -157,8 +157,8 @@ unit_tests:
           NULL::BOOLEAN AS is_cervix_removal,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144581, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144581, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144581, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144581, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144582, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144582, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144583, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -189,8 +189,8 @@ unit_tests:
           column4::TIMESTAMP_NTZ AS date_recorded,
           'LSMOK_COD'::VARCHAR AS source_cluster_id
       FROM VALUES
-          ('SYN_Z', -144581, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144581, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144581, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144581, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144582, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144582, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144583, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -225,8 +225,8 @@ unit_tests:
           column4::TIMESTAMP_NTZ AS date_recorded,
           'LSMOK_COD'::VARCHAR AS source_cluster_id
       FROM VALUES
-          ('SYN_Z', -144581, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144581, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144581, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144581, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144582, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144582, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144583, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -257,8 +257,8 @@ unit_tests:
           column4::TIMESTAMP_NTZ AS date_recorded,
           'LSMOK_COD'::VARCHAR AS source_cluster_id
       FROM VALUES
-          ('SYN_Z', -144581, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144581, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144581, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144581, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144582, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144582, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144583, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -297,8 +297,8 @@ unit_tests:
           NULL::BOOLEAN AS is_never_smoker,
           NULL::BOOLEAN AS has_smoking_history
       FROM VALUES
-          ('SYN_Z', -144581, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144581, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144581, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144581, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144582, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144582, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144583, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -365,7 +365,7 @@ unit_tests:
       observation_id: SYN_A
     - person_id: -144592
       observation_id: SYN_Z
-- name: ndpp_event_grain_uses_timestamp_save_time_and_id
+- name: ndpp_event_grain_uses_save_time_then_id
   model: int_referral_ndpp_all
   given: []
   overrides:
@@ -380,7 +380,7 @@ unit_tests:
   expect:
     rows:
     - person_id: -144593
-      observation_id: SYN_A
+      observation_id: SYN_MORNING
       clinical_effective_date: '2024-03-01'
     - person_id: -144593
       observation_id: SYN_NEXT

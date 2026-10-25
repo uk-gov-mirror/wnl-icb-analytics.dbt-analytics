@@ -2,6 +2,7 @@
     config(
         materialized='incremental',
         incremental_strategy='delete+insert',
+        on_schema_change='append_new_columns',
         unique_key='end_date',
         cluster_by=['end_date', 'person_id'],
         snowflake_warehouse=env_var('EFI2_HISTORY_WAREHOUSE', target.warehouse),
@@ -32,7 +33,7 @@ codelist AS (
 ),
 
 relevant_observations AS (
-    -- Match the current cohort's DISTINCT evidence grain before month expansion.
+    -- Match the current cohort's evidence grain before month expansion.
     -- The hash retains hidden grain fields without carrying them across 60 months.
     SELECT
         obs.id AS observation_id,

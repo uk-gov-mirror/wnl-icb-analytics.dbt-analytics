@@ -6,8 +6,8 @@ models:
       ALCBRINTDEC_COD. One row per person, concept and calendar date up to the build
       date. Includes inactive and deceased people, without age or SMI-register
       restrictions. The selected clinical timestamp is retained. Within a calendar
-      day, the latest clinical timestamp wins, then clinical priority, save time
-      and observation ID.
+      day, completion takes priority over decline, then the latest save time
+      and highest observation ID decide the selected record.
     config:
       meta:
         owner:
@@ -53,5 +53,5 @@ unit_tests:
               ('SYN_FUTURE', '2999-01-01', NULL)
     expect:
       rows:
-        - {person_id: -144521, observation_id: SYN_A, clinical_effective_date: '2024-03-01 15:00:00', alcohol_advice_services: 'Yes'}
+        - {person_id: -144521, observation_id: SYN_MORNING, clinical_effective_date: '2024-03-01 09:00:00', alcohol_advice_services: 'Yes'}
         - {person_id: -144521, observation_id: SYN_NEXT, clinical_effective_date: '2024-03-02 09:00:00', alcohol_advice_services: 'Yes'}

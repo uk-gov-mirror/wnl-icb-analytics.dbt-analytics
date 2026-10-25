@@ -16,7 +16,7 @@ QUALIFY
     ROW_NUMBER()
         OVER (
             PARTITION BY person_id
-            ORDER BY clinical_effective_date DESC,
+            ORDER BY clinical_effective_date::DATE DESC,
                 -- Preserve the existing SMI latest-event priority.
                 CASE concept_code
                     WHEN '1025301000000100' THEN 1

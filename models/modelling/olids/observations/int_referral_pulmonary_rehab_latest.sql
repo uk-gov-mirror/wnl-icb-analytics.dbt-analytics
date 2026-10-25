@@ -14,10 +14,10 @@ For SMI Longer Lives Enhanced Review:
 - PULRHBOFF_COD: Pulmonary Rehab Offered codes
 */
 
-SELECT * EXCLUDE (observation_id, date_recorded)
+SELECT * EXCLUDE (observation_id, date_recorded, clinical_effective_at)
 FROM {{ ref('int_referral_pulmonary_rehab') }}
 
 QUALIFY ROW_NUMBER()
-        OVER (PARTITION BY person_id ORDER BY clinical_effective_date DESC, date_recorded DESC NULLS LAST, observation_id DESC)
+        OVER (PARTITION BY person_id ORDER BY clinical_effective_date::DATE DESC, date_recorded DESC NULLS LAST, observation_id DESC)
     = 1
 

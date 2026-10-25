@@ -28,8 +28,8 @@ unit_tests:
           NULL::VARCHAR AS alt_category,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -82,8 +82,8 @@ unit_tests:
           NULL::VARCHAR AS bilirubin_category,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -136,8 +136,8 @@ unit_tests:
           NULL::VARCHAR AS ggt_category,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -190,8 +190,8 @@ unit_tests:
           FALSE::BOOLEAN AS is_out_of_range,
           NULL::VARCHAR AS haemoglobin_category
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -244,8 +244,8 @@ unit_tests:
           NULL::VARCHAR AS platelets_category,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -309,8 +309,8 @@ unit_tests:
           FALSE::BOOLEAN AS is_extreme_outlier,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -318,22 +318,27 @@ unit_tests:
           ('SYN_OLD', -144504, '2024-03-01', '2024-03-05', 10, TRUE),
           ('SYN_NEW', -144504, '2024-03-02', '2024-03-03', 20, TRUE),
           ('SYN_VALID', -144505, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_INVALID', -144505, '2024-03-02', '2024-03-03', 20, FALSE)
+          ('SYN_INVALID', -144505, '2024-03-01', '2024-03-03', 20, FALSE)
   expect:
     rows:
     - person_id: -144501
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144502
       id: SYN_Z
+      has_later_unassessable_result: false
     - person_id: -144503
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144504
       id: SYN_NEW
+      has_later_unassessable_result: false
     - person_id: -144505
       id: SYN_VALID
+      has_later_unassessable_result: true
   overrides:
     macros:
-      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id WHERE FALSE
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id, NULL::BOOLEAN AS has_later_unassessable_result WHERE FALSE
 - name: cholesterol_hdl_latest_valid_uses_save_time_then_id
   model: int_cholesterol_hdl_latest
   given:
@@ -374,8 +379,8 @@ unit_tests:
           FALSE::BOOLEAN AS is_extreme_outlier,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -383,22 +388,27 @@ unit_tests:
           ('SYN_OLD', -144504, '2024-03-01', '2024-03-05', 10, TRUE),
           ('SYN_NEW', -144504, '2024-03-02', '2024-03-03', 20, TRUE),
           ('SYN_VALID', -144505, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_INVALID', -144505, '2024-03-02', '2024-03-03', 20, FALSE)
+          ('SYN_INVALID', -144505, '2024-03-01', '2024-03-03', 20, FALSE)
   expect:
     rows:
     - person_id: -144501
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144502
       id: SYN_Z
+      has_later_unassessable_result: false
     - person_id: -144503
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144504
       id: SYN_NEW
+      has_later_unassessable_result: false
     - person_id: -144505
       id: SYN_VALID
+      has_later_unassessable_result: true
   overrides:
     macros:
-      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id WHERE FALSE
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id, NULL::BOOLEAN AS has_later_unassessable_result WHERE FALSE
 - name: cholesterol_ldl_latest_valid_uses_save_time_then_id
   model: int_cholesterol_ldl_latest
   given:
@@ -440,8 +450,8 @@ unit_tests:
           FALSE::BOOLEAN AS is_extreme_outlier,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -449,22 +459,27 @@ unit_tests:
           ('SYN_OLD', -144504, '2024-03-01', '2024-03-05', 10, TRUE),
           ('SYN_NEW', -144504, '2024-03-02', '2024-03-03', 20, TRUE),
           ('SYN_VALID', -144505, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_INVALID', -144505, '2024-03-02', '2024-03-03', 20, FALSE)
+          ('SYN_INVALID', -144505, '2024-03-01', '2024-03-03', 20, FALSE)
   expect:
     rows:
     - person_id: -144501
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144502
       id: SYN_Z
+      has_later_unassessable_result: false
     - person_id: -144503
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144504
       id: SYN_NEW
+      has_later_unassessable_result: false
     - person_id: -144505
       id: SYN_VALID
+      has_later_unassessable_result: true
   overrides:
     macros:
-      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id WHERE FALSE
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id, NULL::BOOLEAN AS has_later_unassessable_result WHERE FALSE
 - name: cholesterol_non_hdl_latest_valid_uses_save_time_then_id
   model: int_cholesterol_non_hdl_latest
   given:
@@ -505,8 +520,8 @@ unit_tests:
           FALSE::BOOLEAN AS is_extreme_outlier,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -514,22 +529,27 @@ unit_tests:
           ('SYN_OLD', -144504, '2024-03-01', '2024-03-05', 10, TRUE),
           ('SYN_NEW', -144504, '2024-03-02', '2024-03-03', 20, TRUE),
           ('SYN_VALID', -144505, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_INVALID', -144505, '2024-03-02', '2024-03-03', 20, FALSE)
+          ('SYN_INVALID', -144505, '2024-03-01', '2024-03-03', 20, FALSE)
   expect:
     rows:
     - person_id: -144501
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144502
       id: SYN_Z
+      has_later_unassessable_result: false
     - person_id: -144503
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144504
       id: SYN_NEW
+      has_later_unassessable_result: false
     - person_id: -144505
       id: SYN_VALID
+      has_later_unassessable_result: true
   overrides:
     macros:
-      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id WHERE FALSE
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id, NULL::BOOLEAN AS has_later_unassessable_result WHERE FALSE
 - name: cholesterol_hdl_ratio_latest_valid_uses_save_time_then_id
   model: int_cholesterol_hdl_ratio_latest
   given:
@@ -568,8 +588,8 @@ unit_tests:
           FALSE::BOOLEAN AS is_extreme_outlier,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -577,22 +597,27 @@ unit_tests:
           ('SYN_OLD', -144504, '2024-03-01', '2024-03-05', 10, TRUE),
           ('SYN_NEW', -144504, '2024-03-02', '2024-03-03', 20, TRUE),
           ('SYN_VALID', -144505, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_INVALID', -144505, '2024-03-02', '2024-03-03', 20, FALSE)
+          ('SYN_INVALID', -144505, '2024-03-01', '2024-03-03', 20, FALSE)
   expect:
     rows:
     - person_id: -144501
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144502
       id: SYN_Z
+      has_later_unassessable_result: false
     - person_id: -144503
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144504
       id: SYN_NEW
+      has_later_unassessable_result: false
     - person_id: -144505
       id: SYN_VALID
+      has_later_unassessable_result: true
   overrides:
     macros:
-      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id WHERE FALSE
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id, NULL::BOOLEAN AS has_later_unassessable_result WHERE FALSE
 - name: triglycerides_latest_valid_uses_save_time_then_id
   model: int_triglycerides_latest
   given:
@@ -633,8 +658,8 @@ unit_tests:
           FALSE::BOOLEAN AS is_extreme_outlier,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),
@@ -642,22 +667,27 @@ unit_tests:
           ('SYN_OLD', -144504, '2024-03-01', '2024-03-05', 10, TRUE),
           ('SYN_NEW', -144504, '2024-03-02', '2024-03-03', 20, TRUE),
           ('SYN_VALID', -144505, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_INVALID', -144505, '2024-03-02', '2024-03-03', 20, FALSE)
+          ('SYN_INVALID', -144505, '2024-03-01', '2024-03-03', 20, FALSE)
   expect:
     rows:
     - person_id: -144501
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144502
       id: SYN_Z
+      has_later_unassessable_result: false
     - person_id: -144503
       id: SYN_A
+      has_later_unassessable_result: false
     - person_id: -144504
       id: SYN_NEW
+      has_later_unassessable_result: false
     - person_id: -144505
       id: SYN_VALID
+      has_later_unassessable_result: true
   overrides:
     macros:
-      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id WHERE FALSE
+      get_empty_subquery_sql: SELECT NULL::NUMBER AS person_id, NULL::VARCHAR AS id, NULL::BOOLEAN AS has_later_unassessable_result WHERE FALSE
 - name: blood_glucose_latest_uses_save_time_then_id
   model: int_blood_glucose_latest
   given:
@@ -675,8 +705,8 @@ unit_tests:
           column1::VARCHAR AS observation_id,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144511, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144511, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144511, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144511, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144512, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144512, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144513, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -706,8 +736,8 @@ unit_tests:
           column1::VARCHAR AS observation_id,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144511, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144511, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144511, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144511, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144512, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144512, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144513, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -737,8 +767,8 @@ unit_tests:
           column1::VARCHAR AS observation_id,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144511, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144511, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144511, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144511, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144512, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144512, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144513, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -770,8 +800,8 @@ unit_tests:
           column1::VARCHAR AS observation_id,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144511, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144511, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144511, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144511, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144512, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144512, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144513, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -804,8 +834,8 @@ unit_tests:
           NULL::VARCHAR AS illicit_drug_class,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144511, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144511, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144511, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144511, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144512, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144512, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144513, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -839,8 +869,8 @@ unit_tests:
           column1::VARCHAR AS observation_id,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144511, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144511, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144511, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144511, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144512, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144512, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144513, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -864,15 +894,16 @@ unit_tests:
     rows: |-
       SELECT
           column2::NUMBER AS person_id,
-          column3::TIMESTAMP_NTZ AS clinical_effective_date,
+          column3::DATE AS clinical_effective_date,
+          column3::TIMESTAMP_NTZ AS clinical_effective_at,
           column5::VARCHAR AS concept_code,
           NULL::VARCHAR AS concept_display,
           NULL::VARCHAR AS pr_obs_type,
           column1::VARCHAR AS observation_id,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144511, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144511, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144511, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144511, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144512, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144512, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144513, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -914,8 +945,8 @@ unit_tests:
           NULL::VARCHAR AS screening_status_interpretation,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144511, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
-          ('SYN_A', -144511, '2024-03-01', '2024-03-03', 'SYN_WINNER'),
+          ('SYN_Z', -144511, '2024-03-01 15:00', '2024-03-02', 'SYN_OTHER'),
+          ('SYN_A', -144511, '2024-03-01 09:00', '2024-03-03', 'SYN_WINNER'),
           ('SYN_A', -144512, '2024-03-01', '2024-03-02', 'SYN_OTHER'),
           ('SYN_Z', -144512, '2024-03-01', '2024-03-02', 'SYN_WINNER'),
           ('SYN_Z', -144513, '2024-03-01', NULL, 'SYN_OTHER'),
@@ -946,8 +977,8 @@ unit_tests:
           column1::VARCHAR AS observation_id,
           column4::TIMESTAMP_NTZ AS date_recorded
       FROM VALUES
-          ('SYN_Z', -144511, '2024-03-01', '2024-03-02', FALSE),
-          ('SYN_A', -144511, '2024-03-01', '2024-03-03', TRUE),
+          ('SYN_Z', -144511, '2024-03-01 15:00', '2024-03-02', FALSE),
+          ('SYN_A', -144511, '2024-03-01 09:00', '2024-03-03', TRUE),
           ('SYN_A', -144512, '2024-03-01', '2024-03-02', FALSE),
           ('SYN_Z', -144512, '2024-03-01', '2024-03-02', TRUE),
           ('SYN_Z', -144513, '2024-03-01', NULL, FALSE),
@@ -1302,8 +1333,8 @@ unit_tests:
           NULL::VARCHAR AS eosinophil_category,
           FALSE::BOOLEAN AS is_out_of_range
       FROM VALUES
-          ('SYN_Z', -144501, '2024-03-01', '2024-03-02', 10, TRUE),
-          ('SYN_A', -144501, '2024-03-01', '2024-03-03', 20, TRUE),
+          ('SYN_Z', -144501, '2024-03-01 15:00', '2024-03-02', 10, TRUE),
+          ('SYN_A', -144501, '2024-03-01 09:00', '2024-03-03', 20, TRUE),
           ('SYN_A', -144502, '2024-03-01', '2024-03-02', 10, TRUE),
           ('SYN_Z', -144502, '2024-03-01', '2024-03-02', 20, TRUE),
           ('SYN_Z', -144503, '2024-03-01', NULL, 10, TRUE),

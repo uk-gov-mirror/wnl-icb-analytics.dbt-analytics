@@ -185,7 +185,7 @@ with
             and not hb.is_extreme_outlier
         qualify row_number() over (
             partition by ac.person_id, ac.end_date
-            order by hb.clinical_effective_date desc, hb.date_recorded desc nulls last, hb.id desc
+            order by hb.clinical_effective_date::DATE desc, hb.date_recorded desc nulls last, hb.id desc
         ) = 1
     ),
     {% endif %}
@@ -244,7 +244,7 @@ with
             -- order by clinical_effective_date descending. Paper-alignment deviation.
             row_number() over (
                 partition by person_id, end_date
-                order by clinical_effective_date desc nulls last,
+                order by clinical_effective_date::DATE desc nulls last,
                     date_recorded desc nulls last, observation_id desc
             ) as rn,
             'BMI' as sub_deficit,

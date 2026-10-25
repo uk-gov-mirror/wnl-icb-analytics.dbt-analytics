@@ -19,5 +19,5 @@ WHERE obs.clinical_effective_date IS NOT NULL
     AND obs.clinical_effective_date::DATE <= CURRENT_DATE()
 QUALIFY ROW_NUMBER() OVER (
     PARTITION BY obs.person_id, obs.mapped_concept_code, obs.clinical_effective_date::DATE
-    ORDER BY obs.clinical_effective_date DESC, obs.date_recorded DESC NULLS LAST, obs.id DESC
+    ORDER BY obs.date_recorded DESC NULLS LAST, obs.id DESC
 ) = 1

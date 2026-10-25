@@ -92,8 +92,8 @@ models:
         description: True when plausibility_status is Within valid range. False includes missing values,
           unsupported units and values outside the range.
       - name: most_recent_result_date
-        description: Clinical effective date of the person's most recent result of any validity. Equal to
-          clinical_effective_date unless a later result was invalid.
+        description: Clinical timestamp of the person's latest result of any validity, ranked by calendar
+          date, save time and observation ID.
       - name: has_later_unassessable_result
         description: True when a result more recent than this row exists but failed validity, for example an
           LDL that the laboratory could not calculate. The row is then an older valid result, not the person's

@@ -3,7 +3,7 @@ models:
     description: >-
       Last recorded completed retinal screening per person from RETSCREN_COD or
       CVDRETSCRN_COD. Includes inactive and deceased people with completion evidence.
-      Clinical timestamp, latest save time and highest observation ID determine the
+      Clinical calendar date, latest save time and highest observation ID determine the
       selected event. The completion input does not exclude future clinical dates.
       Declines, referrals and unsuitable codes are outside this input.
     config:
