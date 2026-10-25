@@ -1,12 +1,13 @@
 models:
   - name: int_anticoagulant_medications_all
     description: >-
-      Oral anticoagulant orders for all people, one row per dated order. Legacy BNF 020802
-      membership and category labels remain pending interface approval. National DOAC and
-      vitamin K antagonist refsets identify supported products; heparins and INR test
-      strips are not included in those lists.
-      Combinations are included only within BNF 020802; a component alone does not
-      qualify a product outside that prefix.
+      Oral anticoagulant orders for all people, one row per dated order. Selection uses
+      national DIRECTORANTICOAGDRUG_COD and VITKANTAGDRUG_COD lists, plus the existing BNF
+      chemicals for apixaban, dabigatran, edoxaban, rivaroxaban, warfarin, acenocoumarol,
+      phenindione and phenprocoumon where product lists are incomplete. INR testing strips
+      and pentosan are excluded. Combinations qualify when nationally listed.
+      Type and class flags use national membership only; a retained list-gap product has
+      null type and false class flags, but still counts as oral anticoagulant evidence.
     config:
       meta:
         owner:
@@ -50,11 +51,11 @@ models:
       - name: bnf_name
         description: 'BNF classification name'
       - name: anticoagulant_type
-        description: 'BNF-based anticoagulant type (DOAC, VKA, other)'
+        description: 'DOAC or VKA from national refsets; null for a retained oral anticoagulant missing those lists.'
       - name: is_doac
-        description: 'Flag for Direct Oral Anticoagulants'
+        description: 'Product belongs to DIRECTORANTICOAGDRUG_COD; false for a retained product missing the list.'
       - name: is_vka
-        description: 'Flag for Vitamin K Antagonists'
+        description: 'Product belongs to VITKANTAGDRUG_COD; false for a retained product missing the list.'
       - name: is_recent_3m
         description: 'Order in the 3 calendar months up to and including the build date; lower bound excluded.'
       - name: is_recent_6m

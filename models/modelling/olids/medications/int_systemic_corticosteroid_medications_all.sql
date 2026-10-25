@@ -26,18 +26,13 @@ SELECT
     base_orders.bnf_code,
     base_orders.bnf_name,
 
-    -- Legacy classification retained pending approval; corticosteroid_type_dmd is ingredient-based.
-    CASE
-        WHEN base_orders.bnf_code LIKE '060301%' THEN 'REPLACEMENT'        -- Replacement therapy
-        WHEN base_orders.bnf_code LIKE '060302%' THEN 'GLUCOCORTICOID'     -- Glucocorticoid therapy
-        WHEN base_orders.bnf_code LIKE '060303%' THEN 'MINERALOCORTICOID'  -- Mineralocorticoid
-        ELSE 'OTHER_CORTICOSTEROID'
-    END AS corticosteroid_type,
+    CASE WHEN dmd.vtm_id IN ('775983003', '89192008') THEN 'MINERALOCORTICOID'
+         WHEN dmd.vtm_id IS NOT NULL THEN 'GLUCOCORTICOID'
+         ELSE 'UNKNOWN' END::varchar(20) AS corticosteroid_type,
 
-
-    -- Usage classification flags
-    CASE WHEN base_orders.bnf_code LIKE '060301%' THEN TRUE ELSE FALSE END AS is_replacement_therapy,
-    CASE WHEN base_orders.bnf_code LIKE '060302%' THEN TRUE ELSE FALSE END AS is_anti_inflammatory,
+    -- Compatibility name used by C-LTCS for glucocorticoid course evidence, not indication.
+    CASE WHEN dmd.vtm_id IS NULL THEN NULL
+         ELSE dmd.vtm_id NOT IN ('775983003', '89192008') END AS is_anti_inflammatory,
     CASE WHEN dmd.vtm_id IS NULL THEN NULL
          ELSE dmd.vtm_id IN ('775983003', '89192008') END AS is_mineralocorticoid,
 
