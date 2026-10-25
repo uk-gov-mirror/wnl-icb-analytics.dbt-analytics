@@ -8,31 +8,31 @@
 -- Applies patient-specific NG136 BP targets with priority ranking (most stringent first).
 -- Targets come from the bp_thresholds seed, which holds both CLINIC and HBPM_ABPM
 -- variants for each TARGET_UPPER rule (HBPM_ABPM is clinic -5 mmHg per NG136 rec 1.4.22).
--- Eligible BP readings use daily context minima, with monitoring priorities
--- defined in int_nice_blood_pressure_daily_by_context. A passing context wins
--- on the latest eligible day.
+-- Values, staging and monitoring use the latest valid general BP reading.
+-- Control flags use separate control-eligible evidence and its context-specific target.
 -- Also produces NG136 hypertension staging using the measurement-appropriate thresholds.
 
--- One row per person in the existing BP population after target-aware context selection.
-WITH bp_population AS (
-    SELECT person_id
+WITH latest_bp AS (
+    -- Get most recent BP event (paired systolic/diastolic) for each person
+    SELECT
+        person_id,
+        clinical_effective_date,
+        systolic_value,
+        diastolic_value,
+        is_home_bp_event,
+        is_abpm_bp_event
     FROM {{ ref('int_blood_pressure_latest') }}
 ),
-latest_bp AS ({{ blood_pressure_control_latest_contexts() }}),
 
 patient_characteristics AS (
     -- Gather key patient characteristics for BP threshold determination
     SELECT
-        people.person_id,
-        bp.reading_date::TIMESTAMP_NTZ AS latest_bp_date,
+        bp.person_id,
+        bp.clinical_effective_date AS latest_bp_date,
         bp.systolic_value AS latest_systolic_value,
         bp.diastolic_value AS latest_diastolic_value,
         bp.is_home_bp_event,
         bp.is_abpm_bp_event,
-        bp.is_valid_bp,
-        bp.bp_context_group,
-        bp.date_recorded,
-        bp.observation_id,
         -- Reading source used to pick CLINIC vs HBPM_ABPM threshold variant
         CASE
             WHEN COALESCE(bp.is_home_bp_event, FALSE) OR COALESCE(bp.is_abpm_bp_event, FALSE) THEN 'HBPM_ABPM'
@@ -56,32 +56,31 @@ patient_characteristics AS (
         COALESCE(stroke_tia.is_on_register, FALSE) AS has_stroke_tia,
         COALESCE(pad.is_on_register, FALSE) AS has_pad
 
-    FROM bp_population AS people
-    LEFT JOIN latest_bp AS bp ON people.person_id = bp.person_id
+    FROM latest_bp AS bp
     INNER JOIN
         {{ ref('dim_person_age') }} AS age
-        ON people.person_id = age.person_id
+        ON bp.person_id = age.person_id
     LEFT JOIN
         {{ ref('fct_person_diabetes_register') }} AS dm
-        ON people.person_id = dm.person_id
+        ON bp.person_id = dm.person_id
     LEFT JOIN
         {{ ref('fct_person_ckd_register') }} AS ckd
-        ON people.person_id = ckd.person_id
+        ON bp.person_id = ckd.person_id
     LEFT JOIN
         {{ ref('fct_person_hypertension_register') }} AS htn
-        ON people.person_id = htn.person_id
+        ON bp.person_id = htn.person_id
     LEFT JOIN
         {{ ref('fct_person_chd_register') }} AS chd
-        ON people.person_id = chd.person_id
+        ON bp.person_id = chd.person_id
     LEFT JOIN
         {{ ref('fct_person_stroke_tia_register') }} AS stroke_tia
-        ON people.person_id = stroke_tia.person_id
+        ON bp.person_id = stroke_tia.person_id
     LEFT JOIN
         {{ ref('fct_person_pad_register') }} AS pad
-        ON people.person_id = pad.person_id
+        ON bp.person_id = pad.person_id
     LEFT JOIN
         {{ ref('int_urine_acr_latest') }} AS acr
-        ON people.person_id = acr.person_id
+        ON bp.person_id = acr.person_id
 ),
 
 ranked_thresholds AS (
@@ -138,31 +137,33 @@ ranked_thresholds AS (
     -- but the belt-and-braces tie-break guards against future threshold additions)
     QUALIFY
         ROW_NUMBER() OVER (
-            PARTITION BY pc.person_id, pc.bp_context_group
+            PARTITION BY pc.person_id
             ORDER BY priority_rank ASC, thr.threshold_rule_id ASC
         ) = 1
 ),
 
-selected_context AS (
-    SELECT *
-    FROM ranked_thresholds
+control_bp AS (
+    SELECT
+        bp.*,
+        thr.systolic_threshold,
+        thr.diastolic_threshold
+    FROM ({{ blood_pressure_control_latest_contexts() }}) AS bp
+    INNER JOIN ranked_thresholds AS person ON bp.person_id = person.person_id
+    INNER JOIN {{ ref('bp_thresholds') }} AS thr
+        ON thr.patient_group = person.patient_group
+        AND thr.measurement_context = bp.applied_measurement_context
+        AND thr.threshold_type = 'TARGET_UPPER'
+        AND thr.operator = 'BELOW'
     QUALIFY ROW_NUMBER() OVER (
-        PARTITION BY person_id
-        ORDER BY (is_valid_bp
-            AND latest_systolic_value < systolic_threshold
-            AND latest_diastolic_value < diastolic_threshold) DESC NULLS LAST,
-            is_valid_bp DESC NULLS LAST,
-            CASE bp_context_group WHEN 'CLINIC' THEN 1 WHEN 'HOME' THEN 2 ELSE 3 END,
-            date_recorded DESC NULLS LAST, observation_id DESC
+        PARTITION BY bp.person_id
+        ORDER BY {{ bp_control_context_order(
+            'is_valid_bp AND systolic_value < thr.systolic_threshold AND diastolic_value < thr.diastolic_threshold'
+        ) }}, thr.threshold_rule_id
     ) = 1
 ),
 
 with_staging AS (
-    -- Add NG136 hypertension staging. The ranked_thresholds join has already picked the
-    -- measurement-appropriate TARGET_UPPER row (CLINIC or HBPM_ABPM -5 mmHg variant), so
-    -- rt.systolic_threshold / rt.diastolic_threshold are the values to compare against.
-    -- Staging uses the same canonical ambulatory flag (applied_measurement_context) as
-    -- the control comparison so both paths share one source of truth for reading source.
+    -- Staging follows the latest valid general reading's measurement context.
     SELECT
         rt.*,
         rt.applied_measurement_context = 'HBPM_ABPM' AS is_ambulatory_reading,
@@ -201,7 +202,7 @@ with_staging AS (
                 END
         END AS diastolic_stage
 
-    FROM selected_context AS rt
+    FROM ranked_thresholds AS rt
 ),
 
 with_monitoring_interval AS (
@@ -242,36 +243,21 @@ SELECT
     ws.latest_acr_value,
     ws.threshold_rule_id AS applied_threshold_rule_id,
 
-    -- Applied threshold details — the row selected from bp_thresholds already matches
-    -- the latest reading's measurement context (CLINIC or HBPM_ABPM -5 mmHg variant)
+    -- These targets describe the latest valid general reading.
     ws.patient_group AS applied_patient_group,
     ws.applied_measurement_context,
     ws.systolic_threshold AS applied_systolic_threshold,
     ws.diastolic_threshold AS applied_diastolic_threshold,
     (ws.is_on_dm_register AND ws.diabetes_type = 'Type 2') AS has_t2dm,
 
-    -- BP control: compare against the measurement-appropriate target
-    COALESCE(
-        ws.is_valid_bp AND ws.latest_systolic_value IS NOT NULL
-        AND ws.latest_systolic_value < ws.systolic_threshold,
-        FALSE
-    ) AS is_systolic_controlled,
-
-    COALESCE(
-        ws.is_valid_bp AND ws.latest_diastolic_value IS NOT NULL
-        AND ws.latest_diastolic_value < ws.diastolic_threshold,
-        FALSE
-    ) AS is_diastolic_controlled,
-
-    -- Overall control: both systolic AND diastolic must be controlled
-    COALESCE((
-        ws.is_valid_bp AND ws.latest_systolic_value IS NOT NULL
-        AND ws.latest_systolic_value < ws.systolic_threshold
-    )
-    AND (
-        ws.is_valid_bp AND ws.latest_diastolic_value IS NOT NULL
-        AND ws.latest_diastolic_value < ws.diastolic_threshold
-    ), FALSE) AS is_overall_bp_controlled,
+    -- Control evidence may differ from the latest valid reading shown above.
+    COALESCE(control.is_valid_bp
+        AND control.systolic_value < control.systolic_threshold, FALSE) AS is_systolic_controlled,
+    COALESCE(control.is_valid_bp
+        AND control.diastolic_value < control.diastolic_threshold, FALSE) AS is_diastolic_controlled,
+    COALESCE(control.is_valid_bp
+        AND control.systolic_value < control.systolic_threshold
+        AND control.diastolic_value < control.diastolic_threshold, FALSE) AS is_overall_bp_controlled,
 
     -- Hypertension staging (NICE NG136 diagnostic thresholds)
     -- Uses highest stage between systolic and diastolic
@@ -321,7 +307,11 @@ SELECT
             ),
             FALSE
         )
-    END AS is_latest_bp_within_recommended_interval
+    END AS is_latest_bp_within_recommended_interval,
+
+    control.reading_date AS control_evidence_date,
+    control.bp_context_group AS control_evidence_context
 
 FROM with_monitoring_interval AS ws
+LEFT JOIN control_bp AS control ON ws.person_id = control.person_id
 ORDER BY ws.person_id

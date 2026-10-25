@@ -7,6 +7,7 @@ WITH reading_rows AS (
         person_id,
         effective_date::DATE AS reading_date,
         bp_context_group,
+        bp_context = 'HOME_AVERAGE' AS is_home_average,
         COALESCE(parent_observation_id::VARCHAR, 'NOPARENT:' || bp_context_group) AS reading_id,
         id::VARCHAR AS observation_id,
         date_recorded,
@@ -21,11 +22,6 @@ WITH reading_rows AS (
     FROM {{ ref('int_blood_pressure_observations_base') }}
     WHERE effective_date::DATE <= CURRENT_DATE()
         AND bp_context NOT IN ('ABPM_NIGHT', 'ABPM_MIN_MAX')
-    -- Single home readings must not lower a recorded average on the same date.
-    QUALIFY bp_context_group <> 'HOME' OR bp_context = 'HOME_AVERAGE'
-        OR COUNT_IF(bp_context = 'HOME_AVERAGE') OVER (
-            PARTITION BY person_id, effective_date::DATE, bp_context_group
-        ) = 0
 ),
 
 complete_readings AS (
@@ -34,6 +30,7 @@ complete_readings AS (
         reading_date,
         bp_context_group,
         reading_id,
+        is_home_average,
         monitoring_priority,
         CASE WHEN STARTSWITH(reading_id, 'NOPARENT:') THEN COALESCE(
             MIN(IFF(is_systolic_row AND result_value BETWEEN 40 AND 350, result_value, NULL)),
@@ -46,8 +43,18 @@ complete_readings AS (
         MAX(date_recorded) AS date_recorded,
         MAX(observation_id) AS observation_id
     FROM reading_rows
-    GROUP BY person_id, reading_date, bp_context_group, reading_id, monitoring_priority
+    GROUP BY person_id, reading_date, bp_context_group, reading_id, is_home_average, monitoring_priority
     HAVING systolic_value IS NOT NULL AND diastolic_value IS NOT NULL
+),
+
+preferred_home_readings AS (
+    SELECT *
+    FROM complete_readings
+    -- A lone average component must not remove complete single home readings.
+    QUALIFY bp_context_group <> 'HOME' OR is_home_average
+        OR COUNT_IF(is_home_average) OVER (
+            PARTITION BY person_id, reading_date, bp_context_group
+        ) = 0
 ),
 
 assessed AS (
@@ -55,7 +62,7 @@ assessed AS (
         systolic_value BETWEEN 40 AND 350
             AND diastolic_value BETWEEN 20 AND 200
             AND systolic_value > diastolic_value AS is_valid_bp
-    FROM complete_readings
+    FROM preferred_home_readings
 ),
 
 preferred_readings AS (

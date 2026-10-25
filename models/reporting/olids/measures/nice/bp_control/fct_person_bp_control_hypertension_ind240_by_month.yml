@@ -12,11 +12,7 @@ models:
     with current rules, code lists and records, so later corrections can change past months. Code
     lists: BP_COD, SYSBP_COD, DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; HYP_COD, HYPRES_COD
     (PCD). At the latest eligible date, any clinic, home or ambulatory context can meet its own
-    strict NICE target. Daily components use independent minima within each context. Clinic readings
-    qualify. Home averages take priority over self-reported or unspecified home readings on the same
-    date. Daytime or waking ABPM averages take priority, followed by unspecified and 24-hour ABPM.
-    Night-time, interval, minimum and maximum ABPM codes are excluded before pairing. This is a
-    local rule.
+    strict NICE target. Daily components use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
   config:
     meta:
       owner:

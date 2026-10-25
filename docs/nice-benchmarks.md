@@ -22,11 +22,12 @@ not a QOF same-day rule. On the latest eligible date, any context can achieve ag
 its own indicator target. NICE targets remain strict, while QOF and the CVDPREVENT
 comparison use inclusive targets.
 
-Clinic readings qualify. Home averages take priority over self-reported or unspecified
-home readings on the same date; single home readings count when no average exists.
-Daytime or waking ABPM averages take priority, followed by unspecified and 24-hour
-ABPM as same-day fallbacks. Night-time, interval, minimum and maximum ABPM codes are
-excluded before pairing. These selection rules follow the local decision in
+Clinic readings qualify. Complete home averages take priority over self-reported or
+unspecified home readings on the same date. Single home readings count when no complete
+average exists. Night-time averages and minimum ABPM readings are excluded before pairing;
+daytime (day-interval) averages are preferred, and 24-hour averages are a same-day fallback.
+Unspecified ABPM ranks between daytime and 24-hour averages, with valid complete readings
+preferred before this priority. These selection rules follow the local decision in
 [issue #1440](https://github.com/wnl-icb-analytics/dbt-analytics/issues/1440#issuecomment-6223398952)
 and its review. The waking-hours basis is described in
 [NICE NG136](https://www.nice.org.uk/guidance/ng136/chapter/Recommendations).
@@ -35,12 +36,11 @@ The original figures below predate this selection update. Revalidation uses the 
 March NCL geography and period, with published practice membership. Applying inclusive
 targets separates the threshold difference from evidence selection. All five comparable
 CVDPREVENT BP measures remain within the project's three-percentage-point tolerance.
-The earlier average-only rule removed single home evidence and produced a larger gap.
-The final rule retains that evidence when no home average is recorded on the date.
 Similar headline results do not prove identical extraction or same-day selection.
 Register populations and retrospective records still differ between extracts.
 The general BP control and diabetes triple-target flags use the same eligible context
-evidence, retaining their existing populations and targets. Recording-only indicators,
+evidence, retaining their existing populations and targets. Displayed BP values and recording
+dates use the latest valid general reading. General BP staging does too. Recording-only indicators,
 general BP events and LTC LCS keep their existing rules.
 
 ## How to read this

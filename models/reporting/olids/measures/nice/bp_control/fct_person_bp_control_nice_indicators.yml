@@ -11,10 +11,7 @@ models:
       adjustments are applied. Based on NICE NG136. Code lists: BP_COD, SYSBP_COD, DIASBP_COD,
       HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; HYP_COD, HYPRES_COD (PCD). At the latest eligible date,
       any clinic, home or ambulatory context can meet its own strict NICE target. Daily components
-      use independent minima within each context. Clinic readings qualify. Home averages take
-      priority over self-reported or unspecified home readings on the same date. Daytime or waking
-      ABPM averages take priority, followed by unspecified and 24-hour ABPM. Night-time, interval,
-      minimum and maximum ABPM codes are excluded before pairing. This is a local rule.
+      use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -112,10 +109,7 @@ models:
       adjustments are applied. Based on NICE NG136. Code lists: BP_COD, SYSBP_COD, DIASBP_COD,
       HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; HYP_COD, HYPRES_COD (PCD). At the latest eligible date,
       any clinic, home or ambulatory context can meet its own strict NICE target. Daily components
-      use independent minima within each context. Clinic readings qualify. Home averages take
-      priority over self-reported or unspecified home readings on the same date. Daytime or waking
-      ABPM averages take priority, followed by unspecified and 24-hour ABPM. Night-time, interval,
-      minimum and maximum ABPM codes are excluded before pairing. This is a local rule.
+      use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -158,10 +152,7 @@ models:
       personalised care adjustments are applied. Based on NICE NG136. Code lists: BP_COD, SYSBP_COD,
       DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; CHD_COD (PCD). At the latest eligible date,
       any clinic, home or ambulatory context can meet its own strict NICE target. Daily components
-      use independent minima within each context. Clinic readings qualify. Home averages take
-      priority over self-reported or unspecified home readings on the same date. Daytime or waking
-      ABPM averages take priority, followed by unspecified and 24-hour ABPM. Night-time, interval,
-      minimum and maximum ABPM codes are excluded before pairing. This is a local rule.
+      use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -204,10 +195,7 @@ models:
       care adjustments are applied. Based on NICE NG136. Code lists: BP_COD, SYSBP_COD, DIASBP_COD,
       HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; CHD_COD (PCD). At the latest eligible date, any clinic,
       home or ambulatory context can meet its own strict NICE target. Daily components use
-      independent minima within each context. Clinic readings qualify. Home averages take priority
-      over self-reported or unspecified home readings on the same date. Daytime or waking ABPM
-      averages take priority, followed by unspecified and 24-hour ABPM. Night-time, interval,
-      minimum and maximum ABPM codes are excluded before pairing. This is a local rule.
+      independent minima within each context. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -251,10 +239,7 @@ models:
       Code lists: BP_COD, SYSBP_COD, DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; STRK_COD,
       TIA_COD (PCD). At the latest eligible date, any clinic, home or ambulatory context can meet
       its own strict NICE target. Daily components use independent minima within each context.
-      Clinic readings qualify. Home averages take priority over self-reported or unspecified home
-      readings on the same date. Daytime or waking ABPM averages take priority, followed by
-      unspecified and 24-hour ABPM. Night-time, interval, minimum and maximum ABPM codes are
-      excluded before pairing. This is a local rule.
+      {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -298,10 +283,7 @@ models:
       Code lists: BP_COD, SYSBP_COD, DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; STRK_COD,
       TIA_COD (PCD). At the latest eligible date, any clinic, home or ambulatory context can meet
       its own strict NICE target. Daily components use independent minima within each context.
-      Clinic readings qualify. Home averages take priority over self-reported or unspecified home
-      readings on the same date. Daytime or waking ABPM averages take priority, followed by
-      unspecified and 24-hour ABPM. Night-time, interval, minimum and maximum ABPM codes are
-      excluded before pairing. This is a local rule.
+      {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -344,11 +326,7 @@ models:
       No personalised care adjustments are applied. Based on NICE NG136. Code lists: BP_COD,
       SYSBP_COD, DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; PAD_COD (PCD). At the latest
       eligible date, any clinic, home or ambulatory context can meet its own strict NICE target.
-      Daily components use independent minima within each context. Clinic readings qualify. Home
-      averages take priority over self-reported or unspecified home readings on the same date.
-      Daytime or waking ABPM averages take priority, followed by unspecified and 24-hour ABPM.
-      Night-time, interval, minimum and maximum ABPM codes are excluded before pairing. This is a
-      local rule.
+      Daily components use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -391,11 +369,7 @@ models:
       No personalised care adjustments are applied. Based on NICE NG136. Code lists: BP_COD,
       SYSBP_COD, DIASBP_COD, HOMEBP_COD, ABPM_COD, HOMEAMBBP_COD; PAD_COD (PCD). At the latest
       eligible date, any clinic, home or ambulatory context can meet its own strict NICE target.
-      Daily components use independent minima within each context. Clinic readings qualify. Home
-      averages take priority over self-reported or unspecified home readings on the same date.
-      Daytime or waking ABPM averages take priority, followed by unspecified and 24-hour ABPM.
-      Night-time, interval, minimum and maximum ABPM codes are excluded before pairing. This is a
-      local rule.
+      Daily components use independent minima within each context. {{ doc('bp_control_evidence_rule') }}
     config:
       meta:
         owner:
@@ -432,10 +406,7 @@ models:
       build date. Includes NICE IND239, NICE IND240, NICE IND241, NICE IND242, NICE IND243, NICE
       IND244, NICE IND245, NICE IND246. Each indicator has its own denominator, measurement window
       and exclusions. Supporting evidence accompanies the achievement status. No personalised care
-      adjustments are applied. Clinic readings qualify. Home averages take priority over
-      self-reported or unspecified home readings on the same date. Daytime or waking ABPM averages
-      take priority, followed by unspecified and 24-hour ABPM. Night-time, interval, minimum and
-      maximum ABPM codes are excluded before pairing. Daily components use independent minima within
+      adjustments are applied. {{ doc('bp_control_evidence_rule') }} Daily components use independent minima within
       each context on the latest eligible date; either context can meet its own target.
     config:
       meta:

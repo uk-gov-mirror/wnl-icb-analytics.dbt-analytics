@@ -4,11 +4,8 @@ models:
       Diabetes care targets for current OLIDS diabetes-register members, one row per person. Targets
       are HbA1c at or below 58 mmol/mol, blood pressure below 130/80 mmHg using the local target,
       and total cholesterol below 5 mmol/L. Uses the latest HbA1c and cholesterol measurements, with
-      separate 12-month recency flags. BP uses independent context minima on the latest eligible
-      day, including invalid-only days. Clinic readings qualify. Home averages take priority over
-      self-reported or unspecified home readings on the same date. Daytime or waking ABPM averages
-      take priority, followed by unspecified and 24-hour ABPM. Night-time, interval, minimum and
-      maximum ABPM codes are excluded before pairing. The local BP target remains below 130/80 mmHg
+      separate 12-month recency flags. BP values and recording dates describe the latest valid general
+      reading. Control uses separate latest control-eligible evidence. {{ doc('bp_control_evidence_rule') }} The local BP target remains below 130/80 mmHg
       in every context. Target achievement does not require recency, and missing values do not meet
       the target.
     tests:
@@ -106,14 +103,18 @@ models:
         description: Clinical category for HbA1c level
 
       - name: latest_bp_date
-        description: Latest eligible control date; null when absent
+        description: Clinical date of the latest valid general BP reading; null when absent
 
       - name: latest_systolic
-        description: Independent systolic minimum in mmHg within the selected latest-day context; null when absent
+        description: Systolic value of the latest valid general BP reading in mmHg; null when absent
 
       - name: latest_diastolic
-        description: Independent diastolic minimum in mmHg within the selected latest-day context; null when absent
+        description: Diastolic value of the latest valid general BP reading in mmHg; null when absent
 
+      - name: control_evidence_date
+        description: Clinical date of the latest control-eligible evidence; null when none is available. Invalid-only dates remain.
+      - name: control_evidence_context
+        description: CLINIC, HOME or ABPM for the selected control evidence; null when absent. A context meeting the target takes priority on the latest eligible day.
       - name: latest_chol_date
         description: Date of most recent cholesterol measurement
 
@@ -140,9 +141,24 @@ unit_tests:
   given:
   - input: ref('fct_person_diabetes_register')
     format: sql
-    rows: SELECT person_id,'Type 2'::VARCHAR AS diabetes_type,TRUE AS is_on_register FROM (SELECT column1::NUMBER AS person_id
-      FROM VALUES (-14441),(-14442),(-14443),(-14444),(-14445),(-14446),(-14447),(-14448))
-  - input: ref('int_nice_blood_pressure_daily_by_context')
+    rows: SELECT person_id,'Type 2'::VARCHAR AS diabetes_type,TRUE AS is_on_register FROM (SELECT column1::NUMBER
+      AS person_id FROM VALUES (-14441),(-14442),(-14443),(-14444),(-14445),(-14446),(-14447),(-14448))
+  - input: ref('int_blood_pressure_latest')
+    format: sql
+    rows: |-
+      SELECT column1::NUMBER AS person_id, column2::TIMESTAMP_NTZ AS clinical_effective_date,
+          column3::FLOAT AS systolic_value, column4::FLOAT AS diastolic_value,
+          column5::BOOLEAN AS is_home_bp_event, column6::BOOLEAN AS is_abpm_bp_event
+      FROM VALUES
+          (-14441,'2026-08-01',150,95,FALSE,FALSE),
+          (-14442,'2026-08-01',139,89,FALSE,FALSE),
+          (-14443,'2026-08-01',135,85,FALSE,FALSE),
+          (-14444,'2026-08-01',145,85,FALSE,FALSE),
+          (-14445,'2026-07-01',120,70,TRUE,FALSE),
+          (-14446,'2026-08-01',145,95,FALSE,TRUE),
+          (-14447,'2026-08-01',130,95,TRUE,FALSE),
+          (-14448,'2026-08-01',129,79,FALSE,FALSE)
+  - input: ref('int_blood_pressure_control_daily_by_context')
     format: sql
     rows: 'SELECT column1::NUMBER AS person_id,column2::DATE AS reading_date,column3::VARCHAR AS bp_context_group,
 
@@ -172,8 +188,8 @@ unit_tests:
       FROM (SELECT column1::NUMBER AS person_id FROM VALUES (-14441),(-14442),(-14443),(-14444),(-14445),(-14446),(-14447),(-14448))
   - input: ref('int_cholesterol_latest')
     format: sql
-    rows: SELECT person_id,'2026-08-01'::DATE AS clinical_effective_date,4::FLOAT AS cholesterol_value FROM (SELECT column1::NUMBER
-      AS person_id FROM VALUES (-14441),(-14442),(-14443),(-14444),(-14445),(-14446),(-14447),(-14448))
+    rows: SELECT person_id,'2026-08-01'::DATE AS clinical_effective_date,4::FLOAT AS cholesterol_value FROM (SELECT
+      column1::NUMBER AS person_id FROM VALUES (-14441),(-14442),(-14443),(-14444),(-14445),(-14446),(-14447),(-14448))
   expect:
     rows:
     - person_id: -14441
@@ -191,9 +207,19 @@ unit_tests:
     - person_id: -14445
       bp_in_target_range: false
       all_three_targets_met: false
+      latest_bp_date: '2026-07-01'
+      latest_systolic: 120
+      latest_diastolic: 70
+      control_evidence_date: '2026-08-01'
+      control_evidence_context: CLINIC
     - person_id: -14446
       bp_in_target_range: false
       all_three_targets_met: false
+      latest_bp_date: '2026-08-01'
+      latest_systolic: 145
+      latest_diastolic: 95
+      control_evidence_date: null
+      control_evidence_context: null
     - person_id: -14447
       bp_in_target_range: false
       all_three_targets_met: false

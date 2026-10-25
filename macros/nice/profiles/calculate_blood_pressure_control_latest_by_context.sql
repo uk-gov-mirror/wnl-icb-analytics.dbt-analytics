@@ -1,4 +1,4 @@
-{% macro calculate_nice_blood_pressure_latest_by_context(reference='current') %}
+{% macro calculate_blood_pressure_control_latest_by_context(reference='current') %}
 {# Latest eligible clinical day across contexts, one person/date/context. #}
 WITH candidates AS (
     SELECT population.person_id, population.reporting_date, context.column1 AS bp_context_group
@@ -9,7 +9,7 @@ WITH candidates AS (
 latest_by_context AS (
     SELECT candidate.person_id, candidate.reporting_date, evidence.* EXCLUDE (person_id)
     FROM candidates AS candidate
-    ASOF JOIN {{ ref('int_nice_blood_pressure_daily_by_context') }} AS evidence
+    ASOF JOIN {{ ref('int_blood_pressure_control_daily_by_context') }} AS evidence
         MATCH_CONDITION (candidate.reporting_date >= evidence.reading_date)
         ON candidate.person_id = evidence.person_id
         AND candidate.bp_context_group = evidence.bp_context_group

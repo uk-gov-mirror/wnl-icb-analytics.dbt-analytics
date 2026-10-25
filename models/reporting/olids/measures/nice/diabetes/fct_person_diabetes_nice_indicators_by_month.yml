@@ -61,8 +61,5 @@ models:
     measures. Clinical fields are null where they do not apply to an indicator. No personalised care
     adjustments are applied. Recalculated for each of the last 60 month-ends with current rules,
     code lists and records, so later corrections can change past months. BP control uses independent
-    daily context minima. Clinic readings qualify. Home averages take priority over self-reported or
-    unspecified home readings on the same date. Daytime or waking ABPM averages take priority,
-    followed by unspecified and 24-hour ABPM. Night-time, interval, minimum and maximum ABPM codes
-    are excluded before pairing.
+    daily context minima. {{ doc('bp_control_evidence_rule') }}
   name: fct_person_diabetes_nice_indicators_by_month

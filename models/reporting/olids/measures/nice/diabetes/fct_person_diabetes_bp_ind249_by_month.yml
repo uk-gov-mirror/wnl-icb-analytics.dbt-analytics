@@ -73,10 +73,7 @@ models:
     later corrections can change past months. Code lists: BP_COD, SYSBP_COD, DIASBP_COD,
     HOMEAMBBP_COD, HOMEBP_COD, ABPM_COD (PCD). At the latest eligible date, any clinic, home or
     ambulatory context can achieve against its own strict target. Independent daily minima are
-    local. Clinic readings qualify. Home averages take priority over self-reported or unspecified
-    home readings on the same date. Daytime or waking ABPM averages take priority, followed by
-    unspecified and 24-hour ABPM. Night-time, interval, minimum and maximum ABPM codes are excluded
-    before pairing.
+    local. {{ doc('bp_control_evidence_rule') }}
   name: fct_person_diabetes_bp_ind249_by_month
   data_tests:
   - dbt_utils.unique_combination_of_columns:

@@ -6,8 +6,7 @@
     {% set calculation = context['nice_ind' ~ indicator]('by_month') %}
     {% set calculation = calculation | replace(nice_register(condition, 'by_month') | string, 'SELECT person_id, reporting_date FROM synthetic_population') %}
     {% set calculation = calculation | replace(nice_reference_population('by_month') | string, 'SELECT * FROM synthetic_population') %}
-    {% set systolic = 150 if indicator in [240, 242, 244, 246] else 140 %}
-    {% set calculation = calculation | replace(nice_blood_pressure_for_target('by_month', systolic, 90, systolic - 5, 85), 'SELECT * FROM synthetic_bp') %}
+    {% set calculation = calculation | replace(nice_ref('int_blood_pressure_control_latest_by_context', 'by_month') | string, '(SELECT * FROM synthetic_bp_context)') %}
     {% do queries.append(calculation) %}
 {% endfor %}
 
@@ -54,6 +53,14 @@ synthetic_bp AS (
         (-9401, '2026-09-30', '2026-09-30', 145, 84, TRUE, TRUE),
         (-9402, '2026-09-30', '2026-09-30', 134, 85, TRUE, TRUE),
         (-9403, '2026-09-30', '2026-09-30', 150, 89, TRUE, FALSE)
+),
+synthetic_bp_context AS (
+    SELECT person_id, reporting_date AS reporting_date, latest_bp_date AS reading_date,
+        latest_systolic_value AS systolic_value, latest_diastolic_value AS diastolic_value,
+        is_valid_bp, is_home_bp_event, is_abpm_bp_event, applied_measurement_context,
+        IFF(is_home_bp_event, 'HOME', IFF(is_abpm_bp_event, 'ABPM', 'CLINIC')) AS bp_context_group,
+        NULL::TIMESTAMP_NTZ AS date_recorded, 'SYN' AS observation_id
+    FROM synthetic_bp
 ),
 actual AS (
     {% for calculation in queries %}
