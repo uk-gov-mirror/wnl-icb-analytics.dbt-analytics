@@ -23,6 +23,10 @@ select
     c.warn_row_change_pct,
     c.critical_row_change_pct,
 
+    -- Classification
+    c.business_area,
+    c.object_type,
+
     -- Freshness status
     case
 
