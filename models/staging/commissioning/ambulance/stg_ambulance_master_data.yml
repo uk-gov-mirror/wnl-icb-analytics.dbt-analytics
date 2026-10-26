@@ -1,0 +1,257 @@
+version: 2
+
+sources:
+  - name: stg_ambulance_master_data
+    description: Staging model for the London Ambulance Service data landed in Snowflake.
+    database: DATA_LAKE
+    schema: SDL
+    tables:
+      - name: AMB
+        identifier: amb
+        description: >
+          Master ambulance dataset (~160 columns). Grain to be confirmed with
+          business users (e.g. one row per incident, dispatch or status update).
+        columns:
+          # TODO: replace with the real key once confirmed in exploration
+          - name: dlp_flexor_freeze
+            description: 'Indicates if flex or freeze data'
+            tests:
+              - not_null
+
+          - name: dlp_commissioner_code
+            description: ''
+            tests:
+              - not_null
+
+          - name: dlp_financial_month
+            description: ''
+    
+          - name: dlp_financial_year
+            description: ''
+          
+          - name: dlp_baseline_financial_month
+            description: ''
+            tests:
+              - not_null
+
+          - name: incident_id
+            description: 'Month as integer (1-12)'
+            tests:
+              - not_null
+
+          - name: cad_number
+            description: 'Calendar quarter as integer (1-4)'
+            tests:
+              - not_null
+
+          - name: date_value
+            description: 'Readable month-year label'
+            tests:
+              - not_null
+
+          - name: call_time
+            description: 'UK financial year label'
+            tests:
+              - not_null
+
+          - name: clock_start_time
+            description: 'Starting year of financial year as integer '
+            tests:
+              - not_null
+
+          - name: arrive_on_scene_first_vehicle
+            description: 'UK financial quarter label'
+            tests:
+              - not_null
+
+          - name: arrive_on_scene_first_transporting_vehicle
+            description: 'UK financial quarter as integer'
+            tests:
+              - not_null
+
+          - name: conveying_datetime
+            description: 'Birth year'
+
+          - name: pre_triaged_questions_time
+            description: 'Conservative age calculation using end of birth month'
+            tests:
+              - not_null
+              
+          - name: locality
+            description: 'Birth date approximated to end of birth month'
+
+          - name: icb
+            description: 'Death year if deceased'
+
+          - name: cross_border_flag
+            description: 'Death month if deceased'
+
+          - name: dv_lsoa
+            description: 'Approximate death date if deceased'
+
+          - name: dv_partial_post_code
+            description: 'Death status flag'
+            tests:
+            - not_null
+
+          - name: dv_partial_post_code_destination_postcode
+            description: 'Gender'
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['Male', 'Female', 'Indeterminate sex', 'Unknown']
+
+          - name: dv_recipient_code
+            description: 'Ethnicity category from latest recording'
+            tests:
+              - not_null
+
+          - name: nhs_sitecode
+            description: 'Ethnicity subcategory from latest recording'
+            tests:
+              - not_null
+
+          - name: gp_location
+            description: 'Detailed ethnicity from latest recording'
+            tests:
+              - not_null
+
+          - name: call_age
+            description: 'Sort order for ethnicity category'
+
+          - name: call_gender
+            description: 'Display sort key for ethnicity'
+
+          - name: sk_patient_id_nhs_number
+            description: 'Main language'
+
+          - name: care_home_location_flag
+            description: 'Language type classification'
+
+          - name: determinant_code
+            description: ''
+
+          - name: chief_complaint_code
+            description: 'Interpreter needed flag'
+            tests:
+              - not_null
+
+          - name: ampds_code_version
+            description: 'Current registration status'
+            tests:
+              - not_null
+
+          - name: incident_code
+            description: 'Reason for inactive status (Deceased, Registration ended, No registration history, or NULL)'
+
+          - name: illness_code_1
+            description: 'Current age in years (or age at death)'
+
+          - name: illness_code_2
+            description: 'Conservative age calculation using end of birth month'
+
+          - name: illness_incident_code_version
+            description: '5-year age bands (0-4, 5-9, 10-14, ..., 80-84, 85+)'
+
+          - name: do_h_category
+            description: '10-year age bands (0-9, 10-19, 20-29, ..., 70-79, 80+)'
+
+          - name: full_doh_category
+            description: 'NHS Digital age bands (0-4, 5-14, 15-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75-84, 85+)'
+
+          - name: sub_category
+            description: 'ONS age bands (0-4, 5-9, 10-14, 15-19, 20-24, 25-29, ..., 80-84, 85+)'
+
+          - name: call_hrg_code
+            description: ''
+
+          - name: incident_hrg_code
+            description: 'Life stage categories (Infant, Toddler, Child, Adolescent, Young Adult, Adult, Senior, Elderly, Very Elderly)'
+
+          - name: hrg_version_number
+            description: 'Flag indicating age between birth and age 5'
+          
+          - name: pre_triaged_questions
+            description: 'Flag indicating primary school age (Reception to Year 6)'
+            tests:
+              - not_null
+
+          - name: additional_h_t
+            description: 'Flag indicating secondary school age (Year 7 to Year 13)'
+            tests:
+              - not_null
+
+          - name: call_type
+            description: 'Current or latest practice code'
+            tests:
+              - not_null
+
+          - name: destination_referral_outcome
+            description: 'Practice borough where patient is registered'
+
+          - name: mode_of_transport_flag
+            description: 'Integrated Care Board (ICB) code where patient is registered (practice-based)'
+
+          - name: mode_of_transport_first_responder
+            description: 'Integrated Care Board (ICB) name where patient is registered (practice-based)'
+
+          - name: conveying_crew_type
+            description: 'Practice postcode'
+
+          - name: first_responder_crew_type
+            description: 'Practice LSOA'
+
+          - name: department_type_flag
+            description: 'Practice MSOA'
+
+          - name: pre_alert_blue_call_flag
+            description: 'Practice latitude coordinate'
+
+          - name: h_t_taxi_flag
+            description: 'Practice longitude coordinate'
+
+          - name: baseline_setting_inclusions
+            description: 'Practice neighbourhood classification'
+
+          - name: mh_callsign_s_t
+            description: 'Patient residential address postcode hash for privacy protection'
+
+          - name: hmh_callsign_s_t_base
+            description: 'Patient address Unique Property Reference Number hash (placeholder for future use)'
+
+          - name: mh_callsign_s_c
+            description: 'Household identifier linking persons at same address (placeholder for future use)'
+
+          - name: mh_callsign_mhta
+            description: ' resides (from postcode lookup)'
+
+          - name: mh_S136
+            description: 'Integrated Care Board (ICB) name where patient resides (distinct from registration ICB)'
+
+          - name: callsign_ucr
+            description: 'Local Authority District 2025 code (LAD25CD) where patient resides'
+
+          - name: green_time_s_t
+            description: 'Local Authority District 2025 name (LAD25NM) where patient resides'
+
+          - name: h_t_clinically_closed
+            description: 'London borough where patient resides (NULL for non-London residents)'
+
+          - name: outcome_dispostion
+            description: 'Flag indicating if patient resides in Greater London area'
+
+          - name: outcome_dispostion_code
+            description: 'London area classification (NCL, Other London, Outside London)'
+
+          - name: conveyance_group_revised
+            description: 'Lower Layer Super Output Area 2021 census code where patient resides'
+
+ 
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns:
+                  - person_id
+                  - analysis_month
+        
