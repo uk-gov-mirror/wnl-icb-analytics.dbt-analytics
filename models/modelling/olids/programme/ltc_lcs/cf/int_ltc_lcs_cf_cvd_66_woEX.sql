@@ -5,7 +5,7 @@
 -- Rejects STAT_COD issues/events within 12 months and statin decline within five years,
 -- selecting the latest record on or before today before applying each recency test.
 -- Rejects persistent statin adverse reactions at any date and contraindication,
--- statin not indicated or not tolerated events on or before today. Local adverse codes match exactly.
+-- statin not indicated or not tolerated events on or before today. Local adverse codes use the shared equivalence rule.
 -- Requires no QRISK event on or after the five-year anniversary, regardless of its value.
 -- Excludes QOF palliative care register membership (EMIS library ea06414e).
 -- XML library exclusion 3de35e4f lacks a complete exported definition.
@@ -14,31 +14,31 @@
 -- XML date caps apply before Latest 1, so future records cannot hide earlier records.
 with statin_code_issue_at_baseline as (
     select person_id, order_date
-    from ({{ get_ltc_lcs_medication_orders("6cf0e193-860f-4b76-9d06-09a3037d09eb") }})
+    from ({{ get_ltc_lcs_medication_orders("6cf0e193-860f-4b76-9d06-09a3037d09eb", include_date_recorded=true) }})
     where order_date <= current_date()
     qualify row_number() over (
         partition by person_id, valueset_id
-        order by order_date desc, medication_order_id desc
+        order by order_date desc nulls last, date_recorded desc nulls last, medication_order_id desc
     ) = 1
 ),
 
 statin_code_event_at_baseline as (
     select person_id, clinical_effective_date
-    from ({{ get_ltc_lcs_observations("6cf0e193-860f-4b76-9d06-09a3037d09eb") }})
+    from ({{ get_ltc_lcs_observations("6cf0e193-860f-4b76-9d06-09a3037d09eb", include_date_recorded=true) }})
     where clinical_effective_date <= current_date()
     qualify row_number() over (
         partition by person_id, valueset_id
-        order by clinical_effective_date desc, observation_id desc
+        order by clinical_effective_date desc nulls last, date_recorded desc nulls last, observation_id desc
     ) = 1
 ),
 
 statin_decline_at_baseline as (
     select person_id, clinical_effective_date
-    from ({{ get_ltc_lcs_observations("c2aa42c9-1dc5-ef51-69f1-80caa1d29cd5") }})
+    from ({{ get_ltc_lcs_observations("c2aa42c9-1dc5-ef51-69f1-80caa1d29cd5", include_date_recorded=true) }})
     where clinical_effective_date <= current_date()
     qualify row_number() over (
         partition by person_id, valueset_id
-        order by clinical_effective_date desc, observation_id desc
+        order by clinical_effective_date desc nulls last, date_recorded desc nulls last, observation_id desc
     ) = 1
 ),
 
@@ -77,7 +77,7 @@ on_statin as (
     where clinical_effective_date > dateadd(month, -12, current_date())
     union
     select person_id
-    from ({{ get_ltc_lcs_observations("75140610-d834-c931-9efa-3f47eaf12f5a", emis_local_exact=true) }})
+    from ({{ get_ltc_lcs_observations("75140610-d834-c931-9efa-3f47eaf12f5a") }})
     union
     select person_id
     from ({{ get_ltc_lcs_observations("4b0f96a0-5505-e71e-1db3-09f5f557ce99") }})
