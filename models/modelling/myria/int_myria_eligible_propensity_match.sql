@@ -185,4 +185,5 @@ left join (
     where file_date = (select max(file_date) from {{ ref('stg_myria_enrolled_patients') }})
     --WHERE FILE_DATE = (SELECT MAX(FILE_DATE) from STAGING.MYRIA.STG_MYRIA_ENROLLED_PATIENTS)
 ) m on d.hex_id = m.hx_id
+where d.death_date is null or d.death_date > d.first_file_date
 
