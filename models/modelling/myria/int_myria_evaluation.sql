@@ -29,8 +29,7 @@ with date_range as (-- Generate days for 2 years
         case when mp.group_value = 1 then 'Onboarded 60+ days' else 'Not onboarded' end as myria_status
     from {{ ref('stg_myria_matched_patients') }} mp
     --from STAGING.MYRIA.STG_MYRIA_MATCHED_PATIENTS mp
-    where file_date = (select max(file_date) from {{ ref('stg_myria_matched_patients') }})
-    --WHERE file_date = (select max(first_file_date) from STAGING.MYRIA.STG_MYRIA_MATCHED_PATIENTS) -- DON'T Need this for testing
+    where loaded_at = (select max(loaded_at) from {{ ref('stg_myria_matched_patients') }})
 )
  /*Build activity data (A&E): ae_encounter_summary as Counts:encounters, cost,duration
 limit to eligible group 66K rows by inner join with member spine. Added date range limits to reduce rows from 15 million!
