@@ -26,14 +26,6 @@ ethnicity_codes as (
 gender_codes as (
     select distinct gender_code, gender
     from {{ref('stg_dictionary_dbo_gender')}}
-    ),
-commissioner_codes as (
-    select commissioner_code, commissioner_name
-    from {{ ref('stg_dictionary_dbo_commissioner') }}
-    qualify row_number() over (
-        partition by commissioner_code
-        order by coalesce(end_date, '9999-12-31'::date) desc, start_date desc
-    ) = 1
     )
 
 select 
@@ -104,19 +96,21 @@ select
     , dict_appt_priority.priority_type_desc as referral_acuity_desc
 
     /* Commissioning information */
-    , core.appointment_commissioning_service_agreement_commissioner as assigned_commissioner_code_at_event
     , coalesce(
-        assigned_commissioner_exact.commissioner_name
-        , assigned_commissioner_fallback.commissioner_name
-    ) as assigned_commissioner_name_at_event
-    , core.appointment_commissioning_service_agreement_is_commissioner_recognised
-        as is_assigned_commissioner_recognised
-    , core.appointment_commissioning_service_agreement_commissioner_derived
-        as derived_commissioner_code_at_event
-    , coalesce(
-        derived_commissioner_exact.commissioner_name
-        , derived_commissioner_fallback.commissioner_name
-    ) as derived_commissioner_name_at_event
+        core.appointment_commissioning_commissioner_assignment_commissioner
+        , core.appointment_commissioning_service_agreement_commissioner
+    ) as commissioner_code_at_event
+    , case
+        when core.appointment_commissioning_commissioner_assignment_commissioner is not null
+            then {{ sus_commissioner_organisation_name('cam_commissioner') }}
+        else {{ sus_commissioner_organisation_name('service_commissioner') }}
+      end as commissioner_name_at_event
+    , case
+        when core.appointment_commissioning_commissioner_assignment_commissioner is not null
+            then 'CAM'
+        when core.appointment_commissioning_service_agreement_commissioner is not null
+            then 'DSCRO'
+      end as commissioner_source_at_event
     , iff(core.spec_comm_code is null, 'N','Y') as spec_comm_flag -- Adding Spec_comm   
     , core.spec_comm_code as spec_comm_code
     , dict_pss_sc.spec_comm_desc
@@ -212,27 +206,15 @@ left join ethnicity_codes as eth
 left join gender_codes as gen
     on core.appointment_patient_identity_gender = gen.gender_code
 
-left join commissioner_codes as assigned_commissioner_exact
-    on core.appointment_commissioning_service_agreement_commissioner
-    = assigned_commissioner_exact.commissioner_code
+{{ join_sus_commissioner_organisation(
+    'core.appointment_commissioning_commissioner_assignment_commissioner',
+    'cam_commissioner'
+) }}
 
-left join commissioner_codes as assigned_commissioner_fallback
-    on assigned_commissioner_exact.commissioner_code is null
-    and length(core.appointment_commissioning_service_agreement_commissioner) = 5
-    and right(core.appointment_commissioning_service_agreement_commissioner, 2) = '00'
-    and left(core.appointment_commissioning_service_agreement_commissioner, 3)
-    = assigned_commissioner_fallback.commissioner_code
-
-left join commissioner_codes as derived_commissioner_exact
-    on core.appointment_commissioning_service_agreement_commissioner_derived
-    = derived_commissioner_exact.commissioner_code
-
-left join commissioner_codes as derived_commissioner_fallback
-    on derived_commissioner_exact.commissioner_code is null
-    and length(core.appointment_commissioning_service_agreement_commissioner_derived) = 5
-    and right(core.appointment_commissioning_service_agreement_commissioner_derived, 2) = '00'
-    and left(core.appointment_commissioning_service_agreement_commissioner_derived, 3)
-    = derived_commissioner_fallback.commissioner_code
+{{ join_sus_commissioner_organisation(
+    'core.appointment_commissioning_service_agreement_commissioner',
+    'service_commissioner'
+) }}
 
 left join
     {{ ref('pss_spec_comm')}} as dict_pss_sc

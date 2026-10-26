@@ -41,11 +41,9 @@ select
     , referral_source_op_desc
     , referral_acuity
     , referral_acuity_desc
-    , assigned_commissioner_code_at_event
-    , assigned_commissioner_name_at_event
-    , is_assigned_commissioner_recognised
-    , derived_commissioner_code_at_event
-    , derived_commissioner_name_at_event
+    , commissioner_code_at_event
+    , commissioner_name_at_event
+    , commissioner_source_at_event
     , spec_comm_flag
     , spec_comm_code
     , spec_comm_desc
