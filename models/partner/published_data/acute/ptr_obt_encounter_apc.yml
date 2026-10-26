@@ -238,31 +238,20 @@ models:
           Treatment function description for the specialised service within which the
           patient is treated.
 
-      - name: assigned_commissioner_code_at_event
+      - name: commissioner_code_at_event
         description: >
-          Service-agreement commissioner code supplied with the SUS+ spell. This
-          corresponds to OrganisationCodeCodeofCommissioner in the legacy ERNI APC
-          spell table. Null means no code was supplied.
+          Commissioner Assignment Method (CAM) commissioner when supplied; otherwise
+          the service-agreement/DSCRO commissioner.
 
-      - name: assigned_commissioner_name_at_event
+      - name: commissioner_name_at_event
         description: >
-          Latest retained commissioner name for assigned_commissioner_code_at_event.
-          Null when the supplied code is missing or has no commissioner lookup match.
+          Latest available organisation name for commissioner_code_at_event, not the
+          name at the activity date. Null when the code has no organisation match.
 
-      - name: is_assigned_commissioner_recognised
+      - name: commissioner_source_at_event
         description: >
-          SUS+-supplied indicator that the supplied service-agreement commissioner
-          code was recognised. Null means SUS+ supplied no indicator.
-
-      - name: derived_commissioner_code_at_event
-        description: >
-          Commissioner code derived by SUS+ for the spell. This is separate from the
-          supplied commissioner code. Null means SUS+ supplied no derived code.
-
-      - name: derived_commissioner_name_at_event
-        description: >
-          Latest retained commissioner name for derived_commissioner_code_at_event.
-          Null when the derived code is missing or has no commissioner lookup match.
+          CAM when the Commissioner Assignment Method supplied the selected
+          commissioner; otherwise DSCRO. Null when neither source supplied a code.
 
       - name: hrg_code
         description: >
