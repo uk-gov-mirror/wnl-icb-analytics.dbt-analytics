@@ -21,6 +21,10 @@ Testing:
 -- (asthma_salbutamol_only, asthma_salbutamol_repeats); left out of the is_gap_ columns.
 {% set gap_items_already_published = ['ASTHMA_SALBUTAMOL_ONLY', 'ASTHMA_SALBUTAMOL_OVERUSE'] %}
 
+-- Care pathway gap items already published here under their own names
+-- (asthma_salbutamol_only, asthma_salbutamol_repeats); left out of the is_gap_ columns.
+{% set gap_items_already_published = ['ASTHMA_SALBUTAMOL_ONLY', 'ASTHMA_SALBUTAMOL_OVERUSE'] %}
+
 with inclusion_list as (
     select patient_id
         , area_code
@@ -224,8 +228,23 @@ select il.patient_id
     ,bp.latest_bp_date
     ,coalesce(dcp.care_processes_completed, 0) as care_processes_completed
     , coalesce(dcp9.care_processes_9_completed, 0) as care_processes_9_completed
+    , coalesce(dcp9.care_processes_9_completed, 0) as care_processes_9_completed
     , case when dcp.hba1c_completed_in_last_12m = true then dcp.latest_hba1c_value else null end as latest_hba1c_value
     ,dcp.latest_hba1c_date
+    -- care pathway gaps from cltcs_gap_summary: per domain, per domain group and per item.
+    -- Null for patients outside the cltcs_adult_population cohorts (shortlist only).
+    {%- for d in cltcs_gap_domains() %}
+    , gs.{{ d.stem }}_groups_with_gap
+    , gs.{{ d.stem }}_groups_assessed
+    , gs.{{ d.stem }}_items_with_gap
+    , gs.{{ d.stem }}_items_assessed
+    {%- for group in d.groups %}
+    , gs.has_gap_{{ d.stem }}_{{ group }}
+    {%- endfor %}
+    {%- endfor %}
+    {%- for item_id in cltcs_gap_item_ids() if item_id not in gap_items_already_published %}
+    , gs.is_gap_{{ item_id | lower }}
+    {%- endfor %}
     -- care pathway gaps from cltcs_gap_summary: per domain, per domain group and per item.
     -- Null for patients outside the cltcs_adult_population cohorts (shortlist only).
     {%- for d in cltcs_gap_domains() %}
@@ -321,6 +340,10 @@ left join {{ref('fct_person_bp_control')}} bp
     on il.olids_id = bp.person_id 
 left join {{ref('fct_person_diabetes_8_care_processes')}} dcp
     on il.olids_id = dcp.person_id
+left join {{ ref('fct_person_diabetes_9_care_processes') }} dcp9
+    on il.olids_id = dcp9.person_id
+left join {{ ref('cltcs_gap_summary') }} gs
+    on il.olids_id = gs.person_id
 left join {{ ref('fct_person_diabetes_9_care_processes') }} dcp9
     on il.olids_id = dcp9.person_id
 left join {{ ref('cltcs_gap_summary') }} gs
